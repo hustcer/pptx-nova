@@ -695,7 +695,8 @@ export function compileMckLayout(design, family, layoutId, variant, d, path = 'd
     if (layoutId === 'ledger') {
       const [x, y, w, h] = r.items,
         rh = h / d.initiatives.length,
-        widths = [(w - 0.7) * 0.2, (w - 0.7) * 0.35, (w - 0.7) * 0.17, (w - 0.7) * 0.28],
+        iconInset = d.initiatives.some((item) => item.icon) ? 0.7 : 0,
+        widths = [0.2, 0.35, 0.17, 0.28].map((weight) => (w - iconInset) * weight),
         bindings = []
       const cells = d.initiatives.map((v, i) => {
         const f = `initiatives[${i}]`,
@@ -705,7 +706,7 @@ export function compileMckLayout(design, family, layoutId, variant, d, path = 'd
             d.labels.cost + ': ' + v.cost + ' · ' + d.labels.pillars + ': ' + v.pillars,
             d.labels.owner + ': ' + v.owner + ' · ' + v.ownerDetail + ' · ' + v.footer,
           ]
-        let xx = x + 0.7
+        let xx = x + iconInset
         const paths = [
           [f + '.index', f + '.title', f + '.tag'],
           [f + '.body'],
@@ -722,19 +723,20 @@ export function compileMckLayout(design, family, layoutId, variant, d, path = 'd
           bindings.push({ frame, paths: paths[j].map((k) => `${path}.${k}`) })
           xx += widths[j]
         })
-        icon(
-          'InitiativeIcon' + i,
-          [x + 0.12, y + i * rh + 0.18, 0.35, 0.35],
-          v.icon,
-          v.tone,
-          f + '.icon',
-        )
+        if (v.icon)
+          icon(
+            'InitiativeIcon' + i,
+            [x + 0.12, y + i * rh + 0.18, 0.35, 0.35],
+            v.icon,
+            v.tone,
+            f + '.icon',
+          )
         return row
       })
       cs.push({
         kind: 'table',
         name: 'InitiativesTable',
-        frame: [x + 0.7, y, w - 0.7, h],
+        frame: [x + iconInset, y, w - iconInset, h],
         cells,
         widths,
         rowHeights: cells.map(() => rh),
@@ -747,6 +749,10 @@ export function compileMckLayout(design, family, layoutId, variant, d, path = 'd
           f = `initiatives[${i}]`,
           color = ink(v.tone)
         if (layoutId === 'columns') {
+          if (!v.icon)
+            throw Error(
+              `${path}.${f}.icon: columns requires a peer icon; use ledger for an icon-free table`,
+            )
           box('Initiative' + i, [x, y, w, h], 'paper', 'rule')
           box('InitiativeMark' + i, [x, y, w, 0.055], v.tone)
           tx(

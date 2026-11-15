@@ -38,11 +38,40 @@ test('paper-scholar: explicit excerpt repetition and icon-inset overflow fail cl
   const repeated = valid(excerpt(Array.from({ length: 3 }, () => structuredClone(s))))
   assert.equal(repeated.valid, false)
   assert.match(JSON.stringify(repeated.errors), /repeated|cadence/)
-  const table = createDeck(excerpt([fixture().slides[5]])).designPlan.layouts[0].components.find(
+  const source = fixture().slides[5]
+  source.data.rows.forEach((row) => {
+    row.icon = 'tool'
+  })
+  const table = createDeck(excerpt([source])).designPlan.layouts[0].components.find(
     (c) => c.kind === 'table',
   )
   assert.equal(table.bindings[table.columns.length].frame[0], table.frame[0] + 0.52)
   assert.equal(table.bindings[table.columns.length].frame[2], table.widths[0] - 0.59)
+})
+test('paper-scholar: tables omit icons by default and reserve space only for explicit icons', () => {
+  for (const layoutId of ['full', 'rail']) {
+    const source = fixture().slides[5]
+    source.layoutId = layoutId
+    source.data.rows.forEach((row) => {
+      delete row.icon
+    })
+    assert.equal(valid(excerpt([source])).valid, true)
+    const plain = createDeck(excerpt([source]))
+    assert.equal(
+      plain.patch.ops.some((op) => /_SegmentIcon/.test(op.name ?? '')),
+      false,
+    )
+    const table = plain.designPlan.layouts[0].components.find((c) => c.kind === 'table')
+    assert.equal(table.bindings[table.columns.length].frame[0], table.frame[0] + 0.12)
+    const native = plain.patch.ops.find((op) => op.op === 'set-table')
+    assert.equal(native.cells.find((c) => c.row === 1 && c.column === 0).style.marginLeft, '0.12in')
+    source.data.rows[0].icon = 'school'
+    const explicit = createDeck(excerpt([source]))
+    assert.equal(explicit.patch.ops.filter((op) => op.op === 'add-image').length, 1)
+    const mixed = explicit.patch.ops.find((op) => op.op === 'set-table')
+    assert.equal(mixed.cells.find((c) => c.row === 1 && c.column === 0).style.marginLeft, '0.52in')
+    assert.equal(mixed.cells.find((c) => c.row === 2 && c.column === 0).style.marginLeft, '0.12in')
+  }
 })
 for (const [type, f] of Object.entries(DESIGN.scholar.families))
   test(`paper-scholar ${type}: all layouts preserve minimum and maximum nonreference inputs`, () => {
@@ -90,7 +119,6 @@ test('paper-scholar: signatures and native objects survive abstraction', () => {
     'DecayCurve1',
     'CurveLabel1',
     'ModelAxisArrow',
-    'SegmentIconBack3',
     'CaseImageShell',
     'CaseHeaderBand',
     'ActionBand2',

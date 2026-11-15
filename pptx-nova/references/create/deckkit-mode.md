@@ -174,8 +174,12 @@ node <skill-root>/scripts/cli/deckkits/slots.mjs \
   > deckkit-slots.md
 ```
 
-Use it as the per-slide quick reference for fields, required slots, item limits,
-and approximate text budgets. Do not infer slot limits by reading `.kit.mjs`
+Use it as the per-slide quick reference for fields, required slots, allowed enum values,
+item limits and approximate text budgets. Enum values come from the field schema; a bundled
+icon name is usable only when that slot accepts it. Budgets are schema estimates: the resolved
+layout and item count can leave less space, especially in tables. Validate/build a representative
+dense page before expanding similar pages; use its actual fit diagnostics rather than inserting
+hard line breaks to match the static budget. Do not infer slot limits by reading `.kit.mjs`
 source when a schema row exists.
 
 Before filling slots, map each source responsibility to a compatible page type. Qualitative

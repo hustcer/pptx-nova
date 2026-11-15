@@ -176,27 +176,23 @@
             "label": "Commuters",
             "cells": ["110", "57%", "Late", "87%"],
             "tone": "blush",
-            "emphasisColumn": 4,
-            "icon": "train"
+            "emphasisColumn": 4
           },
           {
             "label": "Students",
             "cells": ["90", "64%", "Early", "82%"],
             "tone": "pale",
-            "emphasisColumn": 2,
-            "icon": "school"
+            "emphasisColumn": 2
           },
           {
             "label": "Professionals",
             "cells": ["112", "54%", "Late", "75%"],
-            "tone": "blush",
-            "icon": "briefcase"
+            "tone": "blush"
           },
           {
             "label": "Retirees",
             "cells": ["48", "50%", "Early", "73%"],
-            "tone": "pale",
-            "icon": "walk"
+            "tone": "pale"
           }
         ],
         "summaryLabel": "All segments",

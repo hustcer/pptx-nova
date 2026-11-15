@@ -338,6 +338,10 @@ These rules apply to all new decks, including Express and Studio:
   checks cannot replace this review.
 - Peer concepts deserve semantic icons or content-specific visuals. Missing slots require maintained
   components, not blanket omission. Reserve numbering for sequence, rank or references; respect the kit contract.
+- **New tables in every DeckKit default to no row/header/cell icons.** Use icons only when explicitly
+  requested by the user/task; a slot or example is not opt-in. Omit icon fields and reclaim insets;
+  repair kits that force icons. Existing-deck edits, translation and refurbishment retain their
+  preservation scope.
 - Plan real composition changes: statements, relationships/processes, native data, open comparisons or
   authentic product visuals. Judge overview geometry/density; changing markers alone does not create variety.
 

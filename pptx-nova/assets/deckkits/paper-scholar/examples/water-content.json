@@ -176,27 +176,23 @@
             "label": "北区 North",
             "cells": ["110", "57%", "晚间", "87%"],
             "tone": "blush",
-            "emphasisColumn": 4,
-            "icon": "droplet"
+            "emphasisColumn": 4
           },
           {
             "label": "东区 East",
             "cells": ["90", "64%", "早间", "82%"],
             "tone": "pale",
-            "emphasisColumn": 2,
-            "icon": "droplet"
+            "emphasisColumn": 2
           },
           {
             "label": "西区 West",
             "cells": ["112", "54%", "晚间", "75%"],
-            "tone": "blush",
-            "icon": "droplet"
+            "tone": "blush"
           },
           {
             "label": "南区 South",
             "cells": ["48", "50%", "早间", "73%"],
-            "tone": "pale",
-            "icon": "droplet"
+            "tone": "pale"
           }
         ],
         "summaryLabel": "全部分组",

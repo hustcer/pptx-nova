@@ -58,7 +58,8 @@ export function renderScholarPlan(design, layouts) {
         cell.style.borders.bottom.color = design.colors[i === 0 ? 'ink' : 'rule']
       }
       for (const cell of op.cells)
-        if (cell.row > 0 && cell.column === 0) cell.style.marginLeft = '0.52in'
+        if (cell.row > 0 && cell.column === 0)
+          cell.style.marginLeft = c.rowIcons[cell.row - 1] ? '0.52in' : '0.12in'
     }
   }
   const p = createOps()

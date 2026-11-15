@@ -116,6 +116,7 @@ function pushSchemaRow(rows, path, schema) {
     type: schemaType(schema),
     budget: budgetSummary(schema),
     description: schema.description ?? '',
+    ...(Array.isArray(schema.enum) ? { allowedValues: schema.enum } : {}),
   })
 }
 
@@ -168,6 +169,9 @@ function buildReference(deckkit) {
   return {
     deckkit,
     readiness: entry.readiness ?? '',
+    budgetScope: 'schema-estimate',
+    budgetNote:
+      'Budgets are schema estimates, not a fit guarantee. Resolved layout, item count, table rows/columns and explicit line breaks can reduce usable space. Validate the actual content and inspect the build fit diagnostics before rendering.',
     qualityProfile: entry.qualityProfile ?? {},
     slideTypes: slideTypes.map((slideType) => {
       const schema = loadSlideSchema(deckkit, slideType)
@@ -200,6 +204,8 @@ function renderMarkdown(ref) {
     '',
     `Readiness: ${ref.readiness || 'unknown'}`,
     '',
+    ref.budgetNote,
+    '',
   ]
   for (const slide of ref.slideTypes) {
     lines.push(`## ${slide.slideType}`)
@@ -216,8 +222,16 @@ function renderMarkdown(ref) {
       }
     } else {
       for (const row of slide.rows) {
+        const notes = [
+          row.description,
+          row.allowedValues?.length
+            ? `Allowed: ${row.allowedValues.map((value) => `\`${String(value)}\``).join(', ')}`
+            : '',
+        ]
+          .filter(Boolean)
+          .join(' ')
         lines.push(
-          `| \`${escapeCell(row.path)}\` | ${row.required ? 'yes' : ''} | ${escapeCell(row.type)} | ${escapeCell(row.budget)} | ${escapeCell(row.description)} |`,
+          `| \`${escapeCell(row.path)}\` | ${row.required ? 'yes' : ''} | ${escapeCell(row.type)} | ${escapeCell(row.budget)} | ${escapeCell(notes)} |`,
         )
       }
     }

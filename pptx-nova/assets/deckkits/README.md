@@ -157,6 +157,10 @@ Midnight Pulse 提供深黑蓝运营报告、叠层深蓝／深青薄雾、青�
 
 ## 校验合同
 
+所有 DeckKit 的新建表格默认不使用图标，包括行标、表头和单元格。表格图标字段必须可选，
+省略时不输出图标、底圈或预留空隙；只有用户或明确的任务设计要求选择图标时才启用。
+标准示例遵守无图标默认，显式图标兼容入口不构成其他任务的默认授权。
+
 `validate-content.mjs`、DeckKit build 胶水和 benchmark CLI 调用
 `shared/validate-deckkit.mjs` 的 `validateDeckkitContent(content, { deckkit, mode })`。
 它先运行 core 的 `validateContent`；只有 catalog 注册了 `designContract` 的套件才增加

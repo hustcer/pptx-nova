@@ -4,7 +4,7 @@ DeckKit: `paper-scholar`
 Showcase case: `paper-scholar.golden-learning`
 Readiness: `default`
 Slides: 8
-Patch ops: 900
+Patch ops: 888
 Title: Small routines build durable recall
 
 ## Best For

@@ -1,6 +1,40 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { runNode, skillPath } from '../helpers/common.mjs'
+
+test('DeckKit slot reference preserves schema enums for authoring controls', () => {
+  const result = runNode([
+    skillPath('scripts/cli/deckkits/slots.mjs'),
+    '--deckkit',
+    'paper-scholar',
+    '--format',
+    'json',
+  ])
+  const reference = JSON.parse(result.stdout)
+  const rows = reference.slideTypes.find((s) => s.slideType === 'scholarSegmentsSlide').rows
+  const schema = JSON.parse(
+    readFileSync(
+      skillPath('assets/deckkits/paper-scholar/schemas/scholarSegmentsSlide.schema.json'),
+      'utf8',
+    ),
+  )
+  for (const field of ['icon', 'tone']) {
+    assert.deepEqual(
+      rows.find((row) => row.path === `data.rows[].${field}`).allowedValues,
+      schema.properties.rows.items.properties[field].enum,
+    )
+  }
+  assert.equal(reference.budgetScope, 'schema-estimate')
+  const markdown = runNode([
+    skillPath('scripts/cli/deckkits/slots.mjs'),
+    '--deckkit',
+    'paper-scholar',
+  ]).stdout
+  for (const value of schema.properties.rows.items.properties.icon.enum) {
+    assert.ok(markdown.includes(`\`${value}\``), value)
+  }
+})
 
 test('DeckKit slot reference covers every swiss-grid slide type', () => {
   const result = runNode([

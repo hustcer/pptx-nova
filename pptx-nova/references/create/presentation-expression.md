@@ -34,6 +34,12 @@ adding effects during an unrelated edit or translation.
 
 ## Icons: make parallel ideas easier to recognize
 
+Tables are the exception to proactive icons: every new table in every DeckKit defaults to text
+and data without icons. Leave row/header/cell icon fields absent unless the user or an explicit
+task design requirement asks for table icons. A showcase or registered slot is capability evidence,
+not opt-in. Reclaim unused icon insets; do not leave empty icon circles or gaps. Existing-deck
+preservation remains governed by its edit/translation/refurbishment scope.
+
 For a text-only page with several peer sections (often two to five), prefer a small semantic icon
 for each section when it improves scanning. Choose symbols for the actual concepts, not one
 generic sparkle repeated throughout. Keep the heading readable without recognizing the symbol.

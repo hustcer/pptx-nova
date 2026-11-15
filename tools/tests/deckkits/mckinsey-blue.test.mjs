@@ -265,3 +265,51 @@ test('ledger capacity rejects overlong cells and auto preserves the same content
   assert.equal(result.designPlan.layouts[0].layoutId, 'columns')
   assertVisible(c, result.patch)
 })
+
+test('McKinsey ledger omits row icons and reclaims their separate column by default', () => {
+  const content = excerpt(6)
+  content.slides[0].layoutId = 'ledger'
+  content.slides[0].data.initiatives.forEach((item) => {
+    delete item.icon
+  })
+  assert.equal(
+    validateDeckkitContent(content, { deckkit: 'mckinsey-blue', mode: 'delivery' }).valid,
+    true,
+  )
+  const plain = createDeck(content)
+  const region = DESIGN.mck.families.mckInitiativeRankingSlide.variants.ledger.regions.items
+  const table = plain.designPlan.layouts[0].components.find(
+    (component) => component.kind === 'table',
+  )
+  assert.equal(
+    plain.patch.ops.some((op) => op.op === 'add-image'),
+    false,
+  )
+  assert.deepEqual(table.frame, region)
+  assert.equal(table.bindings[0].frame[0], region[0] + 0.08)
+  assert.ok(Math.abs(table.widths.reduce((a, b) => a + b, 0) - region[2]) < 1e-10)
+  assertVisible(content, plain.patch)
+
+  const automatic = structuredClone(content)
+  automatic.slides[0].layoutId = 'auto'
+  assert.deepEqual(createDeck(automatic).patch, plain.patch)
+  automatic.slides[0].layoutId = 'columns'
+  assert.throws(() => createDeck(automatic), /columns requires a peer icon/u)
+
+  content.slides[0].data.initiatives[2].icon = 'settings'
+  const explicit = createDeck(content)
+  assert.equal(explicit.patch.ops.filter((op) => op.op === 'add-image').length, 1)
+  const icon = explicit.designPlan.layouts[0].components.find(
+    (component) => component.kind === 'icon',
+  )
+  assert.equal(icon.name, 'InitiativeIcon2')
+  assert.equal(
+    icon.frame[1],
+    region[1] + (2 * region[3]) / content.slides[0].data.initiatives.length + 0.18,
+  )
+  const mixedTable = explicit.designPlan.layouts[0].components.find(
+    (component) => component.kind === 'table',
+  )
+  assert.equal(mixedTable.frame[0], region[0] + 0.7)
+  assert.equal(mixedTable.frame[2], region[2] - 0.7)
+})

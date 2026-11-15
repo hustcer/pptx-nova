@@ -641,7 +641,7 @@
     },
     {
       "id": "mckinsey-blue",
-      "version": "2.0.1",
+      "version": "2.1.0",
       "path": "mckinsey-blue/mckinsey-blue.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
@@ -8695,7 +8695,7 @@
     },
     {
       "id": "paper-scholar",
-      "version": "1.0.1",
+      "version": "1.1.0",
       "path": "paper-scholar/paper-scholar.kit.mjs",
       "designContract": "paper-scholar/design.json",
       "primitiveDependency": "core-primitives@0.1.0",
@@ -8755,7 +8755,7 @@
           "ten exact fractional retention dots",
           "coral columns with internal unit labels",
           "paired half-life curves, internal labels, time ticks and upright equation",
-          "olive row labels with circular icons and pale/blush evidence cells",
+          "olive row labels and pale/blush evidence cells; optional icons only by explicit request",
           "blush case band overlapped by editable image shell",
           "rounded functional action rows and next-review ledger"
         ],

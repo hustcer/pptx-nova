@@ -18,6 +18,10 @@ bundled kits expose at least one suitable route; support belongs to particular p
 types, rather than every chart, cell or bullet. Icons use the bundled Tabler outline family with
 stroke 1.2 (maximum 1.5). Content supplies names, while the contract owns visual placement.
 
+New tables default to no icons across all DeckKits. Table row/header/cell icon fields must be
+optional, emitted only when explicitly requested for the task, with their padding reclaimed when
+omitted. An example's explicit icons do not authorize them in a different new deck.
+
 For kits with `semanticIcons.bindings`, the registered marker compiler runs before design checking,
 plan hashing and readback capture. A binding either replaces a peer marker or reserves heading
 space with an actual fit check. Omitted icons preserve the previous output. Explicit icons can

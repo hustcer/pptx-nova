@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "paper-scholar",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5

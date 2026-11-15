@@ -105,6 +105,7 @@
             "x-slotRole": "control"
           },
           "icon": {
+            "description": "Optional table icon. Omit by default; supply only for an explicit table-icon design request.",
             "type": "string",
             "minLength": 1,
             "pattern": "\\S",
@@ -124,7 +125,7 @@
             "x-slotRole": "control"
           }
         },
-        "required": ["label", "cells", "tone", "icon"],
+        "required": ["label", "cells", "tone"],
         "additionalProperties": false
       },
       "minItems": 2,

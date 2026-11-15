@@ -143,12 +143,11 @@ export function compileScholarLayout(design, family, id, variant, d, path = 'dat
         const paths = [
             `${path}.${i === 0 ? `headers[${j}]` : j === 0 ? `rows[${i - 1}].label` : `rows[${i - 1}].cells[${j - 1}]`}`,
           ],
-          // The native first-column cell reserves 0.52in for its icon. Use that
-          // actual inset in capacity checks and projected slot budgets as well.
+          // Reserve icon space only for rows with explicitly supplied icons.
           f = [
-            xx + (i > 0 && j === 0 ? 0.52 : 0.12),
+            xx + (i > 0 && j === 0 && d.rows[i - 1].icon ? 0.52 : 0.12),
             yy + 0.07,
-            widths[j] - (i > 0 && j === 0 ? 0.59 : 0.24),
+            widths[j] - (i > 0 && j === 0 && d.rows[i - 1].icon ? 0.59 : 0.24),
             rowHeights[i] - 0.14,
           ],
           st = {
@@ -176,9 +175,14 @@ export function compileScholarLayout(design, family, id, variant, d, path = 'dat
       focusTone: 'ink',
       rowTones: d.rows.map((v) => v.tone),
       emphasis: d.rows.map((v) => v.emphasisColumn),
+      rowIcons: d.rows.map((v) => Boolean(v.icon)),
     })
     let rowY = frame[1] + rowHeights[0]
     d.rows.forEach((v, i) => {
+      if (!v.icon) {
+        rowY += rowHeights[i + 1]
+        return
+      }
       const iconFrame = [frame[0] + 0.14, rowY + (rowHeights[i + 1] - 0.28) / 2, 0.28, 0.28]
       ellipse(`SegmentIconBack${i}`, iconFrame, 'white', null)
       cs.push({

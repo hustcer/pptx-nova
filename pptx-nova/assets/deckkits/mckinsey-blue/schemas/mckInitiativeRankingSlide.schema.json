@@ -206,6 +206,7 @@
             }
           },
           "icon": {
+            "description": "Optional explicit row icon in ledger; omit by default for tables. The columns layout requires a peer icon.",
             "type": "string",
             "minLength": 1,
             "x-slotRole": "control",
@@ -228,7 +229,6 @@
           "owner",
           "ownerDetail",
           "footer",
-          "icon",
           "tone"
         ],
         "additionalProperties": false

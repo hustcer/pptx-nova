@@ -336,7 +336,9 @@ component API and integration boundary; it does not apply a patch or bypass the 
 - `cli/review/structure-check.mjs` - lightweight PPTX OOXML structure check. It
   scans XML inside the PPTX for expected font declarations, expected sRGB/theme
   colors, and empty/default-text placeholder residue, then writes
-  structure-check.json for the final evidence summary. Existing reports require
+  structure-check.json with the scanned input path, SHA-256 and byte length.
+  The Edit Contract gate requires that identity to match the current candidate;
+  legacy reports must be regenerated. Existing reports require
   an explicit current-run `--overwrite`.
 
 ## Asset tools

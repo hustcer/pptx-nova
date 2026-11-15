@@ -112,32 +112,16 @@ read and verify that file when detail is needed; see `references/review/export-a
 
 ### Run Reuse and Isolation
 
-`.pptx-nova/<run>/` may be read as historical evidence, but it must not automatically become the
-execution context for the current task. Create a new current context for new tasks, old-feedback audits,
-tool capability investigations, post-upgrade rechecks, or when the user challenges an old result. Use
-old runs read-only to explain what happened at that time.
-
-Reuse an old run for execution only when the user explicitly asks to continue the same task and the
-source, output target, and task objective have not changed. Even when reusing a run, probe the current
-`xdoc` again first. Old `xdoc-capabilities.json` files only describe what was disclosed at that time and
-are not facts about current capabilities. During development, upgrades, or old-run recovery, any
-judgment about "missing capabilities" must be checked against the current runtime/schema/help first.
+Use a fresh run for a new task. Reuse requires explicit continuation of the same task, unchanged
+source/output/objective and a fresh runtime probe. Read [run reuse and isolation](references/common-workflow.md#run-reuse-and-isolation)
+before resuming, auditing old feedback or investigating capabilities; historical runs stay read-only.
 
 ## Artifact Retention and Cleanup Strategy
 
-`.pptx-nova/<slug>-<timestamp>/` is auditable evidence, not an ordinary cache. Keep the current run's
-capability snapshot, render context, planning/contract inputs, patch and sidecars, machine-gate reports
-(including retained full diff evidence), final
-candidate, comparison/contact overview, visual review, and issue-page evidence. Do not invent missing
-artifacts. The workflow-specific exact retention set is defined in `references/common-workflow.md`.
-
-Only a successful current run may be slimmed, and only by removing rebuildable heavy previews, caches,
-logs, failed intermediate candidates, or unreferenced scratch files. Failed, interrupted, unvalidated,
-or resumable runs stay intact. Never delete user inputs/finals, reference resources, another run,
-anything outside the workspace, or the whole `.pptx-nova` directory. Cross-run cleanup needs an
-explicit request and a reviewed candidate list. `--cleanup` still retains the minimal evidence package
-and writes `cleanup-manifest.json`; `--keep-all` preserves everything. State cleanup status in the final
-summary.
+Runs are auditable evidence. Follow [artifact retention and cleanup](references/common-workflow.md#artifact-retention-and-cleanup-strategy)
+before cleanup: retain the minimal evidence package, keep unsuccessful/resumable runs intact, and
+never delete user inputs/finals or unrelated runs. Cross-run cleanup requires an explicit request and
+a reviewed candidate list. State cleanup status in the final summary.
 
 ## Quick Paths
 

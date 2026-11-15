@@ -1405,6 +1405,7 @@ function evidenceBindings(kind, evidence) {
   }
   if (kind === 'png-preview') return { candidate: evidence?.input }
   if (kind === 'vision-check' || kind === 'final-inspect') return { candidate: evidence?.input }
+  if (kind === 'structure-check') return { candidate: evidence?.artifacts?.pptx }
   return {}
 }
 
@@ -1727,12 +1728,31 @@ function checkEvidence(contract, args, report) {
     )
   }
   const structure = loaded['structure-check']
-  if (structure && structure.status !== 'pass') {
+  if (
+    structure &&
+    (structure.schemaVersion !== 'pptx-nova-structure-check/v1' || structure.status !== 'pass')
+  ) {
     addIssue(
       report,
       'blockers',
       'structure-check-not-passing',
       'structure check evidence did not pass',
+    )
+  }
+  if (
+    structure &&
+    (typeof structure.artifacts?.pptx !== 'string' ||
+      reportedPath(structure.artifacts.pptx, contract.workspace) !== args.candidate ||
+      typeof structure.input?.path !== 'string' ||
+      reportedPath(structure.input, contract.workspace) !== args.candidate ||
+      structure.input?.sha256 !== report.candidate.sha256 ||
+      structure.input?.byteLength !== report.candidate.byteLength)
+  ) {
+    addIssue(
+      report,
+      'blockers',
+      'structure-check-input-mismatch',
+      'structure check must identify the exact current candidate path, SHA-256 and byte length; regenerate the scan',
     )
   }
   return loaded
@@ -1804,7 +1824,8 @@ function nextAction(report) {
   ) {
     return 'verify-changed-scope'
   }
-  if (codes.has('structure-check-not-passing')) return 'run-structure-audit'
+  if (codes.has('structure-check-not-passing') || codes.has('structure-check-input-mismatch'))
+    return 'run-structure-audit'
   if (report.blockers.length > 0) return 'block-and-request-user-decision'
   return 'publish'
 }

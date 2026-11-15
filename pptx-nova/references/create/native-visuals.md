@@ -37,8 +37,9 @@ returns native-evidence components. Any kit can place those components in its ow
 use a distinct component `prefix` when one slide has multiple regions. Do not copy the drawing logic
 into a kit. `createNativeArtworkPatch()` emits the same drawing as typed
 xdoc operations, using a supplied RGB palette and unique object-name prefix.
-Its standalone patch explicitly disables inherited shape effects to keep the composition stable in
-an existing deck's theme. Kit adapters retain responsibility for their own paint and design contracts.
+Its standalone patch explicitly disables inherited 2D shape effects. The source-preserving Edit gate
+also resolves referenced theme effect styles and rejects inherited 3D properties, which an empty local
+effect list does not disable. Kit adapters retain responsibility for their own paint and design contracts.
 
 For a standalone authoring input, prepare a spec and call the shared CLI:
 

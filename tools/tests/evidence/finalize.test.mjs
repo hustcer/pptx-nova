@@ -36,7 +36,13 @@ test('evidence writers require explicit overwrite for current-run artifacts', ()
     structureOutput,
     '--json',
   ]
-  runNode(structureArgs)
+  const structure = JSON.parse(runNode(structureArgs).stdout)
+  const scanned = fileIdentity(skillPath('assets/examples/deckkits/cartesian/deck.pptx'))
+  assert.deepEqual(structure.input, {
+    path: skillPath('assets/examples/deckkits/cartesian/deck.pptx'),
+    sha256: scanned.sha256,
+    byteLength: scanned.byteLength,
+  })
   const structureIdentity = fileIdentity(structureOutput)
   const structureRefusal = runNodeStatus(structureArgs, 1)
   assert.match(structureRefusal.stderr, /structure check output already exists/)

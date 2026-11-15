@@ -93,10 +93,7 @@ function project(node, offsets, omitted) {
     children: node.children.filter((c) => !omitted.has(c)).map((c) => project(c, offsets, omitted)),
   }
 }
-function verifyThemeLine(shape, source, part) {
-  const style = child(shape, 'style', P, true),
-    ref = style && child(style, 'lnRef', A, true)
-  if (!ref || integer(ref, 'idx') === 0) return
+function themeFormat(source, part) {
   const related = (owner, suffix) => {
     const rels = posix.join(posix.dirname(owner), '_rels', posix.basename(owner) + '.rels')
     const relationships = source
@@ -109,15 +106,17 @@ function verifyThemeLine(shape, source, part) {
     if (relationships.some((n) => attr(n, 'Type')?.endsWith('/themeOverride')))
       fail('themeOverride requires a separate inherited-paint review')
     const links = relationships.filter((n) => attr(n, 'Type')?.endsWith('/' + suffix))
-    if (links.length !== 1) fail('unresolved inherited line style')
+    if (links.length !== 1) fail('unresolved inherited theme style')
     return source.relatedPart(owner, attr(links[0], 'Id'))
   }
   const theme = related(related(related(part, 'slideLayout'), 'slideMaster'), 'theme')
-  const styles = child(
-    child(child(source.partTree(theme), 'themeElements', A), 'fmtScheme', A),
-    'lnStyleLst',
-    A,
-  )
+  return child(child(source.partTree(theme), 'themeElements', A), 'fmtScheme', A)
+}
+function verifyThemeLine(shape, source, part) {
+  const style = child(shape, 'style', P, true),
+    ref = style && child(style, 'lnRef', A, true)
+  if (!ref || integer(ref, 'idx') === 0) return
+  const styles = child(themeFormat(source, part), 'lnStyleLst', A)
   const line = styles.children[integer(ref, 'idx', true) - 1]
   if (
     !line ||
@@ -130,6 +129,20 @@ function verifyThemeLine(shape, source, part) {
     )
   )
     fail('inherited line decorations require a separate geometry review')
+}
+function verifyThemeEffects(shape, source, part) {
+  const style = child(shape, 'style', P, true),
+    ref = style && child(style, 'effectRef', A, true)
+  if (!ref || integer(ref, 'idx') === 0) return
+  const styles = child(themeFormat(source, part), 'effectStyleLst', A),
+    effect = styles.children[integer(ref, 'idx', true) - 1]
+  if (!effect || !A.has(effect.uri) || effect.local !== 'effectStyle')
+    fail('unresolved inherited effect style')
+  // An empty local effectLst overrides 2D effects, but not the style's 3D siblings.
+  if (effect.children.some((n) => A.has(n.uri) && ['scene3d', 'sp3d'].includes(n.local)))
+    fail('inherited theme 3D requires a separate geometry review')
+  if (effect.children.some((n) => !A.has(n.uri) || !['effectLst', 'effectDag'].includes(n.local)))
+    fail('unsupported inherited effect style requires a separate geometry review')
 }
 function verifyDrawing(shape, region, source, part) {
   if (
@@ -160,6 +173,7 @@ function verifyDrawing(shape, region, source, part) {
     transform = child(props, 'xfrm', A)
   const effects = child(props, 'effectLst', A)
   if (effects.children.length || effects.attrs.length) fail('explicit empty effects are required')
+  verifyThemeEffects(shape, source, part)
   const paint = (owner) => {
     const fills = owner.children.filter(
       (n) => A.has(n.uri) && ['solidFill', 'noFill'].includes(n.local),

@@ -18,7 +18,7 @@ async function evaluate(fixture) {
   return acceptScopedEditVisuals(fixture)
 }
 
-function fixture(mutateParts = () => {}, selectedBody = '') {
+function fixture(mutateParts = () => {}, selectedBody = '', extraParts = []) {
   const root = mkdtempSync(join(tmpdir(), 'nova-edit-visual-'))
   const write = (name, value) => {
     const path = join(root, name)
@@ -54,6 +54,7 @@ function fixture(mutateParts = () => {}, selectedBody = '') {
       `<p:sld xmlns:p="${p}" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:feature="http://schemas.microsoft.com/office/powerpoint/2010/main"><p:cSld name="${name}">${name === 'chosen' ? selectedBody : ''}</p:cSld></p:sld>`,
     ]),
     ['ppt/charts/chart1.xml', '<chart>Original data</chart>'],
+    ...extraParts,
   ]
   const edited = parts.map(([name, value]) => [
     name,
@@ -191,7 +192,7 @@ test('reviewed intentional scoped edits preserve native oracle decision and acce
   assert.deepEqual(report.acceptance.slides, [2])
 })
 
-function nativeArtworkFixture(mutate = (xml) => xml, duplicateCaption = false) {
+function nativeArtworkFixture(mutate = (xml) => xml, duplicateCaption = false, extraParts = []) {
   const art =
     '<p:sp><p:nvSpPr><p:cNvPr id="8" name="Artwork"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="100000" y="100000"/><a:ext cx="500000" cy="500000"/></a:xfrm><a:custGeom><a:pathLst><a:path w="100" h="100"><a:moveTo><a:pt x="0" y="0"/></a:moveTo><a:lnTo><a:pt x="100" y="100"/></a:lnTo></a:path></a:pathLst></a:custGeom><a:noFill/><a:ln w="12700"><a:solidFill><a:srgbClr val="112233"/></a:solidFill></a:ln><a:effectLst/></p:spPr></p:sp>'
   const caption =
@@ -209,6 +210,7 @@ function nativeArtworkFixture(mutate = (xml) => xml, duplicateCaption = false) {
       caption +
       (duplicateCaption ? caption.replace('id="7"', 'id="9"') : '') +
       '</p:spTree><mc:AlternateContent><mc:Choice Requires="feature"/><mc:Fallback/></mc:AlternateContent>',
+    extraParts,
   )
   const contract = JSON.parse(readFileSync(f.contract))
   Object.assign(contract, {
@@ -237,6 +239,71 @@ function nativeArtworkFixture(mutate = (xml) => xml, duplicateCaption = false) {
   f.write('diff.json', summary)
   return f
 }
+
+function themedArtworkFixture({ effect = '', index = 2, noLine = false, override = '' } = {}) {
+  const a = 'http://schemas.openxmlformats.org/drawingml/2006/main'
+  const r = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
+  const relations = (kind, target, owner) =>
+    `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="main" Type="${r}/${kind}" Target="${target}"/>${override === owner ? `<Relationship Id="override" Type="${r}/themeOverride" Target="../theme/override.xml"/>` : ''}</Relationships>`
+  return nativeArtworkFixture(
+    (xml) => {
+      const styled = xml.replace(
+        '<a:effectLst/></p:spPr></p:sp>',
+        `<a:effectLst/></p:spPr><p:style><a:lnRef idx="1"/><a:effectRef idx="${index}"/></p:style></p:sp>`,
+      )
+      return noLine
+        ? styled.replace(
+            '<a:ln w="12700"><a:solidFill><a:srgbClr val="112233"/></a:solidFill></a:ln>',
+            '<a:ln><a:noFill/></a:ln>',
+          )
+        : styled
+    },
+    false,
+    [
+      [
+        'ppt/slides/_rels/chosen.xml.rels',
+        relations('slideLayout', '../slideLayouts/layout.xml', 'slide'),
+      ],
+      ['ppt/slideLayouts/layout.xml', '<layout/>'],
+      [
+        'ppt/slideLayouts/_rels/layout.xml.rels',
+        relations('slideMaster', '../slideMasters/master.xml', 'layout'),
+      ],
+      ['ppt/slideMasters/master.xml', '<master/>'],
+      [
+        'ppt/slideMasters/_rels/master.xml.rels',
+        relations('theme', '../theme/theme1.xml', 'master'),
+      ],
+      [
+        'ppt/theme/theme1.xml',
+        `<a:theme xmlns:a="${a}"><a:themeElements><a:fmtScheme><a:lnStyleLst><a:ln/></a:lnStyleLst><a:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst><a:outerShdw/></a:effectLst>${effect}</a:effectStyle><a:effectStyle><a:effectLst/><a:sp3d extrusionH="9144000"/></a:effectStyle></a:effectStyleLst></a:fmtScheme></a:themeElements></a:theme>`,
+      ],
+    ],
+  )
+}
+
+test('native artwork rejects inherited theme 3D even with empty local effects and no stroke', async () => {
+  for (const effect of ['<a:scene3d/>', '<a:sp3d extrusionH="9144000"/>']) {
+    for (const noLine of [false, true]) {
+      await assert.rejects(
+        () => evaluate(themedArtworkFixture({ effect, noLine })),
+        /inherited.*3D/,
+      )
+    }
+  }
+})
+
+test('native artwork resolves only the referenced effect style and rejects unresolved inheritance', async () => {
+  assert.equal((await evaluate(themedArtworkFixture())).deliveryAuthorized, true)
+  assert.equal((await evaluate(themedArtworkFixture({ index: 0 }))).deliveryAuthorized, true)
+  await assert.rejects(() => evaluate(themedArtworkFixture({ index: 4 })), /inherited effect style/)
+  for (const override of ['slide', 'layout']) {
+    await assert.rejects(
+      () => evaluate(themedArtworkFixture({ noLine: true, override })),
+      /themeOverride/,
+    )
+  }
+})
 
 test('native artwork scoped acceptance permits declared additions while retaining the native oracle', async () => {
   const f = nativeArtworkFixture()

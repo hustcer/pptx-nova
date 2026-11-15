@@ -253,7 +253,9 @@ as an object target with `produced: true`, its unique resolved name, actual op i
 `expected.nativeArtworkRegion: [x, y, width, height]` in inches. Its frame including line width and
 all path control points must fit that region. Stroke bounds reserve square caps and tangent-based
 miter reach; inherited line decorations that cannot be bounded require a separate geometry review.
-The current profile rejects slide/layout theme overrides rather than assuming the base theme is effective.
+When resolving inherited line or effect styles, the current profile rejects theme overrides rather than
+assuming the base theme is effective. Referenced effect styles containing `scene3d`, `sp3d`, unknown
+children or unresolved references require a separate geometry review, even for shapes with no stroke.
 Use explicit local RGB/none fill and line paint plus `set-shape.effect: { "inherit": false }` so
 theme effects cannot silently add a shadow, glow or reflection. Additions are text-free native freeforms, with no
 relationships, groups, media or active content. Shared artwork motifs use this supported subset.
@@ -265,6 +267,9 @@ Use actual dry-run/diff classifications: xdoc can classify a text-free freeform'
 `text`, and a caption offset as `style`; these categories do not authorize rewriting visible text.
 
 Require dry-run, full semantic diff, PNG preview, vision-diff, final inspect and structure-check.
+The structure report must record the current candidate's path, SHA-256 and byte length in `input`;
+its `artifacts.pptx` must identify that same candidate. Regenerate legacy reports without this identity
+or reports captured before changing the candidate; rebinding an evidence manifest does not refresh a scan.
 After actual canonical source/candidate PNG review, use `cli/edit/finalize.mjs` as usual. Its explicit
 `pptx-nova-native-artwork-edit-acceptance/v1` policy independently compares the selected slide XML
 after removing only declared drawings and applying only declared caption offsets, including the

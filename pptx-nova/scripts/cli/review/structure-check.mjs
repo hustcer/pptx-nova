@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { inflateRawSync } from 'node:zlib'
+import { createHash } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { writeJsonOutput } from '../../lib/runtime/output-files.mjs'
@@ -193,8 +194,7 @@ function findEndOfCentralDirectory(buffer) {
   throw new Error('PPTX ZIP end of central directory was not found')
 }
 
-function readZipEntries(path) {
-  const buffer = readFileSync(path)
+function readZipEntries(buffer) {
   const eocd = findEndOfCentralDirectory(buffer)
   const entryCount = buffer.readUInt16LE(eocd + 10)
   const centralOffset = buffer.readUInt32LE(eocd + 16)
@@ -305,7 +305,8 @@ function makeReport(args) {
     ...args.expectedColors.map(normalizeColor),
     ...collectLockColors(lock),
   ])
-  const entries = readZipEntries(args.pptx)
+  const inputBytes = readFileSync(args.pptx)
+  const entries = readZipEntries(inputBytes)
   const xmlFiles = xmlEntries(entries)
   const fonts = collectFonts(xmlFiles)
   const colors = collectColors(xmlFiles)
@@ -314,6 +315,11 @@ function makeReport(args) {
   const report = {
     schemaVersion: SCHEMA_VERSION,
     status: 'pass',
+    input: {
+      path: args.pptx,
+      sha256: createHash('sha256').update(inputBytes).digest('hex'),
+      byteLength: inputBytes.length,
+    },
     artifacts: {
       pptx: args.pptx,
       deckLock: args.deckLock || null,

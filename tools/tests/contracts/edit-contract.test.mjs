@@ -370,7 +370,16 @@ function writeFixture({
   writeJson(visionDiff, visionDiffFixture({ passed: visionDiffPassed, source, candidate }))
   writeJson(styleDiff, styleDiffFixture({ passed: stylePassed, source, candidate }))
   writeJson(finalInspect, finalInspectFixture(candidate))
-  writeJson(structureCheck, { status: 'pass', source, candidate })
+  writeJson(structureCheck, {
+    schemaVersion: 'pptx-nova-structure-check/v1',
+    status: 'pass',
+    artifacts: { pptx: candidate },
+    input: {
+      path: candidate,
+      sha256: sha256(candidate),
+      byteLength: readFileSync(candidate).length,
+    },
+  })
   return {
     root,
     runDir,
@@ -1102,6 +1111,62 @@ test('edit contract gate blocks evidence generated for a different candidate', (
   assert.equal(report.status, 'fail')
   assert.equal(report.agentGate.nextAction, 'regenerate-current-candidate-evidence')
   assert.ok(report.blockers.some((item) => item.code === 'evidence-candidate-mismatch'))
+})
+
+test('edit contract gate binds real structure checks to their scanned candidate bytes', () => {
+  for (const mutation of [
+    'none',
+    'other-pptx',
+    'same-path-new-bytes',
+    'missing-identity',
+    'legacy-report',
+  ]) {
+    const fixture = writeFixture()
+    const draft = contractDraft()
+    draft.requiredEvidence.push('structure-check')
+    writeJson(fixture.draft, draft)
+    const checked = mutation === 'other-pptx' ? join(fixture.root, 'other.pptx') : fixture.candidate
+    const slide = sessionRuleSlideXml()
+    writeStoredZip(checked, { 'ppt/slides/slide1.xml': slide })
+    const result = runNode([
+      join(skillRoot, 'scripts/cli/review/structure-check.mjs'),
+      '--pptx',
+      checked,
+      '--expected-font',
+      'Arial',
+      '--expected-color',
+      '0076A8',
+      '--output',
+      fixture.structureCheck,
+      '--overwrite',
+      '--json',
+    ])
+    assert.equal(JSON.parse(result.stdout).status, 'pass')
+    if (mutation === 'same-path-new-bytes') {
+      writeStoredZip(checked, {
+        'ppt/slides/slide1.xml': slide.replace('P1 Session Rules', 'P2 Session Rules'),
+      })
+    }
+    if (mutation === 'missing-identity' || mutation === 'legacy-report') {
+      const report = JSON.parse(result.stdout)
+      delete report.input
+      if (mutation === 'missing-identity') delete report.artifacts.pptx
+      writeJson(fixture.structureCheck, report)
+    }
+    // Rebinding the manifest and resetting mtime must not bless an old or unrelated scan.
+    const past = new Date(Date.now() - 5000)
+    utimesSync(fixture.candidate, past, past)
+    generateContract(fixture)
+    const report = runGate(fixture, mutation === 'none' ? 0 : 2)
+    if (mutation === 'none') assert.equal(report.agentGate.passed, true)
+    else
+      assert.ok(
+        report.blockers.some((item) =>
+          ['evidence-candidate-mismatch', 'structure-check-input-mismatch'].includes(item.code),
+        ),
+        mutation,
+      )
+  }
 })
 
 test('edit contract gate blocks old evidence after the candidate is overwritten in place', () => {

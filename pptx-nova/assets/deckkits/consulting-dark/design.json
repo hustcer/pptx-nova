@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "consulting-dark",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -29,11 +29,11 @@
   "fonts": {
     "body": {
       "latin": "Arial",
-      "eastAsian": "Arial Unicode MS"
+      "eastAsian": "Noto Sans SC"
     },
     "display": {
       "latin": "Arial",
-      "eastAsian": "Arial Unicode MS"
+      "eastAsian": "Noto Sans SC"
     }
   },
   "textFrame": {
@@ -199,6 +199,27 @@
         "bold": false,
         "lineHeight": 1.1
       },
+      "presentationMetric": {
+        "role": "body",
+        "sizePt": 56,
+        "color": "warm",
+        "bold": true,
+        "lineHeight": 1.1
+      },
+      "presentationLabel": {
+        "role": "body",
+        "sizePt": 22,
+        "color": "paper",
+        "bold": true,
+        "lineHeight": 1.1
+      },
+      "presentationBody": {
+        "role": "body",
+        "sizePt": 18,
+        "color": "pale",
+        "bold": false,
+        "lineHeight": 1.1
+      },
       "proofMetric": {
         "role": "body",
         "sizePt": 34,
@@ -290,6 +311,9 @@
             "regions": {
               "items": [0.8, 2.05, 11.7, 4.5]
             }
+          },
+          "metrics": {
+            "regions": { "items": [0.8, 2.05, 11.7, 4.5] }
           }
         }
       },
@@ -413,6 +437,13 @@
             "regions": {
               "intro": [0.8, 1.55, 4.1, 4.6],
               "items": [5.6, 1.8, 6.9, 4.5],
+              "closing": [0.8, 6.55, 11.7, 0.3]
+            }
+          },
+          "decision-led": {
+            "regions": {
+              "intro": [0.8, 2.05, 11.7, 1.8],
+              "items": [0.8, 4.3, 11.7, 1.95],
               "closing": [0.8, 6.55, 11.7, 0.3]
             }
           }

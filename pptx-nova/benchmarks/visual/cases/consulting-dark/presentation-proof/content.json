@@ -1,0 +1,75 @@
+{
+  "meta": { "deckkit": "consulting-dark", "designScope": "excerpt" },
+  "slides": [
+    {
+      "type": "kpiRowSlide",
+      "layoutId": "metrics",
+      "data": {
+        "eyebrow": "运营复盘 · 演示数据",
+        "title": "三项指标，一眼读清",
+        "source": "合成演示 · 不代表真实经营结果",
+        "items": [
+          { "index": "01", "title": "已完成服务", "badge": "42,000", "body": "人次 · 同比增长 8%" },
+          { "index": "02", "title": "处理量", "badge": "18,600", "body": "笔 · 同比增长 12%" },
+          { "index": "03", "title": "满意度", "badge": "91%", "body": "同比提升 3 个百分点" }
+        ]
+      }
+    },
+    {
+      "type": "askSlide",
+      "layoutId": "decision-led",
+      "data": {
+        "eyebrow": "决策 · 演示数据",
+        "title": "需要批准的行动",
+        "source": "合成演示 · 无商业或绩效承诺",
+        "sub": "先运行两项试点\n复盘后再决定扩展",
+        "asks": [
+          { "title": "明确范围", "description": "保留试点边界与原始记录" },
+          { "title": "复核证据", "description": "检查等待时长与完成率" },
+          { "title": "作出决定", "description": "依据复盘证据决定扩展" }
+        ],
+        "closing": "现场汇报 · 原生可编辑文字与形状",
+        "closingR": "演示案例 · 不是已批准计划"
+      }
+    },
+    {
+      "type": "kpiRowSlide",
+      "layoutId": "metrics",
+      "data": {
+        "eyebrow": "Quarterly service review · synthetic data",
+        "title": "Evidence stays legible at a distance",
+        "source": "Synthetic demonstration · not an operating claim",
+        "items": [
+          {
+            "index": "01",
+            "title": "Requests handled",
+            "badge": "12,480",
+            "body": "Requests · 8% year-on-year"
+          },
+          {
+            "index": "02",
+            "title": "Completion rate",
+            "badge": "94%",
+            "body": "Up 2 percentage points"
+          }
+        ]
+      }
+    },
+    {
+      "type": "askSlide",
+      "layoutId": "decision-led",
+      "data": {
+        "eyebrow": "Decision · synthetic scenario",
+        "title": "A bounded next step",
+        "source": "Synthetic demonstration · not an approved business plan",
+        "sub": "Run the pilot first.\nExpand only after review.",
+        "asks": [
+          { "title": "Keep a baseline", "description": "Retain the original evidence." },
+          { "title": "Review the result", "description": "Check waiting time and completion." }
+        ],
+        "closing": "Native editable text and shapes",
+        "closingR": "Illustrative decision process"
+      }
+    }
+  ]
+}

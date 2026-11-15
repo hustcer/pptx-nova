@@ -2,6 +2,15 @@
   "schemaVersion": "pptx-nova-visual-benchmarks/v1",
   "cases": [
     {
+      "id": "consulting-dark.presentation-proof",
+      "deckkit": "consulting-dark",
+      "kind": "mixed-language",
+      "contentPath": "cases/consulting-dark/presentation-proof/content.json",
+      "buildPath": "../../assets/deckkits/consulting-dark/examples/build.mjs",
+      "expectedPath": "cases/consulting-dark/presentation-proof/expected.json",
+      "reviewPath": "cases/consulting-dark/presentation-proof/review.md"
+    },
+    {
       "id": "consulting-dark.golden-roadshow",
       "deckkit": "consulting-dark",
       "kind": "golden",

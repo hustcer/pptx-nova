@@ -205,36 +205,56 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
       metric('ProfileMetric' + i, inset(f, 0.16), d.metrics[i], `metrics[${i}]`, true, true)
     })
   } else if (family.role === 'achievements') {
-    const rows = layoutId === 'ledger',
-      frames = grid(r.items, d.items.length, rows ? 1 : Math.min(2, d.items.length))
-    frames.forEach(([x, y, w, h], i) => {
-      const v = d.items[i],
-        p = `items[${i}]`
-      rule('AchievementRule' + i, x, y, w)
-      tx('AchievementIndex' + i, [x, y + 0.2, 0.45, 0.4], v.index, 'label', p + '.index')
-      tx(
-        'AchievementTitle' + i,
-        [x + 0.65, y + 0.2, rows ? 3.5 : w - 2.8, 0.75],
-        v.title,
-        'heading',
-        p + '.title',
-      )
-      tx(
-        'AchievementBadge' + i,
-        [x + w - 1.9, y + 0.12, 1.9, 0.85],
-        v.badge,
-        'proofMetric',
-        p + '.badge',
-        { alignment: 'right' },
-      )
-      tx(
-        'AchievementBody' + i,
-        rows ? [x + 4.65, y + 0.17, w - 6.85, h - 0.2] : [x + 0.65, y + 1.12, w - 0.65, h - 1.15],
-        v.body,
-        'body',
-        p + '.body',
-      )
-    })
+    if (layoutId === 'metrics') {
+      if (d.items.length > 3 || d.items.some((item) => !/[0-9]/.test(item.badge)))
+        throw Error('Metrics composition requires at most three actual numeric evidence values')
+      grid(r.items, d.items.length).forEach(([x, y, w, h], i) => {
+        const item = d.items[i],
+          p = `items[${i}]`
+        rule('MetricRule' + i, x, y, w)
+        tx('MetricIndex' + i, [x, y + 0.2, w, 0.35], item.index, 'label', p + '.index')
+        tx(
+          'MetricValue' + i,
+          [x, y + 0.87, w, 1.35],
+          item.badge,
+          'presentationMetric',
+          p + '.badge',
+        )
+        tx('MetricTitle' + i, [x, y + 2.48, w, 0.62], item.title, 'presentationLabel', p + '.title')
+        tx('MetricBody' + i, [x, y + 3.22, w, h - 3.22], item.body, 'presentationBody', p + '.body')
+      })
+    } else {
+      const rows = layoutId === 'ledger',
+        frames = grid(r.items, d.items.length, rows ? 1 : Math.min(2, d.items.length))
+      frames.forEach(([x, y, w, h], i) => {
+        const v = d.items[i],
+          p = `items[${i}]`
+        rule('AchievementRule' + i, x, y, w)
+        tx('AchievementIndex' + i, [x, y + 0.2, 0.45, 0.4], v.index, 'label', p + '.index')
+        tx(
+          'AchievementTitle' + i,
+          [x + 0.65, y + 0.2, rows ? 3.5 : w - 2.8, 0.75],
+          v.title,
+          'heading',
+          p + '.title',
+        )
+        tx(
+          'AchievementBadge' + i,
+          [x + w - 1.9, y + 0.12, 1.9, 0.85],
+          v.badge,
+          'proofMetric',
+          p + '.badge',
+          { alignment: 'right' },
+        )
+        tx(
+          'AchievementBody' + i,
+          rows ? [x + 4.65, y + 0.17, w - 6.85, h - 0.2] : [x + 0.65, y + 1.12, w - 0.65, h - 1.15],
+          v.body,
+          'body',
+          p + '.body',
+        )
+      })
+    }
   } else if (family.role === 'product') {
     tx('Banner', r.banner, d.banner, 'body', 'banner')
     const rail = layoutId === 'rail',
@@ -526,32 +546,51 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
       )
     })
   } else if (family.role === 'decision') {
-    const [x, y, w, h] = r.intro,
-      rows = layoutId === 'rows'
-    tx('Eyebrow', [0.8, 0.6, 11.7, 0.3], d.eyebrow, 'label', 'eyebrow')
-    tx('Title', [x, y, w, rows ? 2.9 : 2.0], d.title, rows ? 'title' : 'hero', 'title', {
-      color: 'paper',
-    })
-    tx('Sub', [x, y + (rows ? 3.1 : 2.15), w, rows ? h - 3.1 : 0.7], d.sub, 'subtitle', 'sub')
-    grid(r.items, d.asks.length, rows ? 1 : d.asks.length).forEach(([cx, cy, cw, ch], i) => {
-      const v = d.asks[i],
-        p = `asks[${i}]`
-      rule('AskRule' + i, cx, cy, cw)
-      tx(
-        'AskTitle' + i,
-        [cx, cy + 0.18, rows ? 2.5 : cw, rows ? ch - 0.2 : 0.75],
-        v.title,
-        'heading',
-        p + '.title',
-      )
-      tx(
-        'AskDescription' + i,
-        rows ? [cx + 2.9, cy + 0.18, cw - 2.9, ch - 0.2] : [cx, cy + 1.1, cw, ch - 1.12],
-        v.description,
-        'body',
-        p + '.description',
-      )
-    })
+    if (layoutId === 'decision-led') {
+      tx('Eyebrow', b.chrome.eyebrow, d.eyebrow, 'label', 'eyebrow')
+      tx('Title', b.chrome.title, d.title, 'title', 'title')
+      tx('Sub', r.intro, d.sub, 'title', 'sub', { sizePt: 32 })
+      grid(r.items, d.asks.length).forEach(([x, y, w, h], i) => {
+        const item = d.asks[i],
+          p = `asks[${i}]`
+        rule('AskRule' + i, x, y, w)
+        tx('AskTitle' + i, [x, y + 0.18, w, 0.6], item.title, 'presentationLabel', p + '.title')
+        tx(
+          'AskDescription' + i,
+          [x, y + 0.94, w, h - 0.94],
+          item.description,
+          'presentationBody',
+          p + '.description',
+        )
+      })
+    } else {
+      const [x, y, w, h] = r.intro,
+        rows = layoutId === 'rows'
+      tx('Eyebrow', [0.8, 0.6, 11.7, 0.3], d.eyebrow, 'label', 'eyebrow')
+      tx('Title', [x, y, w, rows ? 2.9 : 2.0], d.title, rows ? 'title' : 'hero', 'title', {
+        color: 'paper',
+      })
+      tx('Sub', [x, y + (rows ? 3.1 : 2.15), w, rows ? h - 3.1 : 0.7], d.sub, 'subtitle', 'sub')
+      grid(r.items, d.asks.length, rows ? 1 : d.asks.length).forEach(([cx, cy, cw, ch], i) => {
+        const v = d.asks[i],
+          p = `asks[${i}]`
+        rule('AskRule' + i, cx, cy, cw)
+        tx(
+          'AskTitle' + i,
+          [cx, cy + 0.18, rows ? 2.5 : cw, rows ? ch - 0.2 : 0.75],
+          v.title,
+          'heading',
+          p + '.title',
+        )
+        tx(
+          'AskDescription' + i,
+          rows ? [cx + 2.9, cy + 0.18, cw - 2.9, ch - 0.2] : [cx, cy + 1.1, cw, ch - 1.12],
+          v.description,
+          'body',
+          p + '.description',
+        )
+      })
+    }
     tx('Closing', [r.closing[0], r.closing[1], 5.4, r.closing[3]], d.closing, 'source', 'closing')
     tx('ClosingRight', [6.7, r.closing[1], 5.8, r.closing[3]], d.closingR, 'source', 'closingR', {
       alignment: 'right',
@@ -629,7 +668,10 @@ export function resolveConsultingDeck(design, content) {
     let chosen
     try {
       chosen = selectDesignLayout(
-        candidates,
+        [...candidates].sort((a, b) => {
+          const priority = (c) => (['metrics', 'decision-led'].includes(c.layoutId) ? 0 : 1)
+          return priority(a) - priority(b)
+        }),
         slide.layoutId ?? 'auto',
         layouts,
         design.consulting.rhythm.maxConsecutive,

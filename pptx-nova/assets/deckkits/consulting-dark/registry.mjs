@@ -4,7 +4,7 @@ import { compileConsultingLayout, resolveConsultingDeck } from './layouts.mjs'
 export const CONSULTING_LAYOUTS = {
   cover: { split: ['main', 'detail'], stacked: ['main', 'detail'] },
   profile: { ledger: ['history', 'metrics'], bands: ['history', 'metrics'] },
-  achievements: { quadrants: ['items'], ledger: ['items'] },
+  achievements: { quadrants: ['items'], ledger: ['items'], metrics: ['items'] },
   product: {
     strip: ['banner', 'metrics', 'capabilities'],
     rail: ['banner', 'metrics', 'capabilities'],
@@ -17,7 +17,11 @@ export const CONSULTING_LAYOUTS = {
   flow: { horizontal: ['flow', 'capabilities'], vertical: ['flow', 'capabilities'] },
   benchmark: { rail: ['table', 'chart', 'callout'], stacked: ['table', 'chart', 'callout'] },
   roadmap: { horizontal: ['steps'], ledger: ['steps'] },
-  decision: { columns: ['intro', 'items', 'closing'], rows: ['intro', 'items', 'closing'] },
+  decision: {
+    columns: ['intro', 'items', 'closing'],
+    rows: ['intro', 'items', 'closing'],
+    'decision-led': ['intro', 'items', 'closing'],
+  },
 }
 function assertConsulting(design, { assertFrame }) {
   const b = design.consulting,
@@ -50,6 +54,9 @@ function assertConsulting(design, { assertFrame }) {
     'compactMetric',
     'proofMetric',
     'reading',
+    'presentationMetric',
+    'presentationLabel',
+    'presentationBody',
   ]) {
     const st = b.styles[key]
     if (!st || !design.colors[st.color] || !design.fonts[st.role] || st.italic)

@@ -3,7 +3,7 @@
   "entries": [
     {
       "id": "consulting-dark",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "path": "consulting-dark/consulting-dark.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
@@ -138,7 +138,7 @@
             "heading": "Arial",
             "label": "Arial",
             "body": "Arial",
-            "cjk": "Arial Unicode MS",
+            "cjk": "Noto Sans SC",
             "display": "Arial"
           },
           "styleOps": [
@@ -233,7 +233,7 @@
           },
           "kpiRowSlide": {
             "requiredSlots": ["data.eyebrow", "data.title", "data.source", "data.items"],
-            "allowedLayoutIds": ["auto", "quadrants", "ledger"]
+            "allowedLayoutIds": ["auto", "quadrants", "ledger", "metrics"]
           },
           "previewProductSlide": {
             "requiredSlots": [
@@ -315,7 +315,7 @@
               "data.closing",
               "data.closingR"
             ],
-            "allowedLayoutIds": ["auto", "columns", "rows"]
+            "allowedLayoutIds": ["auto", "columns", "rows", "decision-led"]
           }
         }
       },
@@ -372,7 +372,7 @@
       "quality": {
         "knownBlockingLimits": [],
         "manualHardDefects": 0,
-        "lastBenchmark": "2026-10-25",
+        "lastBenchmark": "2026-11-15",
         "vision": {
           "high": 0,
           "medium": 0,
@@ -386,15 +386,15 @@
             "resolved": 0,
             "reviewable": 0,
             "baselineUnavailableCases": 0,
-            "baselineUpdatedCases": 0
+            "baselineUpdatedCases": 4
           }
         },
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-10-25",
+          "date": "2026-11-15",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-consulting-dark-20261025-redesign/benchmark/dark"
+            "out": ".tmp/deckkit-consulting-dark-design-20261115/benchmark/04"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden", "stress", "mixed-language"],
@@ -413,7 +413,7 @@
               "resolved": 0,
               "reviewable": 0,
               "baselineUnavailableCases": 0,
-              "baselineUpdatedCases": 0
+              "baselineUpdatedCases": 4
             }
           },
           "cases": [
@@ -421,7 +421,7 @@
               "caseId": "consulting-dark.golden-roadshow",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-consulting-dark-20261025-redesign/benchmark/dark/consulting-dark/golden-roadshow/summary.json",
+              "summaryPath": ".tmp/deckkit-consulting-dark-design-20261115/benchmark/04/consulting-dark/golden-roadshow/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/consulting-dark/golden-roadshow/review.md",
               "validation": {
                 "valid": true,
@@ -447,7 +447,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": false
+                  "baselineUpdated": true
                 }
               },
               "previews": {
@@ -458,16 +458,16 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 232128
+                "bytes": 231631
               },
               "patchOps": 1041,
-              "p50TotalMs": 100.7
+              "p50TotalMs": 176.28
             },
             {
               "caseId": "consulting-dark.stress-density",
               "kind": "stress",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-consulting-dark-20261025-redesign/benchmark/dark/consulting-dark/stress-density/summary.json",
+              "summaryPath": ".tmp/deckkit-consulting-dark-design-20261115/benchmark/04/consulting-dark/stress-density/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/consulting-dark/stress-density/review.md",
               "validation": {
                 "valid": true,
@@ -493,7 +493,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": false
+                  "baselineUpdated": true
                 }
               },
               "previews": {
@@ -504,16 +504,16 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 233394
+                "bytes": 233904
               },
               "patchOps": 1146,
-              "p50TotalMs": 100.74
+              "p50TotalMs": 211.88
             },
             {
               "caseId": "consulting-dark.mixed-language",
               "kind": "mixed-language",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-consulting-dark-20261025-redesign/benchmark/dark/consulting-dark/mixed-language/summary.json",
+              "summaryPath": ".tmp/deckkit-consulting-dark-design-20261115/benchmark/04/consulting-dark/mixed-language/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/consulting-dark/mixed-language/review.md",
               "validation": {
                 "valid": true,
@@ -539,7 +539,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": false
+                  "baselineUpdated": true
                 }
               },
               "previews": {
@@ -550,10 +550,56 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 102741
+                "bytes": 103293
               },
               "patchOps": 346,
-              "p50TotalMs": 102.98
+              "p50TotalMs": 182.2
+            },
+            {
+              "caseId": "consulting-dark.presentation-proof",
+              "kind": "mixed-language",
+              "passed": true,
+              "summaryPath": ".tmp/deckkit-consulting-dark-design-20261115/benchmark/04/consulting-dark/presentation-proof/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/consulting-dark/presentation-proof/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "lowBuckets": {
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 4,
+                "expectedCount": 4,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 79047
+              },
+              "patchOps": 321,
+              "p50TotalMs": 200.51
             }
           ],
           "blockers": []

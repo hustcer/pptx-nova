@@ -1,4 +1,4 @@
-# Consulting Dark 2.1
+# Consulting Dark 2.2
 
 An executive consulting language built around a deep navy canvas on every page, decisive warm-white
 typography and open evidence structures. Warm copper directs attention to numbers and short indexes;
@@ -8,6 +8,25 @@ The design contract is the numerical authority. Everyday authors use the registe
 `layoutId`; they do not write coordinates. The resolver checks actual text and data capacity, records
 each component, and chooses deterministically among legal compositions. Explicit layouts must fit.
 If none fits, reorganise or split the content. No field is truncated and no font is shrunk to pass.
+
+## Fixed-canvas presentation compositions
+
+The additive `metrics` layout for `kpiRowSlide` gives one to three actual numeric values a 56pt
+proof role, 22pt labels and 18pt supporting explanations. It uses native text and open rules,
+not raster cards or a shared axis for unlike units. It is eligible only when every authored
+field fits; longer/four-item evidence retains `quadrants` or `ledger`. `auto` prefers this
+presentation composition when feasible, while explicit older layout ids retain their geometry.
+
+The additive `decision-led` layout for `askSlide` places the real requested action (`sub`) in
+the primary reading region, with supporting asks below. A generic short topic title need not
+occupy the largest typography. Keep all source facts, provenance and both closing fields;
+avoid filling required slots with repeated promises when real decision context is available.
+Long titles, explanations or too many asks may need `columns`/`rows`; no hidden truncation or
+font reduction occurs. These layouts address projected-slide reading, not webpage scrolling.
+
+Version 2.2 accepts the previous content schema and adds optional layout choices; existing
+registered layout capacities are unchanged. Automatic layout selection may choose the new
+fitting compositions, so rebuild the plan and actual render before reusing any prior review.
 
 ## Visual decisions
 
@@ -30,25 +49,26 @@ If none fits, reorganise or split the content. No field is truncated and no font
   rules provide local depth; pale supporting text remains readable against navy. Layout, density and
   typography create the deck rhythm. Do not turn evidence pages light or infer business meaning from
   the dark palette.
-- Explicitly request upright Arial and Arial Unicode MS, including regular and bold runs. Fonts are
-  not embedded; another font environment requires new visual checks.
+- Explicitly request upright Arial for Latin and Noto Sans SC for CJK, including regular and bold
+  runs. Real PNG probes must preserve the inner spaces of complex CJK glyphs; an exact font-name
+  match alone is insufficient. Fonts are not embedded; another environment requires new checks.
 - The source note, units, dates, claims and every business label come from content. Example figures
   are synthetic, not product benchmarks. The kit inserts only structural page numbering.
 
 ## Roles and composition choices
 
-| Slide type          | Purpose                                             | Layouts               |
-| ------------------- | --------------------------------------------------- | --------------------- |
-| heroSlide           | Opening argument and project metadata               | split / stacked       |
-| profileTableSlide   | Experience history and supporting metrics           | ledger / bands        |
-| kpiRowSlide         | Numbered achievements with evidence badges          | quadrants / ledger    |
-| previewProductSlide | Product proposition, metrics and capabilities       | strip / rail          |
-| landscapeSlide      | Position, alternatives, strengths and limitations   | columns / ledger      |
-| multiCardSlide      | Audience or workstream groups                       | columns / ledger      |
-| convertFlowSlide    | Source, process, outputs and capabilities           | horizontal / vertical |
-| benchmarkSlide      | Native table and single-series bar evidence         | rail / stacked        |
-| timelineSlide       | Ordered phases with explicit status and description | horizontal / ledger   |
-| askSlide            | Decision statement and concrete requests            | columns / rows        |
+| Slide type          | Purpose                                             | Layouts                       |
+| ------------------- | --------------------------------------------------- | ----------------------------- |
+| heroSlide           | Opening argument and project metadata               | split / stacked               |
+| profileTableSlide   | Experience history and supporting metrics           | ledger / bands                |
+| kpiRowSlide         | Numbered achievements with evidence badges          | metrics / quadrants / ledger  |
+| previewProductSlide | Product proposition, metrics and capabilities       | strip / rail                  |
+| landscapeSlide      | Position, alternatives, strengths and limitations   | columns / ledger              |
+| multiCardSlide      | Audience or workstream groups                       | columns / ledger              |
+| convertFlowSlide    | Source, process, outputs and capabilities           | horizontal / vertical         |
+| benchmarkSlide      | Native table and single-series bar evidence         | rail / stacked                |
+| timelineSlide       | Ordered phases with explicit status and description | horizontal / ledger           |
+| askSlide            | Decision statement and concrete requests            | decision-led / columns / rows |
 
 The two benchmark layouts change the order of chart and interpretation; they retain the same table.
 Table and chart are independent evidence supplied by the author. A displayed callout is not silently
@@ -94,6 +114,14 @@ Schemas and projected budgets are discovery aids. Maximum item counts do not gua
 combination of long text fits every layout. Each component still runs an instance capacity check.
 The release report records actual maximum-density, sparse, Chinese, mixed and alternative-layout
 coverage, visual review and native-host evidence. Candidate is not automatic production eligibility.
+
+## Compatibility from 2.2
+
+CJK roles now request Noto Sans SC rather than Arial Unicode MS, whose complex bold glyphs lost
+inner spaces in the checked runtime. Rebuild and review CJK decks in the destination font environment;
+this is a rendered result check, not a guarantee of an independent installed Bold font file.
+See the [presentation proof review](../../../benchmarks/visual/cases/consulting-dark/presentation-proof/review.md)
+for rendered sparse Chinese/English coverage alongside the existing golden, density and mixed-language cases.
 
 ## Compatibility from 2.0
 

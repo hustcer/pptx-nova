@@ -1589,7 +1589,7 @@
       "caseId": "teal-journal.golden-handbook",
       "kind": "golden",
       "readiness": "default",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "title": "VISIT ONCE, RETURN ALL YEAR.",
       "bestFor": [
         "editorial handbook",
@@ -1603,29 +1603,29 @@
       "files": {
         "deck": {
           "path": "teal-journal/deck.pptx",
-          "bytes": 33776,
-          "sha256": "72862124b663ab77e9ce7b9328584059f7187fdf18447118c6bc1abed265e2e6"
+          "bytes": 34748,
+          "sha256": "167136555258e858ecf599b4a63d35ae3393317fdc0df721a9cd085b7aaaa184"
         },
         "contactSheet": {
           "path": "teal-journal/contact-sheet.webp",
-          "bytes": 585140,
-          "sha256": "7c0dcfe3d028346572e306d88009b74993479e06da2409c90fffd4706c176505",
+          "bytes": 595954,
+          "sha256": "cbbb817ef7569bae2300827ba43e8f318fc9b76d85d3d06a029ab9e38118d700",
           "quality": 86
         },
         "content": {
           "path": "teal-journal/content.json",
-          "bytes": 12955,
-          "sha256": "c2b77f800eeee48c708ef9640c241ed35ae8e9d8d0626c82f0f073eb855ab872"
+          "bytes": 12953,
+          "sha256": "207a066367ce7d33a1b2df3c911fef70bd0a98438dd9f12802f6bd61c0b4476b"
         },
         "brief": {
           "path": "teal-journal/brief.md",
           "bytes": 728,
-          "sha256": "9067a26dac103f3c0d6efa292ffc8cad294582e047f696287bd917acf81a9c6b"
+          "sha256": "55f32187e9bcd62def7f0d71ba1807abbe7428ec61ed7f0d547492ae6565920c"
         },
         "summary": {
           "path": "teal-journal/summary.json",
           "bytes": 2768,
-          "sha256": "8e2acb986e92aef26afd6072b72feb6b593f09ef07d1cf7c12b7b445a3972834"
+          "sha256": "947a35c9ec62e460153ef8fc98a6ab19b0f960234b4bb83b41c0801e0650273d"
         }
       },
       "validation": {
@@ -1637,7 +1637,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 1027
+        "ops": 1050
       },
       "vision": {
         "status": "success",

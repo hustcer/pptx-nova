@@ -1,5 +1,6 @@
 import { designHash, selectDesignLayout } from '../shared/design-contract.mjs'
 import { fitTextPlan } from '../shared/text-layout.mjs'
+import { createNativeArtwork } from '../shared/native-artwork.mjs'
 export const number = (n) => {
   if (!Number.isFinite(n)) throw Error('Finite numeric evidence required')
   return n !== 0 && (Math.abs(n) < 0.001 || Math.abs(n) >= 1e7)
@@ -206,9 +207,20 @@ export function compileJournalLayout(design, family, id, variant, d, path = 'dat
       ],
       { line: 'accent', linePt: 3 },
     )
+    const art = b.coverArtwork,
+      [ax, ay, aw, ah] = art.region
+    cs.push(
+      ...createNativeArtwork({
+        frame: [x + w * ax, y + h * ay, w * aw, h * ah],
+        kind: d.artwork,
+        linePt: art.linePt,
+        accentPt: art.accentPt,
+        tones: { surface: 'paper', ink: 'ink', accent: 'accent', secondary: 'highlight' },
+      }),
+    )
     tx(
       'AssetCaption',
-      [x + 0.3, y + h * 0.38, w - 0.6, 1],
+      [x + 0.3, y + h * b.coverArtwork.captionY, w - 0.6, 1],
       d.assetCaption,
       'label',
       'assetCaption',
@@ -480,9 +492,21 @@ export function compileJournalLayout(design, family, id, variant, d, path = 'dat
       const [x, y, w, h] = r.sample
       box('SampleBorder', r.sample, 'ink')
       box('SamplePaper', [x + 0.012, y + 0.012, w - 0.024, h - 0.024], 'paper')
+      const art = b.sampleArtwork,
+        [ax, ay, aw, ah] = art.region,
+        captionY = y + h * art.captionY
+      box('SampleArtworkField', [x + 0.13, y + 0.15, w - 0.26, captionY - y - 0.15], 'pale')
+      cs.push(
+        ...createNativeArtwork({
+          frame: [x + w * ax, y + h * ay, w * aw, h * ah],
+          linePt: art.linePt,
+          accentPt: art.accentPt,
+          tones: { surface: 'paper', ink: 'ink', accent: 'accent', secondary: 'highlight' },
+        }),
+      )
       owned(
         'SampleImage',
-        [x + 0.13, y + 0.15, w - 0.26, 0.62],
+        [x + 0.13, captionY, w - 0.26, 0.62],
         d.sample.imageCaption,
         'pale',
         'sample.imageCaption',
@@ -490,16 +514,16 @@ export function compileJournalLayout(design, family, id, variant, d, path = 'dat
       )
       tx(
         'SampleTitle',
-        [x + 0.18, y + 1, w - 0.36, 0.55],
+        [x + 0.18, y + 1.38, w - 0.36, 0.55],
         d.sample.heading,
         'heading',
         'sample.heading',
       )
-      tx('SampleTag', [x + 0.18, y + 1.69, w - 0.36, 0.32], d.sample.tag, 'small', 'sample.tag')
-      owned('SampleCTA', [x + 0.13, y + 2.18, w - 0.26, 0.45], d.sample.cta, 'accent', 'sample.cta')
+      tx('SampleTag', [x + 0.18, y + 2, w - 0.36, 0.32], d.sample.tag, 'small', 'sample.tag')
+      owned('SampleCTA', [x + 0.13, y + 2.42, w - 0.26, 0.45], d.sample.cta, 'accent', 'sample.cta')
       tx(
         'SampleTerms',
-        [x + 0.18, y + 2.85, w - 0.36, 0.36],
+        [x + 0.18, y + 3.03, w - 0.36, 0.36],
         d.sample.terms,
         'small',
         'sample.terms',

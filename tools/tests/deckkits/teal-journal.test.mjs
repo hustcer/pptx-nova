@@ -24,6 +24,68 @@ const file = (p) =>
   )
 const fixture = () => file('examples/content.json')
 const excerpt = (slides) => ({ meta: { deckkit: 'teal-journal', designScope: 'excerpt' }, slides })
+test('teal-journal: cover image regions contain editable native artwork by default', () => {
+  for (const layoutId of ['angular', 'inset']) {
+    const slide = structuredClone(fixture().slides[0])
+    slide.layoutId = layoutId
+    const built = createDeck(excerpt([slide]))
+    const art = built.patch.ops.filter((o) => o.op === 'add-freeform' && /_Artwork/.test(o.name))
+    assert.ok(art.length >= 3, 'A caption and empty field are not a finished illustration')
+    assert.equal(built.designCheck.status, 'pass')
+    assert.equal(
+      built.patch.ops.some((o) => o.op === 'add-image'),
+      false,
+    )
+  }
+})
+test('teal-journal: cover artwork choices are bounded, content-independent native compositions', () => {
+  for (const layoutId of ['angular', 'inset']) {
+    const signatures = []
+    for (const artwork of ['contours', 'documents', 'connections']) {
+      const slide = structuredClone(fixture().slides[0])
+      Object.assign(slide, { layoutId })
+      Object.assign(slide.data, {
+        artwork,
+        title: 'Shared repair tools',
+        assetCaption: 'LOCAL REPAIR',
+      })
+      const content = excerpt([slide])
+      assert.equal(validateDeckkitContent(content, { mode: 'delivery' }).valid, true)
+      const built = createDeck(content)
+      assert.equal(built.designCheck.status, 'pass')
+      const paths = built.designPlan.layouts[0].components.filter((c) =>
+        c.name.startsWith('Artwork'),
+      )
+      assert.ok(paths.length >= 3)
+      for (const c of paths) {
+        assert.equal(c.kind, 'path')
+        for (const cmd of c.path.commands)
+          for (const key of ['x', 'y', 'x1', 'y1', 'x2', 'y2'])
+            if (key in cmd) assert.ok(cmd[key] >= 0 && cmd[key] <= 100000)
+      }
+      const serialized = JSON.stringify(built.patch)
+      assert.doesNotMatch(serialized, /PPTX ROADSHOW|HUSTCER|BUILD WITH|IMAGE SHELL/)
+      signatures.push(JSON.stringify(paths.map((c) => c.path)))
+      slide.data.artwork = 'unregistered-photo'
+      assert.equal(validateDeckkitContent(content, { mode: 'delivery' }).valid, false)
+    }
+    assert.equal(new Set(signatures).size, 3)
+  }
+})
+test('teal-journal: both anatomy image regions use shared artwork and preserve caption capacity', () => {
+  for (const layoutId of ['center', 'offset']) {
+    const slide = structuredClone(fixture().slides.find((s) => s.type === 'journalAnatomySlide'))
+    slide.layoutId = layoutId
+    const built = createDeck(excerpt([slide]))
+    const cs = built.designPlan.layouts[0].components
+    assert.ok(cs.filter((c) => c.name.startsWith('Artwork') && c.kind === 'path').length >= 3)
+    const caption = cs.find((c) => c.name === 'SampleImage')
+    assert.ok(caption.paths.some((p) => p.endsWith('.data.sample.imageCaption')))
+    assert.equal(caption.frame[2], 3.65 - 0.26)
+    assert.equal(caption.frame[3], 0.62)
+    assert.equal(built.designCheck.status, 'pass')
+  }
+})
 test('teal-journal: qualitative narrative needs no invented numeric evidence', () => {
   const data = {
     title: 'Repair library',

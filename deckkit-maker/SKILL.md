@@ -316,6 +316,10 @@ benchmark 覆盖；最终 catalog 必须把未覆盖内容写入 `knownLimits` �
 
 ### 图片资产原则
 
+当前新增图片式视觉统一走 [原生 PowerPoint 组合](../pptx-nova/references/create/native-visuals.md)。
+空外壳只可用于开发时登记资产职责，不能作为交付完成态。复用主体相关的 shape/path、连接线、
+分组、文字、已注册图标及有真实数据依据的原生对象，维护对应套件合同和测试；保留用户提供的真实素材。
+
 DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片、截图、插画、产品界面图、
 背景位图占主要表达价值）默认不进入 Phase 1 高保真 rebuild set；只登记其页型、图片角色、
 裁切/边框/callout/caption 等可复用外壳。若该页贡献了新的可复用页型，重建外壳和

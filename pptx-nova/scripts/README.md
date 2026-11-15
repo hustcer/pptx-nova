@@ -28,6 +28,10 @@ All paths below are relative to scripts/. Run Node entries with
 `node <skill-root>/scripts/cli/<workflow>/<command>.mjs`.
 The public release audit checks this layout and local module imports.
 
+`cli/assets/native-artwork.mjs` generates editable illustration patches for any DeckKit from a
+frame, motif and palette. See [native visuals](../references/create/native-visuals.md) for the shared
+component API and integration boundary; it does not apply a patch or bypass the owning workflow.
+
 ## Runtime and recovery
 
 - `cli/runtime/probe.mjs` - capture a compact runtime capability snapshot,

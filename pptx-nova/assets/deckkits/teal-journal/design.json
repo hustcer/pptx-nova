@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "teal-journal",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -108,6 +108,18 @@
     }
   ],
   "journal": {
+    "coverArtwork": {
+      "region": [0.22, 0.1, 0.63, 0.52],
+      "captionY": 0.68,
+      "linePt": 1.25,
+      "accentPt": 3.2
+    },
+    "sampleArtwork": {
+      "region": [0.04, 0.045, 0.92, 0.14],
+      "captionY": 0.186,
+      "linePt": 0.8,
+      "accentPt": 1.6
+    },
     "family": "teal-editorial/v1",
     "styles": {
       "hero": {
@@ -340,7 +352,7 @@
         "variants": {
           "center": {
             "regions": {
-              "sample": [4.84, 2.12, 3.65, 3.35],
+              "sample": [4.84, 2.12, 3.65, 3.5],
               "left": [0.8, 2.12, 3.6, 3.1],
               "right": [8.95, 2.12, 3.58, 3.1],
               "plot": [0.8, 5.75, 11.73, 0.55]
@@ -348,7 +360,7 @@
           },
           "offset": {
             "regions": {
-              "sample": [0.8, 2.12, 3.65, 3.35],
+              "sample": [0.8, 2.12, 3.65, 3.5],
               "left": [4.95, 2.12, 3.55, 3.1],
               "right": [9, 2.12, 3.53, 3.1],
               "plot": [0.8, 5.75, 11.73, 0.55]

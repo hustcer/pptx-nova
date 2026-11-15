@@ -26,6 +26,7 @@ New-deck preparation, DeckKit selection, narrative and design authoring:
 - [Design lock and assets](create/design-lock-and-assets.md) — `deck_lock.json`, `assets_manifest.json`, check-lock
 - [Narrative quality](create/narrative-quality.md) — Deck profile, claim spine, contact-sheet plan, comeback review
 - [Design contracts](create/design-contracts.md)
+- [Native visuals](create/native-visuals.md) — Shared editable illustrations and the current route for newly authored image-like visuals
 - [Rich deck patterns](create/rich-deck-patterns.md) — Rich visual patterns when no suitable DeckKit exists
 - [DeckKit generator workflow](create/deck-generator-workflow.md) — Creating or extending DeckKits
 

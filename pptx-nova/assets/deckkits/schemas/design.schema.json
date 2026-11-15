@@ -4194,9 +4194,22 @@
       "required": ["role", "sizePt", "color", "bold", "lineHeight"],
       "additionalProperties": false
     },
+    "journalArtwork": {
+      "type": "object",
+      "properties": {
+        "region": { "$ref": "#/$defs/frame" },
+        "captionY": { "type": "number", "minimum": 0, "maximum": 1 },
+        "linePt": { "type": "number", "exclusiveMinimum": 0 },
+        "accentPt": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "required": ["region", "captionY", "linePt", "accentPt"],
+      "additionalProperties": false
+    },
     "journal": {
       "type": "object",
       "properties": {
+        "sampleArtwork": { "$ref": "#/$defs/journalArtwork" },
+        "coverArtwork": { "$ref": "#/$defs/journalArtwork" },
         "family": {
           "const": "teal-editorial/v1"
         },

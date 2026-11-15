@@ -57,6 +57,8 @@ second final render. The standard runner still owns the final full-deck canonica
   native diagram, real input/output excerpt or comparison. Native diagrams need connected,
   purposeful relationships and clear hierarchy; generic equal boxes with arrow characters are a
   wireframe, not a finished platform map. Never invent a screenshot, logo, metric or testimonial.
+  For new image-like visuals, follow [native visuals](native-visuals.md): use a finished PowerPoint
+  composition rather than a caption-only image holder or a raster-generation fallback.
 - **Rhythm:** vary macro-composition and density across the contact sheet, not only slide-type
   names. Long stretches of tiny text on the same empty surface fail. A persuasive deck needs a
   memorable content-led moment: a strong reveal, visual transformation, comparison or typographic

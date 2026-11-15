@@ -15,7 +15,7 @@
         "source": "来源：合成数据 · 2026 年全年 · 测试容量与字体，不代表真实统计。",
         "summary": "延长用品寿命，建立可信赖的社区服务。\nA handbook for the next service cycle.",
         "markers": ["预约", "诊断", "修复", "返还"],
-        "assetCaption": "服务照片\nDOCUMENTARY SHELL"
+        "assetCaption": "共享与维修\nCOMMUNITY"
       }
     },
     {
@@ -239,7 +239,7 @@
         "verdict": "说明：数据与文字均为演示用途；编辑后须从 content 重建同步。",
         "source": "来源：合成数据 · 2026 年全年 · 测试容量与字体，不代表真实统计。",
         "sample": {
-          "imageCaption": "服务证据 / IMAGE SHELL",
+          "imageCaption": "服务概览 / OVERVIEW",
           "heading": "一件旧物的新使用周期",
           "tag": "# 维修与日常",
           "cta": "预约诊断 / BOOK",

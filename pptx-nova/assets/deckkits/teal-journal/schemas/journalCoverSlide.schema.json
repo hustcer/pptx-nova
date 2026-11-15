@@ -3,6 +3,13 @@
   "title": "journalCoverSlide",
   "type": "object",
   "properties": {
+    "artwork": {
+      "type": "string",
+      "enum": ["contours", "documents", "connections"],
+      "default": "contours",
+      "x-slotRole": "control",
+      "description": "Editable native illustration inside the cover field. Omission draws abstract contours; documents and connections express conceptual relationships, not a real screenshot or measured data."
+    },
     "title": {
       "type": "string",
       "minLength": 1,

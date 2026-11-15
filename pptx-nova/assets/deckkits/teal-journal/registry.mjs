@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { assertDesignValue } from '../shared/design-contract.mjs'
 import { compileJournalLayout, resolveJournalDeck } from './layouts.mjs'
+import { ARTWORK_PATH_NAMES } from '../shared/native-artwork.mjs'
 export const JOURNAL_LAYOUTS = {
   cover: {
     angular: ['hero', 'field', 'strip', 'summary', 'markers'],
@@ -94,6 +95,7 @@ function checkJournal(design, op, fail) {
     fail('Journal uses square fields and functional circular endpoints')
   if (
     op.op === 'add-freeform' &&
+    !ARTWORK_PATH_NAMES.has(name.replace(/^S\d+_/, '')) &&
     !/(CoverAngularField|CoverCoralEdge|JourneyTrack|JourneySegment\d+)$/.test(name)
   )
     fail('Unregistered journal path')

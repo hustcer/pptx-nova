@@ -26,7 +26,7 @@
 
 图表、表格、文字、色域、时间区间、分配段、引线与端点均可编辑。手工改图表/表格数据不会自动更新独立标题、注记、派生形状、区间或分配段；要同步这些对象，修改 content 后重新生成。形状不是内嵌电子表格公式。
 
-参考的照片只迁移为显式资产外壳，不复制原图，也不伪装成插画替代。1.0.0 没有注册外部图片输入或自由 customOps，不宣称照片摄入、原生换肤、已有源稿无损保留、动画或其他比例验证。若真实交付需要照片，先扩展可验证的资产合同再使用；不能把外壳示例称作完整摄影主题复刻。
+不复制参考照片。封面切角色域内现以原生可编辑插画完成视觉职责，不能把概念图声称为真实照片或产品截图。未注册外部图片输入或自由 customOps，不宣称照片摄入、原生换肤、已有源稿无损保留或其他比例验证；真实证据图片须通过明确的资产合同接入。
 
 标准流程为 `slots → validate-content → create/build → create/run → exact-candidate PNG review → finalize`。验证范围与环境未验证项见 [验收记录](../../../benchmarks/visual/cases/teal-journal/golden-handbook/review.md)。
 
@@ -39,3 +39,9 @@
 ## Semantic concept icons (1.2.0)
 
 Optional bundled Tabler outline icons are supported in `journalOutlookSlide: data.notes[].icon`. Choose symbols for the actual concepts. The registered marker compiler uses the kit's existing palette and layout owners, with a 1.2 stroke. Omitted icons retain the previous output and capacity. An explicit icon replaces the peer marker where registered; edition numbers, metrics, dates, status and references remain separate. Inset headings are rechecked at their available width; split or choose a fitting layout instead of shrinking text. Review the actual PNGs, including alternative layouts and mixed-language content.
+
+## 原生插画（1.3.0）
+
+`journalCoverSlide.data.artwork` 可选 `contours`、`documents` 或 `connections`，分别表达编辑式曲线、文档与输出、连接协作。省略时绘制曲线，不再输出只有文字的空图壳；angular / inset 两种构图均支持。所有图案由 xdoc 原生路径组成，可在 PowerPoint 中逐个编辑，未使用位图、SVG 图片或新增依赖。
+
+`assetCaption` 继续完整保留，由原图壳中部移到插画下方，字号和容量保持不变。`journalAnatomySlide` 的 center / offset 样例图片区同样复用共享曲线插画，`sample.imageCaption` 完整保留；样例卡片略增高，文本字号、字段宽高与条目容量不变。内容无需迁移；封面可按主题显式选择图案。这是概念/装饰插画，不是产品界面、数据可视化或照片证明。新增图片职责仍须扩展注册合同，不能用封面字段冒充全套图片摄入。

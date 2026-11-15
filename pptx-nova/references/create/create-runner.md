@@ -25,6 +25,8 @@ If these inputs are not prepared yet:
   rendered example selection and the design floor, including one-sentence Express;
 - read `references/create/presentation-expression.md` for every new deck: proactive icon choices,
   motion grammar, Morph opportunities and standard choreography preparation, including Express;
+- read [native visuals](native-visuals.md) when a page calls for a new image or contains an image holder;
+  author a finished native composition through registered slots instead of leaving a shell;
 - read `references/create/create-express.md` for a simple/default deck;
 - read `references/create/deckkit-mode.md` only when DeckKit selection or content slots are unresolved;
 - read `references/create/create-studio.md` plus `references/create/design-lock-and-assets.md` for an explicitly

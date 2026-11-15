@@ -7429,7 +7429,7 @@
     },
     {
       "id": "teal-journal",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "path": "teal-journal/teal-journal.kit.mjs",
       "designContract": "teal-journal/design.json",
       "primitiveDependency": "core-primitives@0.1.0",
@@ -7732,7 +7732,7 @@
           "date": "2026-11-15",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-teal-journal-review-20261115-01/benchmark/01"
+            "out": ".tmp/deckkit-teal-journal-native-art-20261115-2205/benchmark/04"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -7759,7 +7759,7 @@
               "caseId": "teal-journal.golden-handbook",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-teal-journal-review-20261115-01/benchmark/01/teal-journal/golden-handbook/summary.json",
+              "summaryPath": ".tmp/deckkit-teal-journal-native-art-20261115-2205/benchmark/04/teal-journal/golden-handbook/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/teal-journal/golden-handbook/review.md",
               "validation": {
                 "valid": true,
@@ -7796,16 +7796,16 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 206692
+                "bytes": 212229
               },
-              "patchOps": 1024,
-              "p50TotalMs": 195.09
+              "patchOps": 1050,
+              "p50TotalMs": 556.9
             },
             {
               "caseId": "teal-journal.golden-narrative",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-teal-journal-review-20261115-01/benchmark/01/teal-journal/golden-narrative/summary.json",
+              "summaryPath": ".tmp/deckkit-teal-journal-native-art-20261115-2205/benchmark/04/teal-journal/golden-narrative/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/teal-journal/golden-narrative/review.md",
               "validation": {
                 "valid": true,
@@ -7845,7 +7845,7 @@
                 "bytes": 85925
               },
               "patchOps": 341,
-              "p50TotalMs": 328.65
+              "p50TotalMs": 218.7
             }
           ],
           "blockers": []
@@ -7855,7 +7855,7 @@
         "Based on supplied travel-green-handbook design specification and eight-panel reference; use the observed 16:9 evidence grammar where mismatched document sections describe another source.",
         "Creation only; no native skinning or arbitrary existing-deck preservation claim.",
         "Arial/Arial Unicode MS and Georgia/Songti SC are nonembedded substitutes; installed upright regular and bold must be available.",
-        "Reference photographs are not redistributed; explicit editable asset shells only. External photo ingestion is not registered in 1.0.0.",
+        "Reference photographs are not redistributed. Covers provide editable native contours, documents and connections; external photo ingestion remains unregistered.",
         "Native chart/table source data remain editable; route intervals, allocation segments, independent labels and annotation leaders require regeneration from content after edits.",
         "Bounded 2–5 table rows, 3–4 phases/routes and exactly six specimen annotations, and 2–4 qualitative narrative sections; longer content must reorganize or split."
       ],

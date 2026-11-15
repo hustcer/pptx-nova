@@ -344,6 +344,11 @@ These rules apply to all new decks, including Express and Studio:
   preservation scope.
 - Plan real composition changes: statements, relationships/processes, native data, open comparisons or
   authentic product visuals. Judge overview geometry/density; changing markers alone does not create variety.
+- For every visual that would need a newly generated image, use a finished native PowerPoint
+  composition as the sole current authoring route until image generation is integrated. Shapes,
+  paths, connectors, groups, text, registered icons and appropriate data objects may be combined;
+  do not deliver empty image holders. Follow [native visuals](references/create/native-visuals.md).
+  Supplied/authorized images and protected source pictures retain their normal input/preservation rules.
 
 ## Common Edit Hard Rules
 

@@ -15,6 +15,9 @@ it does not establish visual quality. A one-sentence request delegates design ju
 A local edit does not authorize replacing the visual world. A refurbishment needs a recognizable
 whole design, not only a color wash, footer or border. Respect explicitly quiet, dense, monochrome,
 historical or reference-led requests. Do not force every deck into the same corporate or dark style.
+When asked to preserve colors or fonts, retain each protected object's values; reusing the palette
+or font family elsewhere does not establish object-level preservation. Declare any permitted weight
+or emphasis change explicitly, then verify the source/candidate properties as well as the pixels.
 
 For a new deck, a meaningful visual edit or a refurbishment, obtain compact task context:
 
@@ -53,6 +56,8 @@ The context report is an aid, not a second lock or an executable edit plan.
 - **Typography:** use stable display/body/data/source roles and readable real-size text. Projection
   often needs substantially larger body text than a dense reading deck. A technical minimum is not
   a target. Check actual CJK/Latin weight, punctuation, line breaks and paragraph spacing.
+  Inspect complex CJK glyphs at the rendered weight: matched font names and no overflow do not
+  prove open counters or distinct strokes. Re-render after changing the font environment.
 - **Composition:** use the established grid, optical alignment and purposeful grouping. Leave room
   around a substantial subject. Fix measure and grouping before shrinking text; change/split layouts
   only within scope and preserve all required facts. Respect registered kit capacities and constants.

@@ -15,14 +15,9 @@ the execution boundary: it chooses a route, validates fidelity, binds publicatio
 
 ## Target design before execution
 
-Apply the [shared design floor](../review/design-floor.md) to every refurbishment. Prepare task
-context, open the actual target sample and identify the complete visual change the source needs.
-Color/font remapping is an execution baseline; evaluate composition, proof scale, typography and
-whole-deck rhythm before treating it as a finished redesign.
-
-For a named target DeckKit or a DeckKit-native redesign goal, use
-[design-led refurbishment](refurbish-design-led.md) for the source/design map, representative-page
-review and independent content-equivalence checks.
+Apply the [design floor](../review/design-floor.md): inspect source/target and judge composition,
+proof scale, typography and rhythm. Named-kit or kit-native goals use [design-led refurbishment](refurbish-design-led.md)
+for source/design mapping, representative-page review and independent content equivalence; recoloring alone is unfinished.
 
 ## Standard command
 

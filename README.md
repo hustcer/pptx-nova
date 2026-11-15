@@ -49,7 +49,6 @@ setup. Ask it to confirm:
 
 - `pptx-nova` is available in the assistant you are using.
 - The required runtime is installed and can run in that assistant's environment.
-- Whether a license is needed for your task and what, if anything, you need to do next.
 
 <details>
 <summary>Manual installation (optional)</summary>
@@ -94,9 +93,7 @@ platform requirements, and runtime verification.
 
 ## Make your first presentation
 
-Once the setup checks pass, send this request to the same assistant. If it
-reports that a license is required, follow [Licenses and plans](#licenses-and-plans)
-below and then continue the task.
+Once the setup checks pass, send this request to the same assistant:
 
 ```text
 Use pptx-nova to create a 3-slide Chinese presentation about getting started
@@ -122,45 +119,19 @@ See [Typical requests](#typical-requests) for editing, translation, and export e
 
 ## Licenses and plans
 
-Free works without an account or license, within the limits below. Personal
-requires a license even though its current price is 0 for personal local
-noncommercial use.
+Free works without an account or license for single-user local noncommercial
+tasks: up to 10 slides and 5 MiB of compressed PPTX inputs combined per task,
+with a `structurify.io` watermark on PPTX, PDF, and PNG outputs.
 
-|                                 | Free                               | Personal (licensed plan)                                                                |
-| ------------------------------- | ---------------------------------- | --------------------------------------------------------------------------------------- |
-| Current price                   | Free                               | 0 — [apply for a license](https://structurify.io/en/commerce/?product=runtime-personal) |
-| License                         | No account or license required     | Offline individual license, valid for 30 days                                           |
-| Slides per task                 | Up to 10                           | No plan-level limit                                                                     |
-| Compressed PPTX inputs per task | Up to 5 MiB combined               | No plan-level limit                                                                     |
-| PPTX, PDF, and PNG outputs      | Carry a `structurify.io` watermark | No new plan watermark when the task is authorized                                       |
-
-Both plans support single-user local use, local scripts, and a per-user daemon.
-Format and resource limits and existing signed watermark rules still apply.
-Personal is currently free for personal local noncommercial use, with no plans
-to charge for this use in the near term. See the linked application page for
-license terms.
-
-To use Personal:
-
-1. [Apply for a license](https://structurify.io/en/commerce/?product=runtime-personal)
-   and obtain the xdoc Runtime license file.
-2. Give your assistant access to the downloaded license file or its local path,
-   then send this request:
-
-   ```text
-   Install this xdoc Personal license and check that it is effective.
-   ```
-
-3. Ask the assistant to continue your presentation task and report any remaining
-   authorization issue.
-
-The standard automated visual checks require unwatermarked conversion
-authorization. If Free cannot complete a required check, install a license that
-authorizes the task before continuing; Free can still produce watermarked previews.
-For renewal, provide the newly issued license file and ask the assistant to
-install and check it. The assistant can follow the
-[licensing workflow](pptx-nova/references/runtime/licensing.md) for installation,
-renewal, and authorization diagnostics.
+Personal is currently free for personal local noncommercial use. Installing
+its license removes these plan-level slide and input-size limits and adds no
+new plan watermark; format, resource, and existing watermark rules still apply.
+[Apply for Personal](https://structurify.io/en/commerce/?product=runtime-personal),
+then ask your assistant to install and check the downloaded file.
+The standard automated visual checks need a license that supports unwatermarked
+conversion, such as Personal. See the application page for validity and usage
+terms, and the [licensing guide](pptx-nova/references/runtime/licensing.md)
+for installation, renewal, and other deployment scenarios.
 
 ## Get help from your AI assistant
 
@@ -170,7 +141,7 @@ problem. You can use these requests:
 | Problem                                                   | What to say to your assistant                                                                               |
 | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | The skill is unavailable or installation did not complete | Check whether pptx-nova is installed for this assistant and verify its dependencies. Help me fix the setup. |
-| A license error or unexpected watermark                   | Check the license used for this task, explain the cause, and tell me what is needed to continue.            |
+| A task reports an error                                   | Check the original error message, explain the cause, and help me continue the task.                         |
 | You cannot find the generated file                        | Tell me where the final PPTX was saved and provide a file link or full path.                                |
 
 ## What pptx-nova can do
@@ -342,15 +313,7 @@ for Linux x64/ARM64, macOS 13+ ARM64, and Windows x64. Rendering still depends
 on the available fonts and the support status of the requested feature.
 
 Install the published CLI with `npm i -g @s8fy/xdoc@0.22.0` (Node.js 22+), or
-use a [native release archive](docs/xdoc-installation.md). Free mode supports
-single-user local tasks up to 10 slides and 5 MiB of compressed PPTX inputs
-combined; editable PPTX, PDF, and PNG outputs carry a `structurify.io` watermark.
-Local scripts and a per-user daemon are supported. The launch Free, Personal,
-and Enterprise plans do not include CI, shared servers, or Service/API use;
-deployment in those environments requires separately applicable authorization.
-Public downloads use non-commercial terms unless separately licensed.
-The canonical automated visual audit requires unwatermarked conversion
-authorization; Free mode can still produce watermarked previews for review.
+use a [native release archive](docs/xdoc-installation.md).
 
 That changes the workflow: pptx-nova can plan a deck with DeckKits, edit real
 PPTX objects instead of screenshots, check selectors before writing, preserve

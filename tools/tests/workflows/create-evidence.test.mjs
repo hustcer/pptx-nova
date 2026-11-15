@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtempSync, writeFileSync, readFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, writeFileSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -8,7 +8,9 @@ import { designReviewFixture } from '../helpers/design-review-fixtures.mjs'
 import {
   recordCreateInputs,
   verifyCreateInputs,
+  canonicalCreatePreview,
 } from '../../../pptx-nova/scripts/lib/create/create-delivery.mjs'
+import { renderContextForDate } from '../../../pptx-nova/scripts/lib/review/render-context.mjs'
 import {
   fileSha256,
   captureVisualBinding,
@@ -75,6 +77,71 @@ function fixture() {
   }
   writeFileSync(manifestPath, JSON.stringify(manifest))
   return { root, candidate, manifestPath, manifest }
+}
+
+for (const [label, candidates, owner] of [
+  ['named shape', [{ shapeName: 'CoverMarker', shapeId: '42', elementKey: 0 }], 'CoverMarker'],
+  ['unnamed shape', [{ shapeName: null, shapeId: '42', elementKey: 0 }], 'shape 42'],
+  ['element key', [{ shapeName: null, shapeId: null, elementKey: 0 }], 'element 0'],
+]) {
+  test(`Create retains rendered review diagnostics when a canonical finding blocks acceptance (${label})`, () => {
+    const f = fixture()
+    f.manifest.renderContext = {
+      ...renderContextForDate(),
+      authorizationClock: 'independent',
+      bitmapCacheBinding: 'pdf-sha256',
+    }
+    f.manifest.findings = [
+      {
+        id: 'finding:label',
+        checkId: 'static-layout',
+        kind: 'text-unexpected-wrap',
+        severity: 'low',
+        slide: 1,
+        disposition: 'observed',
+        message: 'Label may wrap',
+        candidates,
+      },
+    ]
+    f.manifest.decision = {
+      action: 'require-human-confirmation',
+      assurance: 'candidate-only',
+      reasons: ['Candidate findings require review'],
+    }
+    f.manifest.checks.find((check) => check.id === 'policy').outcome = 'inconclusive'
+    writeFileSync(f.manifestPath, JSON.stringify(f.manifest))
+    const artifacts = {
+      candidate: f.candidate,
+      canonicalDir: f.root,
+      canonicalManifest: f.manifestPath,
+      visualGate: join(f.root, 'gate.json'),
+      reviewGallery: join(f.root, 'review.html'),
+      previewReport: join(f.root, 'preview.json'),
+      binding: join(f.root, 'binding.json'),
+    }
+    const summary = { slideCount: 1, phases: [], artifacts: {}, review: {} }
+    assert.throws(
+      () =>
+        canonicalCreatePreview(summary, { xdocBin: 'fake' }, artifacts, () =>
+          summary.phases.push({ name: 'preview-render' }),
+        ),
+      (error) => {
+        assert.match(error.message, /text-unexpected-wrap/)
+        assert.match(error.message, /slide 1/)
+        assert.ok(error.message.includes(owner))
+        assert.ok(error.message.includes(f.manifestPath))
+        return true
+      },
+    )
+    assert.ok(readFileSync(artifacts.reviewGallery, 'utf8').includes('slide.png'))
+    assert.equal(summary.phases[0].slideCount, 1)
+    assert.equal(summary.phases[0].estimatedRenderedPixels, 1)
+    assert.equal(summary.artifacts.previews, f.root)
+    assert.match(summary.review.instructions, /fresh run directory/)
+    assert.doesNotMatch(summary.review.instructions, /--finalize/)
+    assert.equal(existsSync(artifacts.binding), false)
+    assert.equal(JSON.parse(readFileSync(artifacts.visualGate)).deliveryAuthorized, false)
+  })
 }
 
 test('Create input binding rejects edited or omitted choreography and a changed DeckKit patch', () => {

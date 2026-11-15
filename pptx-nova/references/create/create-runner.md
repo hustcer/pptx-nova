@@ -167,6 +167,12 @@ Other preparation-time routes remain explicit:
 Do not retry past a failed gate with stale `candidate.pptx`. Repair the authoritative input, create a
 new candidate, and rerun the runner in a new or safely reusable current run directory.
 
+If canonical rendering succeeds but acceptance fails, the error names the retained manifest and
+up to five findings with slide/object identities. Use `visual-evidence/review.html` or those exact
+PNGs to diagnose the finding; the render counters still describe completed work. A rendered gallery
+does not authorize delivery. Fix the content/layout source and regenerate; do not rewrite the native
+manifest's findings or decision to make the gate pass.
+
 ## Delivery boundary
 
 With a runtime that discloses `visualModes.values` including `create`, machine success produces

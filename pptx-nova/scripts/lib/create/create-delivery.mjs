@@ -77,15 +77,36 @@ export function canonicalCreatePreview(summary, args, artifacts, runJsonPhase) {
     ],
     artifact: artifacts.previewReport,
   })
-  verifyRenderContext(JSON.parse(readFileSync(artifacts.canonicalManifest, 'utf8')))
+  const manifest = JSON.parse(readFileSync(artifacts.canonicalManifest, 'utf8'))
+  verifyRenderContext(manifest)
   const gate = evaluateVisualEvidence(artifacts.canonicalManifest, {
     candidate: artifacts.candidate,
   })
   writeFileSync(artifacts.visualGate, JSON.stringify(gate, null, 2) + '\n')
-  if (!gate.machineChecksPassed)
+  const failGate = () => {
+    const findings = (manifest.findings ?? []).slice(0, 5).map((finding) => {
+      const owner = finding.candidates
+        ?.map(
+          ({ shapeName, shapeId, elementKey }) =>
+            shapeName ||
+            (shapeId !== null && shapeId !== undefined
+              ? `shape ${shapeId}`
+              : elementKey !== null && elementKey !== undefined
+                ? `element ${elementKey}`
+                : null),
+        )
+        .find(Boolean)
+      return [finding.severity, finding.kind, `slide ${finding.slide ?? '?'}`, owner]
+        .filter(Boolean)
+        .join(' / ')
+    })
     throw new Error(
-      `Canonical create gate: ${gate.status}; ${gate.errors.join('; ')} ${gate.decision?.reasons?.join('; ') ?? ''}`,
+      `Canonical create gate: ${gate.status}; ${gate.errors.join('; ')} ${gate.decision?.reasons?.join('; ') ?? ''}` +
+        (findings.length ? ` Findings: ${findings.join('; ')}.` : '') +
+        ` Inspect ${artifacts.canonicalManifest} and its candidate PNGs; repair authoritative inputs before retrying.`,
     )
+  }
+  if (gate.errors.length) failGate()
   const binding = captureVisualBinding(artifacts.canonicalManifest, artifacts.candidate)
   if (binding.slideCount !== summary.slideCount)
     throw new Error('canonical slide count does not match content')
@@ -105,14 +126,18 @@ export function canonicalCreatePreview(summary, args, artifacts, runJsonPhase) {
   writeFileSync(artifacts.reviewGallery, gallery)
   summary.artifacts.previews = artifacts.canonicalDir
   summary.artifacts.contactSheet = null
-  summary.review.instructions =
-    'Open review.html or every canonical PNG; write design_review.json with slide-specific craft observations; record --candidate/--manifest/--design-review visual review, then rerun with --finalize --visual-review. No final output exists yet.'
+  summary.review.instructions = gate.machineChecksPassed
+    ? 'Open review.html or every canonical PNG; write design_review.json with slide-specific craft observations; record --candidate/--manifest/--design-review visual review, then rerun with --finalize --visual-review. No final output exists yet.'
+    : 'Open review.html or every canonical PNG to diagnose findings; repair authoritative inputs and regenerate in a fresh run directory. This failed candidate cannot be finalized or published.'
   const phase = summary.phases.findLast((p) => p.name === 'preview-render')
   phase.slideCount = binding.slideCount
   phase.estimatedRenderedPixels = pages.reduce((sum, p) => {
     const bytes = readFileSync(join(artifacts.canonicalDir, p.path))
     return sum + bytes.readUInt32BE(16) * bytes.readUInt32BE(20)
   }, 0)
+  // Successful rendering remains useful diagnosis even when acceptance is blocked.
+  // Retain the gallery and actual render cost, but never create a finalizable binding.
+  if (!gate.machineChecksPassed) failGate()
   writeFileSync(
     artifacts.binding,
     JSON.stringify(recordCreateInputs(args, artifacts), null, 2) + '\n',

@@ -69,6 +69,39 @@ export function renderClayPlan(design, layouts) {
       else if (c.kind === 'chip') {
         p.box(s, name, 'rectangle', x, y, w, h, C[c.color])
         ownedText(s, name, { ...c, style: { ...c.style, alignment: 'center' } })
+      } else if (c.kind === 'icon') {
+        p.icon(s, name, c.icon, x, y, w, h, {
+          style: 'outline',
+          color: C.accent,
+          strokeWidth: b.spacing.iconStrokeWidth,
+        })
+      } else if (c.kind === 'hub') {
+        p.box(s, name, 'ellipse', x, y, w, h, C[c.color])
+      } else if (c.kind === 'link') {
+        p.ops.push({
+          op: 'add-freeform',
+          slide: s,
+          name,
+          x: x + 'in',
+          y: y + 'in',
+          w: w + 'in',
+          h: h + 'in',
+          path: {
+            width: 1000,
+            height: 1000,
+            commands: [
+              { type: 'move', x: ((c.from[0] - x) / w) * 1000, y: ((c.from[1] - y) / h) * 1000 },
+              { type: 'line', x: ((c.to[0] - x) / w) * 1000, y: ((c.to[1] - y) / h) * 1000 },
+            ],
+          },
+        })
+        p.ops.push({
+          op: 'set-shape',
+          slide: s,
+          shape: { name },
+          fill: { type: 'none' },
+          line: { color: C.rule, width: '1pt' },
+        })
       } else if (c.kind === 'placeholder') {
         p.box(s, name, 'rectangle', x, y, w, h, C.paper)
         p.setLine(s, name, C.rule, '0.7pt')

@@ -75,19 +75,23 @@
         "findings": [
           {
             "title": "Participation",
-            "body": "New learners joined the open workshop."
+            "body": "New learners joined the open workshop.",
+            "icon": "users"
           },
           {
             "title": "Quality",
-            "body": "Review sessions expose gaps before delivery."
+            "body": "Review sessions expose gaps before delivery.",
+            "icon": "messages"
           },
           {
             "title": "Access",
-            "body": "Evening groups improve schedule coverage."
+            "body": "Evening groups improve schedule coverage.",
+            "icon": "clock"
           },
           {
             "title": "Next cycle",
-            "body": "Owners will confirm the revised programme."
+            "body": "Owners will confirm the revised programme.",
+            "icon": "refresh"
           }
         ]
       }

@@ -23,7 +23,8 @@ test('isolated slot probes declare excerpt scope for complete-deck contracts', (
   assert.equal(result.status, 0, result.stderr)
   const report = JSON.parse(result.stdout)
   assert.equal(report.ok, true)
-  assert.equal(report.results[0].slideTypes.length, 8)
+  assert.equal(report.results[0].slideTypes.length, 9)
+  assert.ok(report.results[0].slideTypes.some((page) => page.slideType === 'clayNarrativeSlide'))
   assert.ok(report.results[0].slideTypes.every((page) => page.status === 'ok'))
 })
 

@@ -9,6 +9,8 @@ import {
   checkDesignReadback,
 } from '../../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
 import { validateDeckkitContent } from '../../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
+import { CLAY_FAMILY } from '../../../pptx-nova/assets/deckkits/warm-clay/registry.mjs'
+import { renderClayPlan } from '../../../pptx-nova/assets/deckkits/warm-clay/components.mjs'
 const read = (p) => JSON.parse(readFileSync(new URL('../../../' + p, import.meta.url), 'utf8'))
 const fixture = () => read('pptx-nova/assets/deckkits/warm-clay/examples/content.json')
 const excerpt = (slides) => ({ meta: { deckkit: 'warm-clay', designScope: 'excerpt' }, slides })
@@ -141,14 +143,16 @@ test('warm-clay native object readback rejects missing chart/table data and chan
 })
 test('warm-clay source image is not embedded and owned labels use explicit alignment', () => {
   const r = createDeck(fixture())
-  assert.equal(
-    r.patch.ops.some((o) => o.op === 'add-image'),
-    false,
+  assert.equal(r.patch.ops.filter((o) => o.op === 'add-image').length, 4)
+  assert.ok(
+    r.patch.ops
+      .filter((o) => o.op === 'add-image')
+      .every((o) => /_FindingChip\d+_Icon_/.test(o.name)),
   )
   const chips = r.patch.ops.filter(
     (o) => o.op === 'set-text-frame' && /Chip/.test(o.shape?.name ?? '') && o.frame,
   )
-  assert.ok(chips.length >= 8)
+  assert.ok(chips.length >= 4)
   assert.ok(chips.every((o) => o.frame.verticalAnchor === 'middle'))
   for (const p of [
     'warm-clay/components.mjs',
@@ -181,4 +185,107 @@ test('warm-clay native labels avoid dangling decimal points for integers and sci
   assert.equal(format(), '0.0#####')
   s.data.points[0].value = 0.00002
   assert.equal(format(), '0.00E+00')
+})
+
+const narrative = () => ({
+  type: 'clayNarrativeSlide',
+  data: {
+    section: 'ARCHIVE',
+    title: 'Keep the collection accessible',
+    subtitle: 'Qualitative priorities',
+    verdict: 'No numerical baseline is implied',
+    source: 'Source: archive brief',
+    lead: 'Access begins with context',
+    sections: [
+      { title: 'Description', body: 'Preserve names and context beside each record.' },
+      { title: 'Discovery', body: 'Help readers find related material.' },
+    ],
+  },
+})
+test('warm-clay qualitative narratives preserve every field without fabricated metrics in both compositions', () => {
+  const fingerprints = []
+  for (const layoutId of ['leadLeft', 'columns']) {
+    const s = { ...narrative(), layoutId }
+    assert.equal(validateDeckkitContent(excerpt([s]), { mode: 'delivery' }).valid, true)
+    const r = createDeck(excerpt([s]))
+    assert.equal(r.designCheck.status, 'pass')
+    const emitted = r.patch.ops
+      .filter((o) => typeof o.text === 'string')
+      .map((o) => o.text)
+      .join('\n')
+      .replace(/\s+/gu, ' ')
+    for (const value of [s.data.lead, ...s.data.sections.flatMap((v) => [v.title, v.body])])
+      assert.ok(emitted.includes(value.replace(/\s+/gu, ' ')), value)
+    assert.equal(
+      r.patch.ops.some((o) => o.op === 'add-chart' || o.op === 'add-table'),
+      false,
+    )
+    fingerprints.push(r.designPlan.layouts[0].fingerprint)
+  }
+  assert.equal(new Set(fingerprints).size, 2)
+})
+test('warm-clay narrative capacity rejects blank fields, extra items and overflow without truncation', () => {
+  for (const change of [
+    (s) => (s.data.lead = ' '),
+    (s) => (s.data.sections[0].title = ' '),
+    (s) => (s.data.sections[0].body = ' '),
+    (s) => (s.data.sections = Array.from({ length: 5 }, () => s.data.sections[0])),
+    (s) => (s.data.sections[0].body = 'Long narrative '.repeat(250)),
+  ]) {
+    const s = narrative()
+    change(s)
+    assert.equal(validateDeckkitContent(excerpt([s]), { mode: 'delivery' }).valid, false)
+    assert.throws(() => createDeck(excerpt([s])))
+  }
+  for (const layoutId of ['leadLeft', 'columns']) {
+    const s = narrative()
+    s.layoutId = layoutId
+    s.data.lead = '记录的意义\nLives in context'
+    s.data.sections = Array.from({ length: 4 }, (_, i) => ({
+      title: `主题 ${i + 1}`,
+      body: '保留来源与语境，帮助读者查找相关材料。',
+    }))
+    assert.equal(createDeck(excerpt([s])).designCheck.status, 'pass')
+  }
+})
+
+test('warm-clay semantic icons replace peer numbering using only the bundled monochrome family', () => {
+  for (const layoutId of ['leadLeft', 'columns']) {
+    const s = narrative()
+    s.layoutId = layoutId
+    s.data.sections[0].icon = 'book'
+    s.data.sections[1].icon = 'search'
+    const c = excerpt([s])
+    assert.equal(validateDeckkitContent(c, { mode: 'delivery' }).valid, true)
+    const r = createDeck(c)
+    assert.equal(r.designCheck.status, 'pass')
+    assert.equal(r.patch.ops.filter((o) => o.op === 'add-image').length, 2)
+    assert.equal(
+      r.patch.ops.some((o) => o.op === 'add-shape' && /NarrativeChip/.test(o.name ?? '')),
+      false,
+    )
+    const wrong = structuredClone(r.patch)
+    wrong.ops.find((o) => o.op === 'add-image').bytesBase64 =
+      Buffer.from('<svg/>').toString('base64')
+    assert.equal(checkDesignPatch(DESIGN, wrong).status, 'fail')
+    s.data.sections[0].icon = 'unknown-unregistered-icon'
+    assert.equal(validateDeckkitContent(excerpt([s]), { mode: 'delivery' }).valid, false)
+  }
+  const s = structuredClone(fixture().slides[1])
+  s.data.findings.forEach((v) => delete v.icon)
+  s.data.findings[0].icon = 'book'
+  assert.equal(createDeck(excerpt([s])).patch.ops.filter((o) => o.op === 'add-image').length, 1)
+})
+
+test('warm-clay optional icon stroke uses the same default for rendering and whitelist checks', () => {
+  const design = structuredClone(DESIGN)
+  delete design.clay.spacing.iconStrokeWidth
+  assert.doesNotThrow(() => assertDesignContract(design))
+  const s = narrative()
+  s.data.sections[0].icon = 'book'
+  const result = CLAY_FAMILY.resolve(design, excerpt([s]))
+  const patch = renderClayPlan(design, result.layouts)
+  assert.equal(checkDesignPatch(design, patch).status, 'pass')
+  const icon = patch.ops.find((op) => op.op === 'add-image')
+  assert.match(Buffer.from(icon.bytesBase64, 'base64').toString('utf8'), /stroke-width="1.2"/)
 })

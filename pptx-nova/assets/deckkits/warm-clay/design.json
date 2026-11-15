@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "warm-clay",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -189,7 +189,8 @@
     },
     "spacing": {
       "gap": 0.28,
-      "rulePt": 0.7
+      "rulePt": 0.7,
+      "iconStrokeWidth": 1.2
     },
     "chrome": {
       "section": [0.83, 0.53, 11.45, 0.28],
@@ -210,7 +211,8 @@
       "columns": [3, 5],
       "rows": [2, 6],
       "steps": [3, 4],
-      "commitments": [2, 4]
+      "commitments": [2, 4],
+      "sections": [2, 4]
     },
     "families": {
       "clayCoverSlide": {
@@ -232,6 +234,15 @@
               "description": [0.83, 3.9, 8.8, 0.6],
               "metrics": [0.83, 5.05, 8.8, 1.15],
               "asset": [10.15, 2.3, 2.18, 3.65]
+            }
+          },
+          "statement": {
+            "regions": {
+              "hero": [0.83, 1, 8.8, 2],
+              "quote": [0.83, 3.4, 8.8, 0.8],
+              "description": [0.83, 4.35, 8.8, 0.55],
+              "metrics": [0.83, 5.3, 8.8, 1],
+              "asset": [10.15, 2, 2.18, 3.7]
             }
           }
         }
@@ -353,6 +364,35 @@
               "title": [1.5, 1, 10.33, 1.1],
               "items": [1.35, 2.55, 10.63, 3.1],
               "mechanism": [1.4, 5.78, 10.53, 0.4]
+            }
+          }
+        }
+      },
+      "clayNarrativeSlide": {
+        "role": "narrative",
+        "variants": {
+          "leadLeft": {
+            "regions": {
+              "lead": [0.83, 2.68, 3, 2.65],
+              "sections": [4.55, 2.45, 7.95, 3.85]
+            }
+          },
+          "columns": {
+            "regions": {
+              "lead": [0.83, 2.45, 11.67, 1],
+              "sections": [0.83, 3.9, 11.67, 2.4]
+            }
+          },
+          "quadrants": {
+            "regions": {
+              "lead": [0.83, 2.65, 3, 2.6],
+              "sections": [4.55, 2.45, 7.95, 3.85]
+            }
+          },
+          "hub": {
+            "regions": {
+              "lead": [5.35, 3.85, 2.63, 1.1],
+              "sections": [0.83, 2.45, 11.67, 3.85]
             }
           }
         }

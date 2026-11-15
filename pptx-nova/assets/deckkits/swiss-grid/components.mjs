@@ -166,7 +166,6 @@ function renderSwissPlan(design, layouts) {
       else if (c.kind === 'icon')
         p.icon(s, name, c.icon, ...c.frame, {
           color: C[c.color],
-          strokeWidth: 1,
         })
       else if (c.kind === 'diagram') diagram(name, c.frame, c.diagram, c.color)
       else if (c.kind === 'table') {

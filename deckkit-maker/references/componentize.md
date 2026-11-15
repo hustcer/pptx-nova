@@ -165,6 +165,11 @@ schema 或 examples 中消失。需要直接调试 `createDeck` 时才临时 imp
 
 ## 5. 测试（强制）
 
+为已有 DeckKit 新增第二个 golden case 时，在 `benchmarks/visual/index.json` 中为原有展示案例
+保留唯一的 `showcase: true`；新增能力案例仍参与 benchmark，不自动替换用户展示稿。
+用实际 index 检查 showcase 选择，并执行 `just deckkit-examples -d <id>` 与对应 `check`，
+防止测试扩展破坏展示素材更新入口。
+
 在 `tools/tests/deckkits/<id>.test.mjs` 中为新 kit 补：
 
 - **最小合法 content build 测试**：每个页型构造最小 delivery content，

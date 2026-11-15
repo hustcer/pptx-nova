@@ -105,7 +105,9 @@ inspect/timing 证据，再回读最终 timing；不要仅为通过 merge-safe �
 
 ## 新增动画
 
-新增动画仍是用户显式要求时才做；不要给普通商务 deck 自动加动效。
+新建 deck 按 [presentation expression](../create/presentation-expression.md) 主动设计克制的原生动效，
+并遵守用户的静态要求与播放限制。已有 deck 的编辑只有在用户授权动画变更时才新增动画，
+不得借此扩大普通文字、翻译或样式编辑的范围。
 
 最小 patch：
 

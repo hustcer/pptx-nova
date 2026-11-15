@@ -304,35 +304,42 @@ During xdoc PPTX creation or editing in Feedback Mode, investigate newly observe
 
 These rules apply to all new decks, including Express and Studio:
 
-- Read `references/create/design-quality.md` before selecting a DeckKit. Infer audience/mode,
-  commit to a content-led visual idea, and inspect actual eligible-kit examples; a readiness score
-  or absence of overflow is not evidence of aesthetic fit. Respect the user's pinned visual world.
-- Read `references/create/presentation-expression.md` for every new deck, including one-sentence
-  Express. Proactively use semantic icons for suitable peer sections, native transitions/builds
-  and meaningful Morph continuity; aim for a memorable, polished result within the content and
-  DeckKit. Execute the plan through registered slots and `--choreography`; silence about motion
-  is not an opt-out. Record concrete static/accessibility/playback exceptions instead of guessing.
-- Review the rendered design as well as its mechanics. Write candidate/manifest-bound
-  `design_review.json` with slide-specific observations and a weakest-page assessment; pass it as
-  `--design-review` when recording the Create visual review. Repair unresolved craft failures before
-  publication. The validator checks the judgment record, not beauty; never invent observations.
-- Generate or normalize `outline.json` first, then write `deck_lock.json`; do not jump directly from prompt to patch.
-- Default to DeckKit-first: `content.json -> DeckKit -> patch -> xdoc -> PPTX -> validation`.
+- Read `references/create/design-quality.md` before selection: infer audience/mode, choose a
+  content-led idea and inspect actual eligible-kit examples. Readiness and fit do not prove taste;
+  preserve the user's pinned visual identity.
+- Read `references/create/presentation-expression.md` for every new deck, including Express.
+  Plan semantic icons, native transitions/builds and meaningful Morph through registered slots
+  and `--choreography`. Silence is not a motion opt-out; record static/accessibility/playback exceptions.
+- Review actual renders. Bind `design_review.json` to candidate/manifest hashes, with slide-specific
+  observations and the weakest page; pass `--design-review` to the Create visual review. Repair craft
+  failures before publication. Record validation does not certify beauty; never invent observations.
+- Prepare `outline.json`, then `deck_lock.json`, before `content.json -> DeckKit -> patch -> xdoc -> PPTX -> validation`.
 - Match source responsibilities to registered slots before drafting; never invent metrics, dates,
   owners or allocations merely to fill a layout. Follow `references/create/deckkit-mode.md` for gaps.
-- Persuasive decks for formal reports, clients, investors, boards, roadshows, strategy, product-platform, and similar contexts must read `references/create/narrative-quality.md`, lock `deckProfile`, and per-slide `claimTitle` / `proofObject` / `rhythm` / `layoutIntent` / `visualDensity` in `deck_lock.json`, then write `narrative_quality_review.json` after PNG review.
-- Before writing `content.json` or a manual patch, compare each slide against `deck_lock.slides[]` and confirm page type, rhythm, structural intent, density, and proof object have not drifted from memory. If mismatched, fix the lock or content source first instead of patching around it.
-- Non-appendix slides should have a clear point of view or direction. Main titles/subtitles should be short, scannable, and fitted to DeckKit slots. Avoid pure topic labels such as `Product Overview`, `Market Analysis`, or `Roadmap`. Put the full conclusion in `claimTitle`; when needed, move it into the subtitle, callout, or `proofObject`. Do not sacrifice layout merely to make the displayed title conclusion-like.
-- Main titles and subtitles do not use terminal periods by default. Use question marks/exclamation marks only when the tone or interactive intent is explicit.
-- If the user-provided outline explicitly specifies the main title or subtitle, that wording takes priority. Do not silently rewrite it to be more conclusion-like, shorter, or period-free. Record the source in `titleSource: "user"` / `subtitleSource: "user"`, and adjust only for hard layout overflow or when the user asks for polishing; explain the tradeoff.
-- Automatic selection for delivery may use only DeckKits with `readiness in ["production", "default"]`.
-- When a production/default DeckKit is available, do not use `deck-generator-template.mjs` as the default delivery path.
-- If no usable DeckKit exists, a page type is missing, or component structure must change, create/extend the DeckKit before delivery.
-- When referencing templates, brands, or layouts, write `deck_lock.templateFusion` in semantic layers: `brand` / `layout` / `deck`. Do not guess conflicts and overrides temporarily inside the generator.
-- If the source outline contains only titles or blanks, factual content completed by AI must be written to `deck_lock.assumptions[]`; do not disguise unverified competitors, metrics, cases, or market facts as user-provided content.
-- If the final creation output path already existed before the task began, ask the user to rename, delete, or choose a different path first. Do not overwrite the final path with `--overwrite`.
+- For formal/persuasive decks, read `references/create/narrative-quality.md`; lock `deckProfile` and
+  per-slide `claimTitle`, `proofObject`, `rhythm`, `layoutIntent`, `visualDensity`; write
+  `narrative_quality_review.json` after PNG review.
+- Before content/patch authoring, compare each page's type, rhythm, structure, density and proof with
+  `deck_lock.slides[]`. Resolve drift in the lock/content source before generating operations.
+- Non-appendix pages need a point of view. Keep display titles short and fitted; put complete claims
+  in `claimTitle`, subtitle, callout or proof. Avoid topic-only labels. Omit terminal periods by default;
+  use `?`/`!` only when intentional.
+- User-specified titles/subtitles take priority. Mark `titleSource: "user"` / `subtitleSource: "user"`;
+  change wording only for hard fit failures or requested polishing, explaining the tradeoff.
+- Delivery auto-selection requires `readiness in ["production", "default"]`. Use an eligible kit over
+  `deck-generator-template.mjs`; create/extend a maintained kit when page/component support is missing.
+- Record template/brand/layout sources in `deck_lock.templateFusion` as `brand` / `layout` / `deck`;
+  resolve conflicts there, not inside the generator.
+- Record AI-completed factual content in `deck_lock.assumptions[]`; never label unverified competitors,
+  metrics, cases or market facts as user-provided.
+- If the final path pre-existed the task, ask for a fresh destination; do not replace it with `--overwrite`.
 - For creation tasks, `vision-check` `summary.bySeverity.high` and `summary.bySeverity.medium` must both be 0, and the full-package semantic evidence must be internally consistent with `semanticSummary.passed=true`, `semanticSummary.issueCount=0`, at least 82 source rules / 81 normalized rules, and `semanticIssues=[]`. Dry-run and apply must each disclose `semanticIssues=[]`; a missing semantic field is not proof of safety.
-- PNG/contact sheet visual review cannot be skipped. It catches real line breaks, character overlap, contrast, decorative occlusion, page-number rhythm, and composition issues that dry-run and `vision-check` cannot see.
+- Review PNGs/contact sheets for wraps, overlap, contrast, occlusion, chrome and composition; machine
+  checks cannot replace this review.
+- Peer concepts deserve semantic icons or content-specific visuals. Missing slots require maintained
+  components, not blanket omission. Reserve numbering for sequence, rank or references; respect the kit contract.
+- Plan real composition changes: statements, relationships/processes, native data, open comparisons or
+  authentic product visuals. Judge overview geometry/density; changing markers alone does not create variety.
 
 ## Common Edit Hard Rules
 

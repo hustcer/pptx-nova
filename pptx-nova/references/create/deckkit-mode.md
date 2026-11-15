@@ -119,6 +119,10 @@ benchmark evidence check for that directory; promotion/CI workflows that must
 fail when live benchmark artifacts are missing should use
 `--benchmark-mode required-live`.
 
+Keep benchmark and required-live readiness in the same working directory as well as using the same
+absolute `--out`: retained preview/contact paths may be relative to that execution directory.
+Changing cwd can make existing evidence appear missing. Fix the execution context before rerendering.
+
 Delivery auto-selection only allows `readiness in ["production", "default"]`.
 Use `candidate` only for drafts, migration checks, or explicit human approval.
 When the user explicitly names a candidate DeckKit for an existing-deck
@@ -180,6 +184,11 @@ values, dates or owners. Never invent these to satisfy a reporting layout. Use a
 qualitative layout, or extend the named maintained kit with content-independent schema, capacities,
 examples and tests. Split oversized source tables across pages when the requested page count allows;
 retain every required row and distinguish an author's self-assessment from an independent benchmark.
+
+For Warm Clay qualitative content, use `clayNarrativeSlide` with a lead and 2–4 sections
+(`leadLeft` / `columns`), rather than turning category counts into decorative KPIs. Check the selected
+layout's actual fit before expanding the deck. Split long source tables at semantic boundaries,
+repeat column headings, and retain the complete original row order and assessment disclaimer.
 
 Teal Journal provides `journalNarrativeSlide` for an editorial lead and 2–4 qualitative sections,
 with open row (`leadLeft`) and column (`columns`) compositions. Read its

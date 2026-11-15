@@ -112,7 +112,7 @@
       "caseId": "mckinsey-blue.golden-loyalty",
       "kind": "golden",
       "readiness": "production",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "title": "Kimsoong Customer Loyalty Programme",
       "bestFor": [
         "customer strategy",
@@ -128,13 +128,13 @@
       "files": {
         "deck": {
           "path": "mckinsey-blue/deck.pptx",
-          "bytes": 52723,
-          "sha256": "41f09bebfb16710771d861d5508be86aeaace418b6f003e7c050c8258bb564f0"
+          "bytes": 52739,
+          "sha256": "fc4a1df3657e4bb78f9efc5ce3bcad37c17b9e1a6eb9414f78acadf7789fdfdc"
         },
         "contactSheet": {
           "path": "mckinsey-blue/contact-sheet.webp",
-          "bytes": 801468,
-          "sha256": "1eef284d821b183a4e185780107d4167edbcac21751cc37ebb780dac4a572482",
+          "bytes": 799726,
+          "sha256": "2ecc6811c3b9a7f2806da1326be328e4754eda4bfedda711d65c77d46a0e70fb",
           "quality": 86
         },
         "content": {
@@ -150,7 +150,7 @@
         "summary": {
           "path": "mckinsey-blue/summary.json",
           "bytes": 2770,
-          "sha256": "f67a3efc9e6e48bc16120247d2baa0ee0f3ebac53b357e8ea200ce9545e1374b"
+          "sha256": "e0728450bb987e54712a20ebbcfde6f316cc52df88a07abb409434cf4203e3cc"
         }
       },
       "validation": {
@@ -214,7 +214,7 @@
       "caseId": "swiss-grid.golden-lecture",
       "kind": "golden",
       "readiness": "production",
-      "version": "2.0.0",
+      "version": "2.0.2",
       "title": "网格系统",
       "bestFor": [
         "design education",
@@ -228,13 +228,13 @@
       "files": {
         "deck": {
           "path": "swiss-grid/deck.pptx",
-          "bytes": 49032,
-          "sha256": "c1aa0816b0488b677da544886e089cfdd65ddff8cf52519f93a1982574873af2"
+          "bytes": 49044,
+          "sha256": "89935160262ae8754d94c244909dd969660f7eed52365c45f115fed8d31c86c2"
         },
         "contactSheet": {
           "path": "swiss-grid/contact-sheet.webp",
-          "bytes": 725866,
-          "sha256": "4daa54710cf22abcd62240195430121e93e98d036da95bd20a301ae7cbb691f0",
+          "bytes": 726074,
+          "sha256": "ab680d23b2f3983d2103d6525131bacba7836690797f1ccb05c44fcf76da1538",
           "quality": 86
         },
         "content": {
@@ -250,7 +250,7 @@
         "summary": {
           "path": "swiss-grid/summary.json",
           "bytes": 2730,
-          "sha256": "7e4ce402458961d72c452d07d6be800ee8b82bb2db445550f23b7cd113a9423c"
+          "sha256": "53365a044f1a0d07fffeaa5a32244a2cecdd2619ff0951f9f5b7eafff343bfb8"
         }
       },
       "validation": {
@@ -1092,36 +1092,36 @@
       "caseId": "warm-clay.golden-workshop",
       "kind": "golden",
       "readiness": "production",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "title": "A season of making, measured with care",
       "bestFor": ["work report", "programme review", "craft editorial", "工作汇报"],
       "defaultFor": [],
       "files": {
         "deck": {
           "path": "warm-clay/deck.pptx",
-          "bytes": 30992,
-          "sha256": "15e124139fe7a40218a36b0ec356541d08a48ac0ad9fa72c4a365e2af6abfc54"
+          "bytes": 32426,
+          "sha256": "6290be447fafe9c347563991aef4dda0f807dca4db41ad583be93fdcedc9b584"
         },
         "contactSheet": {
           "path": "warm-clay/contact-sheet.webp",
-          "bytes": 418334,
-          "sha256": "034c7563d626c5ab8693f9e979843d1eaf766fd067928893db0e325d8934979e",
+          "bytes": 419274,
+          "sha256": "e34ed532d860fe904238c1d0cb96214cb422d0e9ca7e685d42a93a0d6dee69b7",
           "quality": 86
         },
         "content": {
           "path": "warm-clay/content.json",
-          "bytes": 11876,
-          "sha256": "d564859a6bd6c2aa9991cfdc39e8bb429289fe6f76bfc12cbc8af6fdb8630cd1"
+          "bytes": 11997,
+          "sha256": "9cfec2f22552650a590fbced0cde2621c23388e18ce953a8a775433b35788cad"
         },
         "brief": {
           "path": "warm-clay/brief.md",
           "bytes": 687,
-          "sha256": "ace5cad033c5f97a2a5e53b4ce294e07c0c4eed2b17cb383213102d50efe34fe"
+          "sha256": "f26c41c80c5e8eede5a26261776015c0078150e71fe008d6dacbe72ef6067a01"
         },
         "summary": {
           "path": "warm-clay/summary.json",
           "bytes": 2757,
-          "sha256": "047237b415cc28630b173bb30e05107a80883d0ab9e97c2ffd5cc197018974ea"
+          "sha256": "8c054eff8c5b506e230e22f549732b51fec29e6b2fa0584e605132084b20623d"
         }
       },
       "validation": {
@@ -1133,7 +1133,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 906
+        "ops": 882
       },
       "vision": {
         "status": "success",
@@ -1878,8 +1878,8 @@
       "deckkit": "paper-scholar",
       "caseId": "paper-scholar.golden-learning",
       "kind": "golden",
-      "readiness": "candidate",
-      "version": "1.0.0",
+      "readiness": "default",
+      "version": "1.0.1",
       "title": "Small routines build durable recall",
       "bestFor": [
         "research courseware",
@@ -1893,13 +1893,13 @@
       "files": {
         "deck": {
           "path": "paper-scholar/deck.pptx",
-          "bytes": 43946,
-          "sha256": "f536d7f17842203f3ae66e1a0ec634b4548425edb59dc1bb304c5972e25189a8"
+          "bytes": 43967,
+          "sha256": "9bb2b84e78b223b49c43a6fe5240ce4bbb54173291d272a6e1de205294246914"
         },
         "contactSheet": {
           "path": "paper-scholar/contact-sheet.webp",
-          "bytes": 547992,
-          "sha256": "a55b1b34bac34d0e6d2b2b71277ec7c4e211dd78b60cb9ce3418298c9f8deb16",
+          "bytes": 547818,
+          "sha256": "43127166238315ab506a4b96bf77dd2b63da7934c7717155c9c57bd0ee8f2c0d",
           "quality": 86
         },
         "content": {
@@ -1909,13 +1909,13 @@
         },
         "brief": {
           "path": "paper-scholar/brief.md",
-          "bytes": 731,
-          "sha256": "8146d571ae41fd102f925e986035d92eecc621efa34bdece196f2dd86e0b1c91"
+          "bytes": 729,
+          "sha256": "04bb5079e20ba1a1820faf8d88d2dc9cf6481ae140baea9028b8fbcd7a07dcd8"
         },
         "summary": {
           "path": "paper-scholar/summary.json",
-          "bytes": 2719,
-          "sha256": "7cb492ac67f80dc7403d5a4d2fde5f74887e5202e57f6da14f9ea764e08c5bc9"
+          "bytes": 2778,
+          "sha256": "7c4bc493c7f74aaaa7df612b50318a2a0bb7c6f1862a369f022f611bfe50e91b"
         }
       },
       "validation": {
@@ -1947,17 +1947,17 @@
           "changed": 0,
           "resolved": 0,
           "reviewable": 0,
-          "baselineUnavailable": true,
+          "baselineUnavailable": false,
           "baselineUpdated": false
         },
         "lowByFamily": {},
         "newLowByFamily": {},
         "changedLowByFamily": {},
         "baseline": {
-          "schemaVersion": "",
-          "fingerprintVersion": "",
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
           "path": "pptx-nova/benchmarks/visual/baselines/paper-scholar.golden-learning.vision-baseline.json",
-          "available": false,
+          "available": true,
           "issueCount": 0
         },
         "stylePolicy": {

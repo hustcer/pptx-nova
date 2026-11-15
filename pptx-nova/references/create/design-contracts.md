@@ -267,9 +267,15 @@ every accepted PNG still require review. Fonts are not bundled; no PowerPoint pa
 ### Warm clay editorial family: Warm Clay
 
 `warm-clay` uses `warm-clay-editorial/v1`: cream paper, upright serif assertions/numerals, terracotta
-evidence, blush numbered squares, corner quarter-disks/rings and open hairline structures. Eight roles
-resolve into fifteen bounded layouts; discover its `clay*Slide` schemas and read
-`assets/deckkits/warm-clay/intent.md`. It is candidate and requires explicit selection.
+evidence, blush numbered squares, corner quarter-disks/rings and open hairline structures. Nine roles
+resolve into twenty bounded layouts; discover its `clay*Slide` schemas and read
+`assets/deckkits/warm-clay/intent.md`. Current selection eligibility follows the catalog.
+
+`clayNarrativeSlide` provides a qualitative lead and 2–4 open numbered sections through
+`leadLeft` or `columns`. Use it for audiences, contributions, priorities and requests when no
+numeric baseline was supplied; never invent metrics to satisfy a quantitative page contract.
+Narrative sections and overview findings accept optional bundled Tabler outline `icon` names,
+replacing peer numbering with exact terracotta SVG assets. This is not arbitrary picture ingestion.
 
 Native single-series columns and horizontal-rule tables retain numeric data and every cell. Integer,
 decimal and scientific labels use separate formats checked against PowerPoint. Metric units append

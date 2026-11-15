@@ -2958,7 +2958,8 @@
                   "process",
                   "kpi",
                   "status",
-                  "commitments"
+                  "commitments",
+                  "narrative"
                 ]
               },
               "variants": {
@@ -3006,6 +3007,11 @@
               "type": "number",
               "minimum": 0.1,
               "maximum": 1
+            },
+            "iconStrokeWidth": {
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 1.5
             }
           },
           "required": ["gap", "rulePt"],

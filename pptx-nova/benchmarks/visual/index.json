@@ -205,6 +205,7 @@
       "id": "warm-clay.golden-workshop",
       "deckkit": "warm-clay",
       "kind": "golden",
+      "showcase": true,
       "contentPath": "../../assets/deckkits/warm-clay/examples/content.json",
       "buildPath": "../../assets/deckkits/warm-clay/examples/build.mjs",
       "expectedPath": "cases/warm-clay/golden-workshop/expected.json",
@@ -309,6 +310,15 @@
       "buildPath": "../../assets/deckkits/teal-journal/examples/build.mjs",
       "expectedPath": "cases/teal-journal/golden-narrative/expected.json",
       "reviewPath": "cases/teal-journal/golden-narrative/review.md"
+    },
+    {
+      "id": "warm-clay.golden-narrative",
+      "deckkit": "warm-clay",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/warm-clay/examples/narrative-content.json",
+      "buildPath": "../../assets/deckkits/warm-clay/examples/build.mjs",
+      "expectedPath": "cases/warm-clay/golden-narrative/expected.json",
+      "reviewPath": "cases/warm-clay/golden-narrative/review.md"
     }
   ]
 }

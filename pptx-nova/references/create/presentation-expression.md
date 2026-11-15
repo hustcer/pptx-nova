@@ -42,6 +42,8 @@ generic sparkle repeated throughout. Keep the heading readable without recognizi
   alignment and palette. Find exact available names through
   `node <skill-root>/scripts/cli/assets/icons.mjs --help`; use registered icon fields/assets, not
   emoji, Unicode arrows, words inside circles, or newly downloaded unlicensed SVGs.
+  DeckKit semantic icons default to stroke width `1.2` in the 24-unit viewBox; never exceed `1.5`.
+  The shared icon emitter enforces this ceiling. Improve optical size or spacing before thickening strokes.
 - Compose icon + heading + supporting content as one perceptual unit. A row, open column or margin
   marker can work; do not turn every page into identical icon cards. Avoid adding icons to every
   bullet, footnote, chart label or table cell. Real diagrams, images and data remain the proof.
@@ -49,6 +51,13 @@ generic sparkle repeated throughout. Keep the heading readable without recognizi
   when selection is open. If a pinned kit lacks an icon slot, respect its contract: use another
   registered visual treatment or the maintained DeckKit-extension route when icons are essential.
   Do not inject `add-image`/`add-group` through choreography or claim unsupported icons were added.
+
+An absent icon slot is an implementation gap, not an aesthetic reason to omit useful icons.
+For a named kit with parallel concepts, extend its maintained schema/component through the registered
+DeckKit route when semantic icons materially improve recognition; keep its visual identity and validate
+the extension. Distinguish semantic symbols from decorative badges. Use ordinal markers for genuine
+steps, ranks or referenced item identities; do not number every set of peers. Review repeated markers
+across the contact sheet and vary the composition before adding more effects.
 
 ## Motion grammar: entrance, continuity, focus
 

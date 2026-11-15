@@ -103,20 +103,28 @@ test('Tabler icon helper searches, resolves aliases, recolors SVG, and emits add
   assert.equal(op.mimeType, 'image/svg+xml')
   const opSvg = Buffer.from(op.bytesBase64, 'base64').toString('utf8')
   assert.match(opSvg, /#FFFFFF/)
-  assert.match(opSvg, /stroke-width="1"/)
+  assert.match(opSvg, /stroke-width="1.2"/)
+  assert.throws(
+    () => p.icon(0, 'TooHeavy', 'chart-line', 1, 2, 0.3, 0.3, { strokeWidth: 1.6 }),
+    /1.5/,
+  )
 })
 
-test('DeckKits do not override Tabler outline icon stroke width by default', () => {
+test('DeckKit component overrides cannot exceed the global semantic icon stroke ceiling', () => {
   const deckkitPaths = [
-    join(ROOT, 'pptx-nova/assets/deckkits/consulting-dark/consulting-dark.kit.mjs'),
-    join(ROOT, 'pptx-nova/assets/deckkits/mckinsey-blue/mckinsey-blue.kit.mjs'),
-    join(ROOT, 'pptx-nova/assets/deckkits/swiss-grid/swiss-grid.kit.mjs'),
+    join(ROOT, 'pptx-nova/assets/deckkits/shared/icon-assets.kit.mjs'),
+    join(ROOT, 'pptx-nova/assets/deckkits/mckinsey-blue/components.mjs'),
+    join(ROOT, 'pptx-nova/assets/deckkits/paper-scholar/components.mjs'),
+    join(ROOT, 'pptx-nova/assets/deckkits/swiss-grid/components.mjs'),
   ]
 
   for (const deckkitPath of deckkitPaths) {
     const source = readFileSync(deckkitPath, 'utf8')
     for (const match of source.matchAll(/strokeWidth\s*:\s*([0-9.]+)/g)) {
-      assert.equal(match[1], '1', `${deckkitPath} uses non-default icon strokeWidth ${match[1]}`)
+      assert.ok(
+        Number(match[1]) > 0 && Number(match[1]) <= 1.5,
+        `${deckkitPath} exceeds semantic icon stroke ceiling`,
+      )
     }
   }
 })

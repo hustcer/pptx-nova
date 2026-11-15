@@ -43,7 +43,7 @@ const strings = (v, k = '') =>
 test('Swiss Grid has one deterministic registered plan for every public responsibility', () => {
   const a = createDeck(fixture),
     b = createDeck(fixture)
-  assert.equal(DESIGN.version, '2.0.1')
+  assert.equal(DESIGN.version, '2.0.2')
   assert.equal(a.designCheck.status, 'pass')
   assert.equal(a.designPlan.layouts.length, 15)
   assert.equal(designHash(a.patch), designHash(b.patch))

@@ -1,0 +1,125 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "clayNarrativeSlide",
+  "type": "object",
+  "properties": {
+    "section": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 11.45,
+        "heightIn": 0.28,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      },
+      "pattern": "\\S"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 26,
+        "widthIn": 11.55,
+        "heightIn": 0.65,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      },
+      "pattern": "\\S"
+    },
+    "subtitle": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 12,
+        "widthIn": 11.55,
+        "heightIn": 0.51,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      },
+      "pattern": "\\S"
+    },
+    "verdict": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 11.45,
+        "heightIn": 0.3,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      },
+      "pattern": "\\S"
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 10.7,
+        "heightIn": 0.26,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      },
+      "pattern": "\\S"
+    },
+    "lead": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 28,
+        "widthIn": 2.63,
+        "heightIn": 1.1,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      }
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "x-slotBudget": {
+              "fontPt": 14,
+              "widthIn": 2.1475,
+              "heightIn": 0.42,
+              "lineHeight": 1.15,
+              "maxLines": 1
+            }
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "x-slotBudget": {
+              "fontPt": 12,
+              "widthIn": 2.7075,
+              "heightIn": 1.68,
+              "lineHeight": 1.15,
+              "maxLines": 6
+            }
+          },
+          "icon": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "x-slotRole": "control",
+            "x-slotProbeOmit": true,
+            "description": "Optional semantic Tabler outline icon from the bundled pack; replaces the ordinal marker."
+          }
+        },
+        "required": ["title", "body"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["section", "title", "subtitle", "verdict", "source", "lead", "sections"],
+  "additionalProperties": false
+}

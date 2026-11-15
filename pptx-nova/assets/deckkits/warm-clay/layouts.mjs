@@ -97,15 +97,25 @@ export function compileClayLayout(design, family, layoutId, variant, d, path = '
       metric(ff, vs[i], `${field}[${i}]`, field + i, compact)
     })
   }
-  const chip = (name, x, y, index) =>
-    cs.push({
-      kind: 'chip',
-      name,
-      frame: [x, y, 0.4, 0.4],
-      text: String(index + 1).padStart(2, '0'),
-      style: b.styles.chip,
-      color: 'pink',
-    })
+  const chip = (name, x, y, index, icon) =>
+    cs.push(
+      icon
+        ? {
+            kind: 'icon',
+            name: `${name}_Icon_${icon}`,
+            frame: [x, y, 0.4, 0.4],
+            icon,
+            color: 'accent',
+          }
+        : {
+            kind: 'chip',
+            name,
+            frame: [x, y, 0.4, 0.4],
+            text: String(index + 1).padStart(2, '0'),
+            style: b.styles.chip,
+            color: 'pink',
+          },
+    )
   const ornament = (corner, large = false) =>
     cs.push({
       kind: 'ornament',
@@ -139,7 +149,7 @@ export function compileClayLayout(design, family, layoutId, variant, d, path = '
     tx('Subtitle', b.chrome.subtitle, d.subtitle, 'body', 'subtitle')
   }
   if (role === 'cover') {
-    tx('Title', r.hero, d.title, 'hero', 'title')
+    tx('Title', r.hero, d.title, 'hero', 'title', layoutId === 'statement' ? { sizePt: 44 } : {})
     rule('CoverAccentRule', r.hero[0], r.hero[1] + r.hero[3] + 0.18, 0.56)
     cs.at(-1).color = 'accent'
     cs.at(-1).frame[3] = 0.04
@@ -166,13 +176,19 @@ export function compileClayLayout(design, family, layoutId, variant, d, path = '
       { alignment: 'center' },
     )
     // Subtitle remains visible; it is not a hidden schema field.
-    tx('Subtitle', [r.hero[0], 4.65, 7.3, 0.3], d.subtitle, 'small', 'subtitle')
+    tx(
+      'Subtitle',
+      [r.hero[0], layoutId === 'statement' ? 4.9 : 4.65, 7.3, 0.3],
+      d.subtitle,
+      'small',
+      'subtitle',
+    )
   } else if (role === 'overview') {
     const vertical = layoutId === 'rail'
     metrics(r.metrics, d.metrics, 'metrics', vertical, true)
     if (vertical) rule('ColumnDivider', r.findings[0] - gap, r.findings[1], r.findings[3], true)
     cells(r.findings, d.findings.length, vertical).forEach(([x, y, w, h], i) => {
-      chip('FindingChip' + i, x, y, i)
+      chip('FindingChip' + i, x, y, i, d.findings[i].icon)
       tx(
         'FindingTitle' + i,
         [x + 0.56, y, w - 0.56, 0.38],
@@ -326,6 +342,85 @@ export function compileClayLayout(design, family, layoutId, variant, d, path = '
         d.steps[i].body,
         'body',
         `steps[${i}].body`,
+      )
+    })
+  } else if (role === 'narrative') {
+    const vertical = layoutId === 'leadLeft'
+    const hub = layoutId === 'hub'
+    if (hub) cs.push({ kind: 'hub', name: 'Hub', frame: [5.4665, 3.0, 2.4, 2.4], color: 'pink' })
+    tx('Lead', r.lead, d.lead, 'quote', 'lead', {
+      sizePt: hub ? 28 : 22,
+      color: 'accent',
+      ...(hub ? { alignment: 'center' } : {}),
+    })
+    if (vertical) rule('ColumnDivider', r.sections[0] - gap, r.sections[1], r.sections[3], true)
+    let frames = cells(r.sections, d.sections.length, vertical)
+    if (layoutId === 'quadrants') {
+      const cols = cells(r.sections, 2)
+      frames = d.sections.map((_, i) => {
+        const f = cols[i % 2],
+          h = (r.sections[3] - 0.35) / 2
+        return [f[0], f[1] + Math.floor(i / 2) * (h + 0.35), f[2], h]
+      })
+    }
+    if (hub) {
+      const n = d.sections.length
+      const positions =
+        n === 2
+          ? [
+              [0.83, 3.4],
+              [8.7, 3.4],
+            ]
+          : n === 3
+            ? [
+                [0.83, 3.4],
+                [8.7, 2.45],
+                [8.7, 4.85],
+              ]
+            : [
+                [0.83, 2.45],
+                [8.7, 2.45],
+                [0.83, 4.85],
+                [8.7, 4.85],
+              ]
+      frames = positions.map(([x, y]) => [x, y, 3.8, 1.45])
+      frames.forEach(([x, y, w], i) => {
+        const left = x < 6,
+          py = y + 0.48,
+          dy = py - 4.2
+        const theta = Math.atan2(dy, left ? -3 : 3)
+        const from = [left ? x + w + 0.08 : x - 0.08, py]
+        const to = [6.6665 + 1.2 * Math.cos(theta), 4.2 + 1.2 * Math.sin(theta)]
+        cs.push({
+          kind: 'link',
+          name: 'HubBranch' + i,
+          from,
+          to,
+          frame: [
+            Math.min(from[0], to[0]),
+            Math.min(from[1], to[1]),
+            Math.max(0.001, Math.abs(to[0] - from[0])),
+            Math.max(0.001, Math.abs(to[1] - from[1])),
+          ],
+        })
+      })
+    }
+    frames.forEach(([x, y, w, h], i) => {
+      chip('NarrativeChip' + i, x, y, i, d.sections[i].icon)
+      tx(
+        'NarrativeTitle' + i,
+        [x + 0.56, y, w - 0.56, 0.42],
+        d.sections[i].title,
+        'heading',
+        `sections[${i}].title`,
+        { bold: true },
+      )
+      tx(
+        'NarrativeBody' + i,
+        vertical ? [x + 0.56, y + 0.48, w - 0.56, h - 0.48] : [x, y + 0.72, w, h - 0.72],
+        d.sections[i].body,
+        'body',
+        `sections[${i}].body`,
       )
     })
   } else if (role === 'kpi') {

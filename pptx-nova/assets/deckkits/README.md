@@ -117,7 +117,7 @@ Clear Impact 提供十二类开放式证据报告职责及二十四个注册构�
 原生柱图、稀疏表格、处理链、数值派生达成条和差异桥。中文、英文与混排使用正体无衬线字体。
 当前为 production，可参与自动交付选择；派生形状与旁注编辑后须从 content 重新生成。详见 [设计与边界](clear-impact/intent.md)。
 
-Warm Clay 提供八类暖陶土报告职责与十五个有界构图，使用奶油底、墨棕衬线标题、
+Warm Clay 提供九类暖陶土报告职责与二十个有界构图，使用奶油底、墨棕衬线标题、
 陶土证据、粉色编号和角落圆环。柱图与表格为原生对象；中文、英文及混排有实际渲染覆盖。
 封面竖幅仅为原生占位外壳，不接受图片输入；字体不嵌入，当前为 production，可参与自动交付选择。
 详见 [设计意图与编辑边界](warm-clay/intent.md) 及 [验收摘要](../../benchmarks/visual/cases/warm-clay/golden-workshop/review.md)。

@@ -1,11 +1,25 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
+import { readFileSync } from 'node:fs'
 import {
   selectGoldenCases,
   mergeManifestEntries,
   parseArgs as parseDeckkitExampleArgs,
   syncManifestEntriesWithCatalog,
 } from '../../update-pptx-nova-deckkit-examples.mjs'
+
+test('bundled visual index selects one showcase per kit while retaining all golden regressions', () => {
+  const index = JSON.parse(
+    readFileSync(new URL('../../../pptx-nova/benchmarks/visual/index.json', import.meta.url)),
+  )
+  const selected = selectGoldenCases(index)
+  assert.equal(
+    selected.length,
+    new Set(index.cases.filter((c) => c.kind === 'golden').map((c) => c.deckkit)).size,
+  )
+  assert.equal(selected.find((c) => c.deckkit === 'warm-clay').id, 'warm-clay.golden-workshop')
+  assert.ok(index.cases.some((c) => c.id === 'warm-clay.golden-narrative'))
+})
 
 test('DeckKit examples updater accepts -d as a DeckKit filter alias', () => {
   const args = parseDeckkitExampleArgs(['--write', '-d', 'broadside'])

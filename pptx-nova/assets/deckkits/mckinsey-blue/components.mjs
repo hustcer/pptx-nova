@@ -68,7 +68,7 @@ export function renderMckPlan(design, layouts) {
         text(name, f, c.text, c.style, true)
       } else if (c.kind === 'circle') rect(name, f, c.color, 'oval')
       else if (c.kind === 'icon') {
-        p.icon(s, name, c.icon, ...f, { color: C[c.color], strokeWidth: 2.6 })
+        p.icon(s, name, c.icon, ...f, { color: C[c.color] })
       } else if (c.kind === 'table') {
         p.ops.push({
           op: 'add-table',

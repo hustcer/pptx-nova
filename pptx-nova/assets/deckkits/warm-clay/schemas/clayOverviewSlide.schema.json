@@ -145,6 +145,14 @@
               "lineHeight": 1.15,
               "maxLines": 5
             }
+          },
+          "icon": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "x-slotRole": "control",
+            "x-slotProbeOmit": true,
+            "description": "Optional semantic Tabler outline icon from the bundled pack; replaces the ordinal marker."
           }
         },
         "required": ["title", "body"],

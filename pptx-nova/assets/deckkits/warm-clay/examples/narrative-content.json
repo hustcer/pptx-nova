@@ -1,0 +1,169 @@
+{
+  "meta": {
+    "deckkit": "warm-clay",
+    "designScope": "excerpt"
+  },
+  "slides": [
+    {
+      "type": "clayCoverSlide",
+      "data": {
+        "section": "00 | WORKSHOP REVIEW",
+        "title": "A season of making, measured with care",
+        "subtitle": "Illustrative workshop operations · synthetic data, not audited facts",
+        "verdict": "Synthetic example — evidence and actions remain traceable to this content.",
+        "source": "Source: synthetic workshop fixture · October 2026",
+        "quote": "Shared skills become visible through steady practice.",
+        "description": "Synthetic programme review for a community ceramics workshop.",
+        "metrics": [
+          {
+            "value": "120",
+            "unit": "people",
+            "label": "Participants",
+            "note": "Synthetic count",
+            "focus": false
+          },
+          {
+            "value": "8",
+            "unit": "sessions",
+            "label": "Programme",
+            "note": "Synthetic schedule",
+            "focus": true
+          },
+          {
+            "value": "92",
+            "unit": "%",
+            "label": "Completion",
+            "note": "Synthetic register",
+            "focus": false
+          }
+        ],
+        "assetLabel": "Portrait slot",
+        "assetCaption": "Replace with your own authorized image in a future supported asset route."
+      },
+      "layoutId": "statement"
+    },
+    {
+      "type": "clayNarrativeSlide",
+      "data": {
+        "section": "ARCHIVE | QUALITATIVE PRIORITIES",
+        "title": "A collection needs context as well as access",
+        "subtitle": "Illustrative archive brief; no quantitative baseline supplied",
+        "verdict": "Keep the priorities qualitative; confirm measures separately if needed.",
+        "source": "Source: synthetic archive programme brief",
+        "lead": "Make the record useful\nwithout losing its context",
+        "sections": [
+          {
+            "title": "Describe",
+            "body": "Preserve provenance and ownership beside each record."
+          },
+          {
+            "title": "Discover",
+            "body": "Show related collections and the questions they answer."
+          },
+          {
+            "title": "Maintain",
+            "body": "Record changes so readers can understand the history."
+          }
+        ]
+      },
+      "layoutId": "leadLeft"
+    },
+    {
+      "type": "clayNarrativeSlide",
+      "data": {
+        "section": "ARCHIVE | QUALITATIVE PRIORITIES",
+        "title": "A collection needs context as well as access",
+        "subtitle": "Illustrative archive brief; no quantitative baseline supplied",
+        "verdict": "Keep the priorities qualitative; confirm measures separately if needed.",
+        "source": "Source: synthetic archive programme brief",
+        "lead": "Make the record useful\nwithout losing its context",
+        "sections": [
+          {
+            "title": "Describe",
+            "body": "Preserve provenance and ownership beside each record.",
+            "icon": "book"
+          },
+          {
+            "title": "Discover",
+            "body": "Show related collections and the questions they answer.",
+            "icon": "search"
+          },
+          {
+            "title": "Maintain",
+            "body": "Record changes so readers can understand the history.",
+            "icon": "archive"
+          }
+        ]
+      },
+      "layoutId": "columns"
+    },
+    {
+      "type": "clayNarrativeSlide",
+      "data": {
+        "section": "ARCHIVE | QUALITATIVE PRIORITIES",
+        "title": "A collection needs context as well as access",
+        "subtitle": "Illustrative archive brief; no quantitative baseline supplied",
+        "verdict": "Keep the priorities qualitative; confirm measures separately if needed.",
+        "source": "Source: synthetic archive programme brief",
+        "lead": "Context\nmatters",
+        "sections": [
+          {
+            "title": "Describe",
+            "body": "Preserve provenance and ownership beside each record.",
+            "icon": "book"
+          },
+          {
+            "title": "Discover",
+            "body": "Show related collections and the questions they answer.",
+            "icon": "search"
+          },
+          {
+            "title": "Maintain",
+            "body": "Record changes so readers can understand the history.",
+            "icon": "archive"
+          },
+          {
+            "title": "Care",
+            "body": "Keep records usable for future readers.",
+            "icon": "shield-check"
+          }
+        ]
+      },
+      "layoutId": "quadrants"
+    },
+    {
+      "type": "clayNarrativeSlide",
+      "data": {
+        "section": "ARCHIVE | QUALITATIVE PRIORITIES",
+        "title": "A collection needs context as well as access",
+        "subtitle": "Illustrative archive brief; no quantitative baseline supplied",
+        "verdict": "Keep the priorities qualitative; confirm measures separately if needed.",
+        "source": "Source: synthetic archive programme brief",
+        "lead": "Archive",
+        "sections": [
+          {
+            "title": "Describe",
+            "body": "Preserve provenance and ownership beside each record.",
+            "icon": "book"
+          },
+          {
+            "title": "Discover",
+            "body": "Show related collections and the questions they answer.",
+            "icon": "search"
+          },
+          {
+            "title": "Maintain",
+            "body": "Record changes so readers can understand the history.",
+            "icon": "archive"
+          },
+          {
+            "title": "Care",
+            "body": "Keep records usable for future readers.",
+            "icon": "shield-check"
+          }
+        ]
+      },
+      "layoutId": "hub"
+    }
+  ]
+}

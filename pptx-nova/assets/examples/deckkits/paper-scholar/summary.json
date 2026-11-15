@@ -63,17 +63,17 @@
       "changed": 0,
       "resolved": 0,
       "reviewable": 0,
-      "baselineUnavailable": true,
+      "baselineUnavailable": false,
       "baselineUpdated": false
     },
     "lowByFamily": {},
     "newLowByFamily": {},
     "changedLowByFamily": {},
     "baseline": {
-      "schemaVersion": "",
-      "fingerprintVersion": "",
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
       "path": "pptx-nova/benchmarks/visual/baselines/paper-scholar.golden-learning.vision-baseline.json",
-      "available": false,
+      "available": true,
       "issueCount": 0
     },
     "stylePolicy": {
@@ -96,12 +96,12 @@
       "command": "cwebp -quiet -q 86 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 1307369,
-      "sha256": "ce0b59066308bdfd69c37c57e8b3b873d1e5ec925d69e59787b61cb43db151b0"
+      "bytes": 1307100,
+      "sha256": "1e3cc6a53d7c97d9947fbf7a7db5706e7c4b34107fff9479b57bfec43c0c96d9"
     },
     "webp": {
-      "bytes": 547992,
-      "sha256": "a55b1b34bac34d0e6d2b2b71277ec7c4e211dd78b60cb9ce3418298c9f8deb16"
+      "bytes": 547818,
+      "sha256": "43127166238315ab506a4b96bf77dd2b63da7934c7717155c9c57bd0ee8f2c0d"
     }
   }
 }

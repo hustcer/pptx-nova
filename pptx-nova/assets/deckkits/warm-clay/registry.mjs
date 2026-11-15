@@ -1,11 +1,13 @@
 import { readFileSync } from 'node:fs'
 import { assertDesignValue } from '../shared/design-contract.mjs'
 import { compileClayLayout, resolveClayDeck } from './layouts.mjs'
+import { DEFAULT_DECKKIT_ICON_STROKE, getTablerIconAsset } from '../shared/icon-assets.kit.mjs'
 
 export const CLAY_LAYOUTS = {
   cover: {
     portrait: ['hero', 'quote', 'description', 'metrics', 'asset'],
     editorial: ['hero', 'quote', 'description', 'metrics', 'asset'],
+    statement: ['hero', 'quote', 'description', 'metrics', 'asset'],
   },
   overview: { rail: ['metrics', 'findings'], band: ['metrics', 'findings'] },
   chart: {
@@ -19,6 +21,12 @@ export const CLAY_LAYOUTS = {
   process: { chain: ['metrics', 'steps'], vertical: ['metrics', 'steps'] },
   kpi: { strip: ['metrics', 'explanation'], rail: ['metrics', 'explanation'] },
   status: { wide: ['table', 'tableNote'] },
+  narrative: {
+    leadLeft: ['lead', 'sections'],
+    columns: ['lead', 'sections'],
+    quadrants: ['lead', 'sections'],
+    hub: ['lead', 'sections'],
+  },
   commitments: {
     columns: ['title', 'items', 'mechanism'],
     ledger: ['title', 'items', 'mechanism'],
@@ -27,12 +35,14 @@ export const CLAY_LAYOUTS = {
 export function validateClayData(type, data, path) {
   const s = JSON.parse(readFileSync(new URL(`./schemas/${type}.schema.json`, import.meta.url)))
   assertDesignValue(data, s, s, path)
+  for (const item of [...(data.sections ?? []), ...(data.findings ?? [])])
+    if (item.icon) getTablerIconAsset(item.icon, { style: 'outline' })
 }
 function assertClay(design, { assertFrame }) {
   const b = design.clay,
     seen = new Set()
-  if (Object.keys(b.families).length !== 8)
-    throw Error('Warm Clay requires eight registered responsibilities')
+  if (Object.keys(b.families).length !== 9)
+    throw Error('Warm Clay requires nine registered responsibilities')
   if (design.colors.paper !== 'F9F4E9') throw Error('Warm Clay requires cream paper')
   for (const value of Object.values(design.colors)) {
     const [r, g, b] = value.match(/../g).map((v) => parseInt(v, 16))
@@ -66,10 +76,23 @@ function checkClay(design, op, fail) {
     fail('Warm Clay requires a single evidence series')
   if (op.op === 'add-shape' && !['rectangle', 'ellipse'].includes(op.kind))
     fail('Unregistered clay shape')
-  if (op.op === 'add-freeform' && !/_Ornament(?:tl|tr|bl|br)$/.test(op.name ?? ''))
+  if (op.op === 'add-freeform' && !/_(?:Ornament(?:tl|tr|bl|br)|HubBranch\d+)$/.test(op.name ?? ''))
     fail('Unregistered clay freeform')
-  if (['add-image', 'add-group'].includes(op.op))
-    fail('Warm Clay has no registered image/group input')
+  if (op.op === 'add-group') fail('Warm Clay has no registered group input')
+  if (op.op === 'add-image') {
+    const icon = /_(?:Finding|Narrative)Chip\d+_Icon_([a-z0-9-]+)$/.exec(op.name ?? '')?.[1]
+    let asset
+    try {
+      if (icon)
+        asset = getTablerIconAsset(icon, {
+          style: 'outline',
+          color: design.colors.accent,
+          strokeWidth: design.clay.spacing.iconStrokeWidth ?? DEFAULT_DECKKIT_ICON_STROKE,
+        })
+    } catch {}
+    if (!asset || op.mimeType !== asset.mimeType || op.bytesBase64 !== asset.bytesBase64)
+      fail('Warm Clay accepts only exact bundled terracotta semantic icons in registered markers')
+  }
   if (
     op.op === 'set-slide-background' &&
     (op.fill?.type !== 'solid' || op.fill.color !== design.colors.paper)
@@ -152,6 +175,7 @@ export const CLAY_FAMILY = {
   groups: {
     anchor: ['cover', 'commitments'],
     review: ['overview', 'kpi'],
+    narrative: ['narrative'],
     evidence: ['chart', 'comparison', 'status'],
     process: ['process'],
   },
@@ -166,6 +190,7 @@ export const CLAY_FAMILY = {
       process: { metrics: [2, 2], steps: c.steps },
       kpi: { metrics: c.metrics },
       status: { columns: c.columns, rows: c.rows },
+      narrative: { sections: c.sections },
       commitments: { items: c.commitments },
     }[f.role]
   },

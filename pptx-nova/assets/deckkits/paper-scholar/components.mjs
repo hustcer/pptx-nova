@@ -68,7 +68,6 @@ export function renderScholarPlan(design, layouts) {
       .forEach((c) =>
         p.icon(s, `S${s}_${c.name}`, c.icon, ...c.frame, {
           color: design.colors[c.color],
-          strokeWidth: 2,
         }),
       ),
   )

@@ -43,7 +43,7 @@ validate/build/Create 使用。`design.json` 是颜色、字体、几何、容�
 文字、圆、线、卡片和胶囊可编辑。胶囊是原生自由路径，保持真实半圆端点。
 日程是原生五列表格，所有表头/单元格参与对象回读；状态轮廓是独立原生路径。
 在 PowerPoint 手工调整表格行高/列宽不会同步胶囊轮廓，须从 content 重新生成。
-没有图表或图片输入能力；清单的数字只是用户提供的展示文本，不推导为统计图。
+没有图表或外部图片输入能力；内置语义图标仅按注册字段使用。清单的数字只是用户提供的展示文本，不推导为统计图。
 
 ## 设计裁决与环境
 
@@ -58,3 +58,7 @@ Georgia 的衬线与字宽不同于 Fraunces，不能声称逐像素还原或跨
 
 创建链的合同迁移不证明任意旧 PPTX 翻新无损。已有独立 `refurbishProfile` 保留，
 不因为创建套件升级而扩写翻新能力或自动获得 production 资格。
+
+## Semantic concept icons (2.1.0)
+
+Optional bundled Tabler outline icons are supported in `longTableIndexSlide: data.cards[].icon`. Choose symbols for the actual concepts. The registered marker compiler uses the kit's existing palette and layout owners, with a 1.2 stroke. Omitted icons retain the previous output and capacity. An explicit icon replaces the peer marker where registered; edition numbers, metrics, dates, status and references remain separate. Inset headings are rechecked at their available width; split or choose a fitting layout instead of shrinking text. Review the actual PNGs, including alternative layouts and mixed-language content.

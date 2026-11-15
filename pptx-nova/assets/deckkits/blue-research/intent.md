@@ -57,3 +57,7 @@ steps 最多四条行动；register 最多两条行动。字长仍须通过真�
 机器、逐页 canonical PNG 与原生宿主事实见
 [benchmark review](../../../benchmarks/visual/cases/blue-research/golden-learning/review.md)。
 本说明只声明实际覆盖的能力，不推断跨平台像素一致或无损保留能力。
+
+## Semantic concept icons (0.2.0)
+
+Optional bundled Tabler outline icons are supported in `researchFindingsSlide: data.items[].icon`. Choose symbols for the actual concepts. The registered marker compiler uses the kit's existing palette and layout owners, with a 1.2 stroke. Omitted icons retain the previous output and capacity. An explicit icon replaces the peer marker where registered; edition numbers, metrics, dates, status and references remain separate. Inset headings are rechecked at their available width; split or choose a fitting layout instead of shrinking text. Review the actual PNGs, including alternative layouts and mixed-language content.

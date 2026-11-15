@@ -19,13 +19,13 @@
   },
   "patch": {
     "schemaVersion": "pptx-patch/v1",
-    "ops": 1260
+    "ops": 1236
   },
   "dryRun": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 27,
-    "opResults": 1260,
+    "changedParts": 31,
+    "opResults": 1236,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -36,8 +36,8 @@
   "apply": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 27,
-    "opResults": 1260,
+    "changedParts": 31,
+    "opResults": 1236,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -63,17 +63,17 @@
       "changed": 0,
       "resolved": 0,
       "reviewable": 0,
-      "baselineUnavailable": true,
+      "baselineUnavailable": false,
       "baselineUpdated": false
     },
     "lowByFamily": {},
     "newLowByFamily": {},
     "changedLowByFamily": {},
     "baseline": {
-      "schemaVersion": "",
-      "fingerprintVersion": "",
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
       "path": "pptx-nova/benchmarks/visual/baselines/blue-research.golden-learning.vision-baseline.json",
-      "available": false,
+      "available": true,
       "issueCount": 0
     },
     "stylePolicy": {
@@ -96,12 +96,12 @@
       "command": "cwebp -quiet -q 86 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 1492767,
-      "sha256": "b9e6fd9ad1237037e1b2c96fb3b70e431b4dd5893f01ee87fd32e1e14473b47b"
+      "bytes": 1490374,
+      "sha256": "0e8f96d3d2284359fb27c7d1dda227eeca6e548f12eafa281f62baf44da1c9d2"
     },
     "webp": {
-      "bytes": 768766,
-      "sha256": "b8d4c24acdcfdc38c5d2cd36488af80df71a74b02e9707e6068173b4b66bc1ae"
+      "bytes": 766954,
+      "sha256": "4cc655119993aecf0864628b9e4df74c3ad502be72406bfebd2d7640bb5f7294"
     }
   }
 }

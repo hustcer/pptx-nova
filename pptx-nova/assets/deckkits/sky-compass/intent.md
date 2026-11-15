@@ -63,3 +63,7 @@ node pptx-nova/scripts/cli/create/build.mjs --deckkit sky-compass content.json -
 - 不宣称任意已有 PPTX 翻新、无损保留、native-skinning、摄影、动画或跨平台像素一致。
 
 实际验收覆盖、主要设计差异与原生宿主结果见 [验收记录](../../../benchmarks/visual/cases/sky-compass/golden-operations/review.md)。
+
+## Semantic concept icons (0.3.0)
+
+Optional bundled Tabler outline icons are supported in `skyCoverageSlide: data.notes[].icon`; `skyProjectSlide: data.items[].icon`. Choose symbols for the actual concepts. The registered marker compiler uses the kit's existing palette and layout owners, with a 1.2 stroke. Omitted icons retain the previous output and capacity. An explicit icon replaces the peer marker where registered; edition numbers, metrics, dates, status and references remain separate. Inset headings are rechecked at their available width; split or choose a fitting layout instead of shrinking text. Review the actual PNGs, including alternative layouts and mixed-language content.

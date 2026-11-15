@@ -4,12 +4,12 @@ DeckKit: `broadside`
 Showcase case: `broadside.golden-html`
 Readiness: `production`
 Slides: 16
-Patch ops: 1178
+Patch ops: 1162
 Title: public ideas made real
 
 ## Best For
 
-brand manifesto, founder vision deck, magazine or cultural pitch, design talk, bilingual EN/CN editorial deck, campaign launch
+brand manifesto, founder vision deck, magazine or cultural pitch, design talk, bilingual EN/CN editorial deck, campaign launch, product-platform
 
 ## Default For
 

@@ -19,13 +19,13 @@
   },
   "patch": {
     "schemaVersion": "pptx-patch/v1",
-    "ops": 1018
+    "ops": 1023
   },
   "dryRun": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 27,
-    "opResults": 1018,
+    "changedParts": 32,
+    "opResults": 1023,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -36,8 +36,8 @@
   "apply": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 27,
-    "opResults": 1018,
+    "changedParts": 32,
+    "opResults": 1023,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -96,12 +96,12 @@
       "command": "cwebp -quiet -q 86 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 1247164,
-      "sha256": "7ea9628df858333bca4aa4a607c5fb589c1cbe60123fce069a870e25d7456bc0"
+      "bytes": 1251140,
+      "sha256": "544729af549c491f10ac8ba32b9b1b0e5ffa924a5b7768043b79e111d9a4ea2c"
     },
     "webp": {
-      "bytes": 523946,
-      "sha256": "242633bb845c383aab8adc3a64c3de417315cd96232897d250ddf4cb3237d958"
+      "bytes": 526398,
+      "sha256": "d064e020fe6797fe4c2464b6b9b2442cd5f99a632c3a0140051a14ed861b095d"
     }
   }
 }

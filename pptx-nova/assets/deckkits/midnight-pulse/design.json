@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "midnight-pulse",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -517,5 +517,18 @@
         }
       ]
     }
+  },
+  "semanticIcons": {
+    "bindings": [
+      {
+        "slideType": "pulseComparisonSlide",
+        "items": "subjects",
+        "target": "SubjectName{i}",
+        "placement": "inset",
+        "color": "ice",
+        "sizeIn": 0.28,
+        "gapIn": 0.1
+      }
+    ]
   }
 }

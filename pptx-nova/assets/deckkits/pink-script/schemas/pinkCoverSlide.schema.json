@@ -9,11 +9,11 @@
       "pattern": "\\S",
       "description": "Top-left brand; no business default.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 11,
+        "widthIn": 5.75,
+        "heightIn": 0.3,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "section": {
@@ -22,11 +22,11 @@
       "pattern": "\\S",
       "description": "Top-right section metadata.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 10.5,
+        "widthIn": 6.13,
+        "heightIn": 0.3,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "kicker": {
@@ -35,11 +35,11 @@
       "pattern": "\\S",
       "description": "Pink editorial eyebrow.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 11,
+        "widthIn": 12.23,
+        "heightIn": 0.3,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "source": {
@@ -48,11 +48,11 @@
       "pattern": "\\S",
       "description": "Visible source, assumptions and/or date from content.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 10.5,
+        "widthIn": 10.7,
+        "heightIn": 0.28,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "title": {
@@ -61,11 +61,11 @@
       "pattern": "\\S",
       "description": "Short pink hero, ideally one word.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
-        "lineHeight": 1.12,
-        "maxLines": 3
+        "fontPt": 140,
+        "widthIn": 10.1,
+        "heightIn": 2.34,
+        "lineHeight": 1,
+        "maxLines": 1
       }
     },
     "continuation": {
@@ -74,11 +74,11 @@
       "pattern": "\\S",
       "description": "Paper-blush hanging continuation.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
-        "lineHeight": 1.12,
-        "maxLines": 3
+        "fontPt": 140,
+        "widthIn": 10.1,
+        "heightIn": 2.34,
+        "lineHeight": 1,
+        "maxLines": 1
       }
     },
     "metadata": {
@@ -94,11 +94,11 @@
             "pattern": "\\S",
             "description": "Metadata label.",
             "x-slotBudget": {
-              "fontPt": 12,
-              "widthIn": 4,
-              "heightIn": 0.8,
+              "fontPt": 10.5,
+              "widthIn": 5.715,
+              "heightIn": 0.25,
               "lineHeight": 1.12,
-              "maxLines": 3
+              "maxLines": 1
             }
           },
           "value": {
@@ -107,11 +107,11 @@
             "pattern": "\\S",
             "description": "Metadata value.",
             "x-slotBudget": {
-              "fontPt": 12,
-              "widthIn": 4,
-              "heightIn": 0.8,
-              "lineHeight": 1.12,
-              "maxLines": 3
+              "fontPt": 24,
+              "widthIn": 5.715,
+              "heightIn": 0.44,
+              "lineHeight": 1,
+              "maxLines": 1
             }
           }
         },

@@ -73,3 +73,7 @@ metadata的“衬线标题”与详细设计/CSS矛盾，采用后者的轻量�
 
 验收范围、证据身份、逐页结果与原生宿主边界见
 [迁移与验收记录](../../../benchmarks/visual/cases/monochrome/golden-library/review.md)。
+
+## Semantic concept icons (0.2.0)
+
+Optional bundled Tabler outline icons are supported in `monoListSlide: data.itemIcons[]`; `monoSplitSlide: data.itemIcons[]`. Choose symbols for the actual concepts. The registered marker compiler uses the kit's existing palette and layout owners, with a 1.2 stroke. Omitted icons retain the previous output and capacity. An explicit icon replaces the peer marker where registered; edition numbers, metrics, dates, status and references remain separate. Inset headings are rechecked at their available width; split or choose a fitting layout instead of shrinking text. Review the actual PNGs, including alternative layouts and mixed-language content.

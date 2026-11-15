@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "long-table",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -426,5 +426,18 @@
       "minFullDeck": 6,
       "maxConsecutive": 2
     }
+  },
+  "semanticIcons": {
+    "bindings": [
+      {
+        "slideType": "longTableIndexSlide",
+        "items": "cards",
+        "target": "CardTitle{i}",
+        "placement": "inset",
+        "color": "ink",
+        "sizeIn": 0.3,
+        "gapIn": 0.1
+      }
+    ]
   }
 }

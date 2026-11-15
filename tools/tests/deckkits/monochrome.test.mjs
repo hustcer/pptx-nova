@@ -1,3 +1,4 @@
+import { withoutSemanticIcons } from '../helpers/semantic-icons.mjs'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -13,8 +14,11 @@ import {
 import { validateDeckkitContent } from '../../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
 import { renderNativeEvidencePlan } from '../../../pptx-nova/assets/deckkits/shared/native-evidence-plan.mjs'
 const file = (p) =>
-  JSON.parse(
-    readFileSync(new URL('../../../pptx-nova/assets/deckkits/monochrome/' + p, import.meta.url)),
+  withoutSemanticIcons(
+    'monochrome',
+    JSON.parse(
+      readFileSync(new URL('../../../pptx-nova/assets/deckkits/monochrome/' + p, import.meta.url)),
+    ),
   )
 const excerpt = (slides) => ({ meta: { deckkit: 'monochrome', designScope: 'excerpt' }, slides })
 const fixture = () => file('examples/content.json')

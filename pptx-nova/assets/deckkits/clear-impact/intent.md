@@ -69,3 +69,7 @@ node pptx-nova/scripts/cli/create/build.mjs --deckkit clear-impact content.json 
 
 复用了主题、规则、容量选择、槽位投影、原生回读和标准 Create 交付能力。
 新增 `impact-evidence/v1` 只负责开放式报告的组件计划及执行；没有修改 core-primitives。
+
+## Semantic concept icons (0.2.0)
+
+Optional bundled Tabler outline icons are supported in `impactReviewSlide: data.findings[].icon`; `impactDecisionsSlide: data.items[].icon`. Choose symbols for the actual concepts. The registered marker compiler uses the kit's existing palette and layout owners, with a 1.2 stroke. Omitted icons retain the previous output and capacity. An explicit icon replaces the peer marker where registered; edition numbers, metrics, dates, status and references remain separate. Inset headings are rechecked at their available width; split or choose a fitting layout instead of shrinking text. Review the actual PNGs, including alternative layouts and mixed-language content.

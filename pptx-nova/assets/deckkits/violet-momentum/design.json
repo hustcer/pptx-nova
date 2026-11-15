@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "violet-momentum",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -369,5 +369,28 @@
         }
       }
     }
+  },
+  "semanticIcons": {
+    "bindings": [
+      {
+        "slideType": "violetDiagnosisSlide",
+        "items": "cases",
+        "target": "CaseName{i}",
+        "placement": "inset",
+        "color": "accent",
+        "sizeIn": 0.28,
+        "gapIn": 0.1
+      },
+      {
+        "slideType": "violetActionsSlide",
+        "items": "decisions",
+        "target": "DecisionRequest{i}",
+        "placement": "inset",
+        "color": "accent",
+        "sizeIn": 0.28,
+        "gapIn": 0.1,
+        "alternates": ["DecisionContent{i}"]
+      }
+    ]
   }
 }

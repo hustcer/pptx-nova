@@ -9,6 +9,11 @@ import { ANNUAL_LAYOUTS } from '../clear-value/registry.mjs'
 import { BIENNALE_REGIONS } from '../biennale-yellow/registry.mjs'
 import { registeredDesignFamily, registeredDesignChecks } from './design-family-registry.mjs'
 import { nativeChartMatches } from '../../../scripts/lib/pptx/native-chart-readback.mjs'
+import {
+  assertSemanticIconPolicy,
+  compileSemanticIcons,
+  isSemanticIconOp,
+} from './semantic-icons.mjs'
 
 const root = resolve(DECKKIT_ROOT)
 const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'))
@@ -80,6 +85,7 @@ export function assertDesignValue(value, schema, doc = schema, path = '$') {
 export function assertDesignContract(design) {
   const schema = readJson(resolve(root, 'schemas/design.schema.json'))
   assertDesignValue(design, schema, schema)
+  assertSemanticIconPolicy(design)
   const ruleIds = new Set()
   for (const rule of design.rules) {
     if (!CHECKS.has(rule.check)) throw new Error(`Unknown design checker: ${rule.check}`)
@@ -461,6 +467,13 @@ export function checkDesignPatch(design, patch) {
   const issue = (rule, message, index) =>
     issues.push({ ruleId: rule.id, severity: 'error', message, opIndex: index })
   patch.ops.forEach((op, index) => {
+    const semanticIcon = isSemanticIconOp(design, op)
+    if (op.op === 'add-image' && /_SemanticIcon_/.test(op.name ?? '') && !semanticIcon)
+      issue(
+        { id: 'semantic-icons' },
+        'Unregistered or modified semantic icon asset/geometry',
+        index,
+      )
     if (design.rules.some((r) => r.check === 'single-accent-focus')) {
       const gold = design.colors[design.roles.focus]
       const hasGold = (v) =>
@@ -485,12 +498,13 @@ export function checkDesignPatch(design, patch) {
       }
     }
     for (const rule of design.rules) {
-      registeredDesignFamily(design)?.checks[rule.check]?.(
-        design,
-        op,
-        (message) => issue(rule, message, index),
-        { patch, index },
-      )
+      if (!semanticIcon)
+        registeredDesignFamily(design)?.checks[rule.check]?.(
+          design,
+          op,
+          (message) => issue(rule, message, index),
+          { patch, index },
+        )
       if (rule.check === 'annual-language') {
         const a = design.annual,
           palette = Object.fromEntries(
@@ -607,7 +621,7 @@ export function checkDesignPatch(design, patch) {
               issue(rule, 'Dense vertical table rules are forbidden', index)
           }
       }
-      if (rule.check === 'forbidden-operations' && rule.values.includes(op.op)) {
+      if (rule.check === 'forbidden-operations' && rule.values.includes(op.op) && !semanticIcon) {
         issue(rule, `Forbidden operation ${op.op}`, index)
       }
       if (rule.check === 'bounds' && op.x !== undefined) {
@@ -680,6 +694,7 @@ export function checkDesignPatch(design, patch) {
 }
 
 export function finishDesign(design, content, patch, layouts = []) {
+  patch = compileSemanticIcons(design, content, patch, layouts)
   const check = checkDesignPatch(design, patch)
   if (check.status === 'fail') {
     throw new Error(`Design check failed: ${check.issues.map((i) => i.message).join('; ')}`)

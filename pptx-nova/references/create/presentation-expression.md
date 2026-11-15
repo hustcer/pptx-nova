@@ -52,6 +52,14 @@ generic sparkle repeated throughout. Keep the heading readable without recognizi
   registered visual treatment or the maintained DeckKit-extension route when icons are essential.
   Do not inject `add-image`/`add-group` through choreography or claim unsupported icons were added.
 
+Every bundled DeckKit now exposes concrete semantic icon fields through
+`cli/deckkits/slots.mjs --deckkit <id>` (the `Semantic icon slots` section). Fill the applicable
+`items[].icon`-style fields with exact bundled names; older string-list contracts use an aligned
+`itemIcons[]` array. Consult the actual schema and example, since field names vary by kit. These
+fields choose symbols; the kit owns position, size and color. The CLI does not infer icon names
+from prose. Check the rendered result, rather than treating an available field as a reason to
+decorate every page.
+
 An absent icon slot is an implementation gap, not an aesthetic reason to omit useful icons.
 For a named kit with parallel concepts, extend its maintained schema/component through the registered
 DeckKit route when semantic icons materially improve recognition; keep its visual identity and validate

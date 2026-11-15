@@ -67,6 +67,21 @@
       },
       "minItems": 2,
       "maxItems": 5
+    },
+    "itemIcons": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 5,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+        "x-slotRole": "control",
+        "x-iconFamily": "tabler-outline",
+        "x-slotProbeValue": "book",
+        "description": "Optional bundled Tabler outline icon; replaces the peer marker. Default stroke 1.2; maximum 1.5."
+      },
+      "description": "Semantic icons in the same order as items; provide exactly one per item.",
+      "x-slotRole": "control"
     }
   },
   "required": ["section", "title", "source", "body", "items"],

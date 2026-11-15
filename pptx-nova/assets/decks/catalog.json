@@ -94,7 +94,7 @@
         "蓝色研究报告",
         "运营对比"
       ],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "broadside-showcase",
@@ -112,7 +112,8 @@
         "magazine or cultural pitch",
         "design talk",
         "bilingual EN/CN editorial deck",
-        "campaign launch"
+        "campaign launch",
+        "product-platform"
       ],
       "status": "available"
     },
@@ -175,7 +176,14 @@
       "preview": "../examples/deckkits/consulting-dark/contact-sheet.webp",
       "content": "../examples/deckkits/consulting-dark/content.json",
       "summary": "../examples/deckkits/consulting-dark/summary.json",
-      "bestFor": ["roadshow", "investor update", "executive consulting", "技术路演"],
+      "bestFor": [
+        "roadshow",
+        "investor update",
+        "executive consulting",
+        "技术路演",
+        "product-platform",
+        "engineering-platform"
+      ],
       "status": "available"
     },
     {
@@ -315,7 +323,7 @@
         "research keynote",
         "编辑式品牌提案"
       ],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "sky-compass-showcase",

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "green-slate",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -286,5 +286,17 @@
       "gateGap": 0.22,
       "rowBottomGap": 0.05
     }
+  },
+  "semanticIcons": {
+    "bindings": [
+      {
+        "slideType": "slateSummarySlide",
+        "items": "findings",
+        "target": "FindingNumber{i}",
+        "placement": "replace",
+        "color": "mint",
+        "sizeIn": 0.34
+      }
+    ]
   }
 }

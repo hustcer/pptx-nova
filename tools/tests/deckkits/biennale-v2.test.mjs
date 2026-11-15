@@ -202,7 +202,7 @@ test('retired slots cannot be restored and contracts reject invalid registration
     mutate(d)
     assert.throws(() => assertDesignContract(d))
   }
-  assert.equal(DESIGN.version, '2.0.0')
+  assert.equal(DESIGN.version, '2.1.0')
   const kit = readFileSync(
     new URL(
       '../../../pptx-nova/assets/deckkits/biennale-yellow/biennale-yellow.kit.mjs',

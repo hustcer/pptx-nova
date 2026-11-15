@@ -43,7 +43,8 @@
         "body": "A welcome desk introduces the collection through three small actions.",
         "items": ["Find a reading interest", "Choose a comfortable place", "Ask a person for help"],
         "assetLabel": "SERVICE MAP PLACEHOLDER",
-        "assetCaption": "Editable shell · bind no reference image"
+        "assetCaption": "Editable shell · bind no reference image",
+        "itemIcons": ["search", "armchair", "user-question"]
       }
     },
     {
@@ -86,7 +87,8 @@
           "Offer one short introduction",
           "Publish a simple weekly rhythm",
           "Review the welcome with readers"
-        ]
+        ],
+        "itemIcons": ["sign-left", "book", "message-circle", "calendar", "users"]
       }
     },
     {

@@ -340,7 +340,7 @@
     }
   },
   "schemaVersion": "pptx-nova-design/v1",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "roles": {
     "surface": "paper",
     "text": "ink",
@@ -390,5 +390,18 @@
       "id": "forest-language",
       "check": "forest-language"
     }
-  ]
+  ],
+  "semanticIcons": {
+    "bindings": [
+      {
+        "slideType": "forestClosingSlide",
+        "items": "items",
+        "target": "TakeawayLabel{i}",
+        "placement": "inset",
+        "color": "accent",
+        "sizeIn": 0.28,
+        "gapIn": 0.1
+      }
+    ]
+  }
 }

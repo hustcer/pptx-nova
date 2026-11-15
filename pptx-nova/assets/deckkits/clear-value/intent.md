@@ -46,3 +46,7 @@ Use `meta.designScope: "excerpt"` for standalone evidence. Full decks alternate 
 evidence and decision. This adapter creates native editable decks; it does not establish arbitrary
 source-PPTX refurbishment or animation fidelity. Contract/readback checks and machine findings do
 not replace actual every-page PNG review, including dense labels and bottom-note clearance.
+
+## Semantic concept icons (0.2.0)
+
+Optional bundled Tabler outline icons are supported in `valueSummarySlide: data.items[].icon`; `valueDecisionSlide: data.items[].icon`. Choose symbols for the actual concepts. The registered marker compiler uses the kit's existing palette and layout owners, with a 1.2 stroke. Omitted icons retain the previous output and capacity. An explicit icon replaces the peer marker where registered; edition numbers, metrics, dates, status and references remain separate. Inset headings are rechecked at their available width; split or choose a fitting layout instead of shrinking text. Review the actual PNGs, including alternative layouts and mixed-language content.

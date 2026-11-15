@@ -31,8 +31,12 @@
 
 生成时的图表 cache、嵌入工作表与输入同源。本次 macOS PowerPoint 原生探针中，Excel 内嵌工作表改值并保存成功，但图表 cache 与重新导出的画面仍为旧值，因此不承诺宿主手工数据编辑的自动同步。独立文字、目标、达成环、事件标记、阶段线、进度条及表格顶线也不随手工数据或几何编辑自动更新；须修改 content 并重新生成以保持同步。柱图使用共同线性轴，极小观测可能低于可辨像素；零值不伪造最小柱高。JSON/原生回读不代表完整 Office 像素等价。
 
-封面的 `cover.photo` 是可选的内容资产，通过 `--assets assets_manifest.json` 注入，支持共享的 cover/contain 裁切。未绑定时保留明确标识的可编辑外壳；正文禁止图片。照片、来源和 caption 不能回退到参考素材。示例照片为独立生成的虚构场景，业务数据明确为合成。
+封面的 `cover.photo` 是可选的内容资产，通过 `--assets assets_manifest.json` 注入，支持共享的 cover/contain 裁切。未绑定时保留明确标识的可编辑外壳；正文不接收任意图片，内置语义图标仅通过注册字段使用。照片、来源和 caption 不能回退到参考素材。示例照片为独立生成的虚构场景，业务数据明确为合成。
 
 ## 字体与验证
 
 无衬线文字使用 Arial / Noto Sans SC；诊断表使用 Georgia / Songti SC。文字保持正体，粗体显式设置；字体不嵌入，另一机器须重新核验实际匹配、中文粗体和换行。机器检查、逐页 canonical PNG 复核和 PowerPoint 原生结果分别记录于迁移验收报告，不互相替代。
+
+## Semantic concept icons (0.2.0)
+
+Optional bundled Tabler outline icons are supported in `pulseComparisonSlide: data.subjects[].icon`. Choose symbols for the actual concepts. The registered marker compiler uses the kit's existing palette and layout owners, with a 1.2 stroke. Omitted icons retain the previous output and capacity. An explicit icon replaces the peer marker where registered; edition numbers, metrics, dates, status and references remain separate. Inset headings are rechecked at their available width; split or choose a fitting layout instead of shrinking text. Review the actual PNGs, including alternative layouts and mixed-language content.

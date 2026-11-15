@@ -1,3 +1,4 @@
+import { withoutSemanticIcons } from '../helpers/semantic-icons.mjs'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
@@ -19,11 +20,14 @@ import {
 } from '../../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
 import { validateDeckkitContent } from '../../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
 const fixture = () =>
-  JSON.parse(
-    fs.readFileSync(
-      new URL(
-        '../../../pptx-nova/assets/deckkits/black-gold/examples/content.json',
-        import.meta.url,
+  withoutSemanticIcons(
+    'black-gold',
+    JSON.parse(
+      fs.readFileSync(
+        new URL(
+          '../../../pptx-nova/assets/deckkits/black-gold/examples/content.json',
+          import.meta.url,
+        ),
       ),
     ),
   )
@@ -91,6 +95,10 @@ test('identity tokens can be renamed without copying or editing the shared rende
   d.colors = Object.fromEntries(Object.entries(d.colors).map(([k, v]) => [rename(k), v]))
   for (const target of [d.roles, d.theme.colors, d.refurbish.palette, d.editorial.contrast])
     for (const k of Object.keys(target)) target[k] = rename(target[k])
+  for (const binding of d.semanticIcons.bindings) {
+    binding.color = rename(binding.color)
+    if (binding.focusColor) binding.focusColor = rename(binding.focusColor)
+  }
   assertDesignContract(d)
   const built = createEditorialDeck(d, fixture())
   assert.equal(built.designCheck.status, 'pass')

@@ -47,27 +47,32 @@
           {
             "num": "01",
             "title": "Slow Atmospheres",
-            "body": "A reading room of long-form essays, drawings and weather notebooks,\norganised around the changing yellow of late afternoon."
+            "body": "A reading room of long-form essays, drawings and weather notebooks,\norganised around the changing yellow of late afternoon.",
+            "icon": "sun"
           },
           {
             "num": "02",
             "title": "Public Form",
-            "body": "Three commissions in three pavilions, each examining how a public square\nwears its own light over the course of a season."
+            "body": "Three commissions in three pavilions, each examining how a public square\nwears its own light over the course of a season.",
+            "icon": "building"
           },
           {
             "num": "03",
             "title": "Field Notes",
-            "body": "A residency programme drawing artists, architects and meteorologists\ntogether for a hundred days of recording, drawing and arguing."
+            "body": "A residency programme drawing artists, architects and meteorologists\ntogether for a hundred days of recording, drawing and arguing.",
+            "icon": "pencil"
           },
           {
             "num": "04",
             "title": "Quiet Editions",
-            "body": "A typographic publishing strand committed to printing only what asks to be\nread in daylight, on warm paper, slowly."
+            "body": "A typographic publishing strand committed to printing only what asks to be\nread in daylight, on warm paper, slowly.",
+            "icon": "book"
           },
           {
             "num": "05",
             "title": "Open Conversations",
-            "body": "Twelve evenings of public talks, paired with a meal and a question: what is the\nweather like in your work?"
+            "body": "Twelve evenings of public talks, paired with a meal and a question: what is the\nweather like in your work?",
+            "icon": "messages"
           }
         ]
       }

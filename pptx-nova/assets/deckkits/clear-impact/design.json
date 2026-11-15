@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "clear-impact",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -463,5 +463,25 @@
         }
       }
     }
+  },
+  "semanticIcons": {
+    "bindings": [
+      {
+        "slideType": "impactReviewSlide",
+        "items": "findings",
+        "target": "FindingIndex{i}",
+        "placement": "replace",
+        "color": "ink",
+        "sizeIn": 0.34
+      },
+      {
+        "slideType": "impactDecisionsSlide",
+        "items": "items",
+        "target": "DecisionIndex{i}",
+        "placement": "replace",
+        "color": "ink",
+        "sizeIn": 0.32
+      }
+    ]
   }
 }

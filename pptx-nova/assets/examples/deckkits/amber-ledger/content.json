@@ -319,7 +319,8 @@
             "evidence": "All pilot sites available.",
             "action": "Transfer to steady operations.",
             "owner": "Service lead",
-            "date": "2026-12"
+            "date": "2026-12",
+            "icon": "building-store"
           },
           {
             "title": "Capacity extension",
@@ -329,7 +330,8 @@
             "evidence": "Two worksites are behind.",
             "action": "Reallocate the site crew.",
             "owner": "Programme lead",
-            "date": "2027-02"
+            "date": "2027-02",
+            "icon": "network"
           },
           {
             "title": "Control upgrade",
@@ -339,7 +341,8 @@
             "evidence": "Integration tests need another cycle.",
             "action": "Run parallel test windows.",
             "owner": "Engineering lead",
-            "date": "2027-03"
+            "date": "2027-03",
+            "icon": "settings"
           }
         ],
         "recovery": "Recovery gate: owners confirm the revised critical path before the next review."

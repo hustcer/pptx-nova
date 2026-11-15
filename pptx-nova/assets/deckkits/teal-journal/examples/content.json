@@ -48,15 +48,18 @@
         "notes": [
           {
             "heading": "Arrivals are already strong",
-            "body": "A stable visitor base supports a shift from volume to deeper participation."
+            "body": "A stable visitor base supports a shift from volume to deeper participation.",
+            "icon": "users"
           },
           {
             "heading": "Everyday life is the draw",
-            "body": "Local markets and evening routes create reasons to stay beyond a single visit."
+            "body": "Local markets and evening routes create reasons to stay beyond a single visit.",
+            "icon": "building-store"
           },
           {
             "heading": "Midweek has room to grow",
-            "body": "Measure weekday occupancy separately from holiday peaks."
+            "body": "Measure weekday occupancy separately from holiday peaks.",
+            "icon": "calendar"
           }
         ]
       }

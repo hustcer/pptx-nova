@@ -4,7 +4,7 @@ DeckKit: `editorial-forest`
 Showcase case: `editorial-forest.golden-editorial`
 Readiness: `candidate`
 Slides: 9
-Patch ops: 593
+Patch ops: 596
 Title: Quarterly Review 2026
 
 ## Best For

@@ -19,36 +19,43 @@
       "caseId": "consulting-dark.golden-roadshow",
       "kind": "golden",
       "readiness": "production",
-      "version": "2.1.0",
+      "version": "2.3.0",
       "title": "A clearer path from signal to scale",
-      "bestFor": ["roadshow", "investor update", "executive consulting", "技术路演"],
+      "bestFor": [
+        "roadshow",
+        "investor update",
+        "executive consulting",
+        "技术路演",
+        "product-platform",
+        "engineering-platform"
+      ],
       "defaultFor": [],
       "files": {
         "deck": {
           "path": "consulting-dark/deck.pptx",
-          "bytes": 31852,
-          "sha256": "bb70e07aa3e1e02063a5ab0f123a3de8869422bc5e9c7a31a1e42accc93067b4"
+          "bytes": 34627,
+          "sha256": "05d6c2c0ce87421112ad538cb4fadee3294fb6c1dffff56033652fc27b105bd0"
         },
         "contactSheet": {
           "path": "consulting-dark/contact-sheet.webp",
-          "bytes": 606888,
-          "sha256": "d459436d65b4771fd014d0030c34536238207b7267ae3c1e6bb49f24fa6d1e14",
+          "bytes": 608160,
+          "sha256": "eccc5673f08bb6dba5cd130276f6d78d98842f9d9d2937c6e268a7e70b0fa509",
           "quality": 86
         },
         "content": {
           "path": "consulting-dark/content.json",
-          "bytes": 11111,
-          "sha256": "98e66498ac9649a6476b9fba44c34219d45b22b932acfab0e94552adbc1a3ee8"
+          "bytes": 11373,
+          "sha256": "050fa1de3a268a83847ef6852fdf650939e3b8bdf9ae01fa856bedddd5780458"
         },
         "brief": {
           "path": "consulting-dark/brief.md",
-          "bytes": 705,
-          "sha256": "d61b638e286ecf94e761529e758dbee45b2aa09baffc43f71975bcaa38d0003c"
+          "bytes": 745,
+          "sha256": "990b3e71cf9ce3a9c26741c9212a6ff4c34b35227bacd09274e427507153c7bd"
         },
         "summary": {
           "path": "consulting-dark/summary.json",
           "bytes": 2786,
-          "sha256": "19a57da18561c0d93198079f470d860bf038c9385fbfc40f9ed3bdbee3f8ee27"
+          "sha256": "32e992a74accd856b67e8f20c1770f8345afe9e44e175c192d4d151f54f68e30"
         }
       },
       "validation": {
@@ -60,7 +67,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 1041
+        "ops": 1009
       },
       "vision": {
         "status": "success",
@@ -214,7 +221,7 @@
       "caseId": "swiss-grid.golden-lecture",
       "kind": "golden",
       "readiness": "production",
-      "version": "2.0.2",
+      "version": "2.1.0",
       "title": "网格系统",
       "bestFor": [
         "design education",
@@ -228,29 +235,29 @@
       "files": {
         "deck": {
           "path": "swiss-grid/deck.pptx",
-          "bytes": 49044,
-          "sha256": "89935160262ae8754d94c244909dd969660f7eed52365c45f115fed8d31c86c2"
+          "bytes": 53217,
+          "sha256": "9a02fdcdf541c37f8ed413ae6de40aabbcde43679cfe8caf72cb4c7a84b26b0e"
         },
         "contactSheet": {
           "path": "swiss-grid/contact-sheet.webp",
-          "bytes": 726074,
-          "sha256": "ab680d23b2f3983d2103d6525131bacba7836690797f1ccb05c44fcf76da1538",
+          "bytes": 725156,
+          "sha256": "c554b714e8f4fa29f5f80969d9611471e76fda23a95e690f1d378125a72d4627",
           "quality": 86
         },
         "content": {
           "path": "swiss-grid/content.json",
-          "bytes": 18164,
-          "sha256": "1b39571544a6e68763e12e502095af7519a93f88f8044822f742028cfdf4f7fd"
+          "bytes": 18533,
+          "sha256": "888abb74bf3d1913c1f267e750eb0e33cb23555971fbfae7db3f9679421c2ca8"
         },
         "brief": {
           "path": "swiss-grid/brief.md",
           "bytes": 736,
-          "sha256": "4d55ea8a02be0bca896822592dcd1be6db8bc9836b6c51ad8facb2d53d8c24a2"
+          "sha256": "d9f07b8e6114c9791b46be3f364e597c74bf21dcef1dba01754ab58ef79b6efb"
         },
         "summary": {
           "path": "swiss-grid/summary.json",
           "bytes": 2730,
-          "sha256": "53365a044f1a0d07fffeaa5a32244a2cecdd2619ff0951f9f5b7eafff343bfb8"
+          "sha256": "03f0cdf8290831ae3232147d2786c62621ac39f96a3e652a93fc03ccc52cf0d0"
         }
       },
       "validation": {
@@ -262,7 +269,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 1960
+        "ops": 1912
       },
       "vision": {
         "status": "success",
@@ -314,7 +321,7 @@
       "caseId": "broadside.golden-html",
       "kind": "golden",
       "readiness": "production",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "title": "public ideas made real",
       "bestFor": [
         "brand manifesto",
@@ -322,35 +329,36 @@
         "magazine or cultural pitch",
         "design talk",
         "bilingual EN/CN editorial deck",
-        "campaign launch"
+        "campaign launch",
+        "product-platform"
       ],
       "defaultFor": [],
       "files": {
         "deck": {
           "path": "broadside/deck.pptx",
-          "bytes": 41228,
-          "sha256": "30fe8fa99f987cd876c218791c7f780aaaf2fd050ef0e9b57bd0baebcca4f45c"
+          "bytes": 42815,
+          "sha256": "72e119aae3ff10bc3f237b87f8e50c9a0b12323463957b6f9cb531b1a6d083dc"
         },
         "contactSheet": {
           "path": "broadside/contact-sheet.webp",
-          "bytes": 552766,
-          "sha256": "7b0ce0bd3cfacefd2aaea4f42caaf1c85f396bcc954343a935dfefa42a4324de",
+          "bytes": 553824,
+          "sha256": "8806f2233f6771d8c357b7d257b4ebfa0ca8ca0e7497f8f25750c9bf4a34eff5",
           "quality": 86
         },
         "content": {
           "path": "broadside/content.json",
-          "bytes": 9961,
-          "sha256": "04e0a204b4bea9d98673994435aac351bdd531f899bc8c8de80b5d859e92aefb"
+          "bytes": 10033,
+          "sha256": "9e63fdc4587e28672e903ca32bb3682c3c55a2eda47a832344f50783aab3958c"
         },
         "brief": {
           "path": "broadside/brief.md",
-          "bytes": 735,
-          "sha256": "5afd830e6043e810ff1c009353a2d85c8785af6486824e3a4849aae9e35a16c8"
+          "bytes": 753,
+          "sha256": "74fd524d5fef0ebb11f467578ccb8ff037ccd32f9a6fde6bf932b748b0d552da"
         },
         "summary": {
           "path": "broadside/summary.json",
           "bytes": 2725,
-          "sha256": "9748aae1ddfbbd3252f709cb614b2452ad92142e16d4a3cc052570f0fa51f033"
+          "sha256": "c2813c2a96fe899c7a29f5107f84e9c6e94d476ebd5268f8199b9ee44c980ded"
         }
       },
       "validation": {
@@ -362,7 +370,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 1178
+        "ops": 1162
       },
       "vision": {
         "status": "success",
@@ -414,7 +422,7 @@
       "caseId": "cartesian.golden-html",
       "kind": "golden",
       "readiness": "production",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "title": "Cartesian",
       "bestFor": [
         "minimal strategy narrative",
@@ -427,29 +435,29 @@
       "files": {
         "deck": {
           "path": "cartesian/deck.pptx",
-          "bytes": 28606,
-          "sha256": "f8353d9e23cd5d8d0e7f928a642d3dfc255c35acae6e5c32fd50ee69ba25d212"
+          "bytes": 29805,
+          "sha256": "eb72d29a05333c27f4b05fab99b908bc6b02cd9c4f373de5f83680a16a3ecbdb"
         },
         "contactSheet": {
           "path": "cartesian/contact-sheet.webp",
-          "bytes": 305774,
-          "sha256": "42c4289c09136ffcb433ad2aa4b1a52196d20fd2acdd12f7c3859fe72a07afa8",
+          "bytes": 306272,
+          "sha256": "376c27c45a24aad721a0d4fecf59081816b1b49c26476498ca1decc4a2d22349",
           "quality": 86
         },
         "content": {
           "path": "cartesian/content.json",
-          "bytes": 6029,
-          "sha256": "f983198fb9c4a2b2dc1e8ba18fc49af9b750e1ddab7e75aa29a66074e6a3a64f"
+          "bytes": 6121,
+          "sha256": "8902dfcfa334ebfc07ae6c9eb217649bf8c182312bb1bbaf36495c7e9d2cd6cd"
         },
         "brief": {
           "path": "cartesian/brief.md",
           "bytes": 709,
-          "sha256": "b3b3ce3d23f7dbcd4dda95726a7170ed108408de2b1fec8ae133dd1b0edb991e"
+          "sha256": "0271f69dc45fde99799b8f12e9637d44f7f79ca62214e46e09517bb99707d69d"
         },
         "summary": {
           "path": "cartesian/summary.json",
           "bytes": 2709,
-          "sha256": "9f34a560a178363cd39232aceef69db9bd9b463f7b4743436171c835ef7588b2"
+          "sha256": "848de4388fa22ee869797579db69e6deaa210723b34c06eaa003ac544977297c"
         }
       },
       "validation": {
@@ -461,7 +469,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 479
+        "ops": 464
       },
       "vision": {
         "status": "success",
@@ -513,7 +521,7 @@
       "caseId": "long-table.golden-html",
       "kind": "golden",
       "readiness": "production",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "title": "LONG TABLE",
       "bestFor": [
         "hospitality brand",
@@ -526,29 +534,29 @@
       "files": {
         "deck": {
           "path": "long-table/deck.pptx",
-          "bytes": 24314,
-          "sha256": "28b35d2c35a4ed50e8790cd6e301b664168d5d59dc195dff051326bf07d14e44"
+          "bytes": 25550,
+          "sha256": "16ca7ed71de521d916489de91c97c7dec317cbb4c384963eb0527ff433cc5a5d"
         },
         "contactSheet": {
           "path": "long-table/contact-sheet.webp",
-          "bytes": 483472,
-          "sha256": "d1ea407870e3fd208ede2dc35530737a67267a5fbfe5978216395c517adec103",
+          "bytes": 484542,
+          "sha256": "31b8615271bc190ddbd3fd8c622369a18df2d41f3b1366bf65dbafab89f3f067",
           "quality": 86
         },
         "content": {
           "path": "long-table/content.json",
-          "bytes": 6702,
-          "sha256": "6c6a59b7d8676699b4e46a9bfc1490d8604a9e186d11a0204cb92bfae14b0d63"
+          "bytes": 6790,
+          "sha256": "1681aeb1010a10d751e99ccfb09216c2f24176e11e713ece5db83a48850e9d6a"
         },
         "brief": {
           "path": "long-table/brief.md",
           "bytes": 712,
-          "sha256": "173f1b70f0dd5a759bca17224af0e60456d94189f41399fac34aba3e8b4abad6"
+          "sha256": "07fa236fe7d3d5298adf6480225e3611ede1c4974e24bd907df891e358405a61"
         },
         "summary": {
           "path": "long-table/summary.json",
           "bytes": 2715,
-          "sha256": "1e97e8aa3b82de8b844c1dc73c7a1eeee72031a7ad026525e9d2e42484fcd895"
+          "sha256": "dc3313fcb71cbe01d2b70e21b2d2f1f03a0136f71a7d3b1cf19f822c08dad103"
         }
       },
       "validation": {
@@ -560,7 +568,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 634
+        "ops": 637
       },
       "vision": {
         "status": "success",
@@ -612,7 +620,7 @@
       "caseId": "biennale-yellow.golden-html",
       "kind": "golden",
       "readiness": "production",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "title": "Aurora Programme",
       "bestFor": [
         "cultural institution programme",
@@ -625,29 +633,29 @@
       "files": {
         "deck": {
           "path": "biennale-yellow/deck.pptx",
-          "bytes": 30831,
-          "sha256": "7d284af2d9eb5a8bc4eb2c46b9a0851b60c29720ec5af1c3572ac30fe8b90f91"
+          "bytes": 32666,
+          "sha256": "24c4be54e21d6acbd3af5d4833993fea2646b7b3548c6e07ddfeedc3f0831a37"
         },
         "contactSheet": {
           "path": "biennale-yellow/contact-sheet.webp",
-          "bytes": 529118,
-          "sha256": "2bbca3e781a0ae167c6cc7841314b728dfa1a2fc5ab1c1f5de4c0a4bd6cceab5",
+          "bytes": 529348,
+          "sha256": "fe387cdbe61a86d715904e9903087a90f2d4a46ba58d94d78fcab2508ed4c894",
           "quality": 86
         },
         "content": {
           "path": "biennale-yellow/content.json",
-          "bytes": 8827,
-          "sha256": "f8efbfa4f8f6253dff46479f10f21719e557d17e99ab90e4fccadcbd32ea7626"
+          "bytes": 8976,
+          "sha256": "38094a42a27d2429f49763d409e5754e988d66ae6a9a7a7e41d553f32a2d3fba"
         },
         "brief": {
           "path": "biennale-yellow/brief.md",
           "bytes": 756,
-          "sha256": "a65a75b8b762e8d16f1e1d279670847286461d213f3cac7856708f0c6ec64fd5"
+          "sha256": "dc6d115ccc7b2e12251b568dbe05ef1c08950b74592a09070b4a9c89cfa07be6"
         },
         "summary": {
           "path": "biennale-yellow/summary.json",
           "bytes": 2751,
-          "sha256": "d69bc8e76af592efcb058301182ff06a5df58aef578d5174722b065b93e9c309"
+          "sha256": "b80a19ea9570998bc3aab1bf4b1238d43a02d1678ff498a7176339ef51b95688"
         }
       },
       "validation": {
@@ -659,7 +667,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 520
+        "ops": 505
       },
       "vision": {
         "status": "success",
@@ -711,36 +719,36 @@
       "caseId": "black-gold.golden-design",
       "kind": "golden",
       "readiness": "production",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "title": "Q1 2026 Embodied AI Venture Capital Monitor",
       "bestFor": ["investment research", "financial periodical", "evidence-led executive briefing"],
       "defaultFor": [],
       "files": {
         "deck": {
           "path": "black-gold/deck.pptx",
-          "bytes": 42656,
-          "sha256": "f52b1ebe6966bfff511250441a198e27734bb43946615c107d34ad64f8775296"
+          "bytes": 43766,
+          "sha256": "f9e4ba243468df74e33d9f14f2aa786d706078d5d5d89895458c45d056baa814"
         },
         "contactSheet": {
           "path": "black-gold/contact-sheet.webp",
-          "bytes": 458236,
-          "sha256": "f495cc50754a4921353d84958b07b5efb60f768e341f19160b5ab6f346f0fa4e",
+          "bytes": 457988,
+          "sha256": "69a1c1bb3222d3515daaecf928b8b626d747b3f503f17c447dd98f66e8317aa0",
           "quality": 86
         },
         "content": {
           "path": "black-gold/content.json",
-          "bytes": 11061,
-          "sha256": "dfa3d2785582e58068dab3d4b5373f7b4135f97c51e04916e498a9c37672fc64"
+          "bytes": 11153,
+          "sha256": "416ec3f439bff89b9cca67fa906e6427889ab4a6127c9d9bbde1a40aa54d38b3"
         },
         "brief": {
           "path": "black-gold/brief.md",
           "bytes": 707,
-          "sha256": "a9cb47a5e863828b36fb18e39b8fae0427fa9b54830b9c5e791f90f4b1392216"
+          "sha256": "5f2d369dbe373d4a44dc4dc6ab91438e6ff333aabc37acbaabd9850cbe50f5b0"
         },
         "summary": {
           "path": "black-gold/summary.json",
           "bytes": 2754,
-          "sha256": "cd0ca3766c9689c63c668ceeb61a19957f60b3819ad7dcc8658fc92da69828c7"
+          "sha256": "201b04e1201d2b3687b514020c6cb8b20c5285ba7dfcaa5273df732d63ff2870"
         }
       },
       "validation": {
@@ -752,7 +760,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 591
+        "ops": 582
       },
       "vision": {
         "status": "success",
@@ -804,7 +812,7 @@
       "caseId": "green-slate.golden-design",
       "kind": "golden",
       "readiness": "production",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "title": "Service transformation Value follows adoption",
       "bestFor": [
         "dark strategy report",
@@ -816,29 +824,29 @@
       "files": {
         "deck": {
           "path": "green-slate/deck.pptx",
-          "bytes": 43495,
-          "sha256": "c1ac2a7931cdade10aa46f4be75b0690508dedfcbfb865bec60d11976a92cff2"
+          "bytes": 44638,
+          "sha256": "edf00e4b49e4fe0386e095a2f668a1516a3c2852729e1922353e441d7feb0b73"
         },
         "contactSheet": {
           "path": "green-slate/contact-sheet.webp",
-          "bytes": 605490,
-          "sha256": "7cd19c81f8f0422bdd987fdd2908c67e1fa5d4b5e568c6ad2bfe148829722ab3",
+          "bytes": 605132,
+          "sha256": "f1ab869ad34d3750ed5631e7c9bd545c5e184b8645df24d42028f79508dc7bc4",
           "quality": 86
         },
         "content": {
           "path": "green-slate/content.json",
-          "bytes": 18172,
-          "sha256": "3db3f8f7979005bc47cc03eb7972f98073e34a1a560e0c18c975c50ea7db5348"
+          "bytes": 18275,
+          "sha256": "a3e568263f85d0318de593e4b72d33ed16e5f98de338e7f661968fa4b09b655b"
         },
         "brief": {
           "path": "green-slate/brief.md",
           "bytes": 746,
-          "sha256": "94d64b1e180d9a13f96fb752b2f3651fcdf87926275f70565e9c36be6471003b"
+          "sha256": "16b7240a31331c3273ff4896ffa416bab6745bcbeed379444b98f03c926b46f5"
         },
         "summary": {
           "path": "green-slate/summary.json",
           "bytes": 2763,
-          "sha256": "e72eff81a720aca69eb801681c40f9b038fea67351ae926ea2de96327674973b"
+          "sha256": "d9a85fcbeafc10b01d26c794149cb2e3f220272724699b623306571885affbe4"
         }
       },
       "validation": {
@@ -850,7 +858,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 931
+        "ops": 922
       },
       "vision": {
         "status": "success",
@@ -902,7 +910,7 @@
       "caseId": "clear-value.golden-design",
       "kind": "golden",
       "readiness": "production",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "title": "Clear value Evidence before conviction",
       "bestFor": [
         "Institutional research and annual reports",
@@ -913,29 +921,29 @@
       "files": {
         "deck": {
           "path": "clear-value/deck.pptx",
-          "bytes": 56246,
-          "sha256": "f2be8d4c1a3d8de4e7c0c7080214d1f57c275cbf8ea9552e96cab39139095e1d"
+          "bytes": 59053,
+          "sha256": "addbac49090f2cca30bf607a216454bc88b225a46d6ec12fc255748c63aa4175"
         },
         "contactSheet": {
           "path": "clear-value/contact-sheet.webp",
-          "bytes": 757850,
-          "sha256": "c02be0c5a92c7d3a1adc92c48f7219fb192562a0065673c734d8b8a439acf76a",
+          "bytes": 757620,
+          "sha256": "d0ca45d79fee8329ac8ee34aa054cbdb3416ebc077dea3cdc6d8b651810f2aa2",
           "quality": 86
         },
         "content": {
           "path": "clear-value/content.json",
-          "bytes": 26490,
-          "sha256": "1ea18885ef9976c8f8681771b4ec0d44816bd946de7e8a99de986d22f3662b82"
+          "bytes": 26716,
+          "sha256": "783c7da45e0c0d56847fa07e35be44aa6b0b6b02fa7b297ba584a0daef94a486"
         },
         "brief": {
           "path": "clear-value/brief.md",
           "bytes": 750,
-          "sha256": "74543305bbb773a89c2ff7ee2622e50534d9d602d081e82180710440edadc4ac"
+          "sha256": "4248945e07c16f93c123fa8e5bbcb90572e247c37778d3011f1a5b95d7e28195"
         },
         "summary": {
           "path": "clear-value/summary.json",
           "bytes": 2756,
-          "sha256": "fa3c8c3c18a8ecc5d24bc839822f3fe2f62d7d4cec97465d0e38be3af5e343d1"
+          "sha256": "8ad8115922283ac537f6517589ff4828a2bc69c927d85ca1c96b616fbadbb2c5"
         }
       },
       "validation": {
@@ -947,7 +955,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 897
+        "ops": 876
       },
       "vision": {
         "status": "success",
@@ -999,36 +1007,36 @@
       "caseId": "clear-impact.golden-impact",
       "kind": "golden",
       "readiness": "production",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "title": "Impact report",
       "bestFor": ["impact report", "operating review", "sustainability report", "工作汇报"],
       "defaultFor": [],
       "files": {
         "deck": {
           "path": "clear-impact/deck.pptx",
-          "bytes": 37954,
-          "sha256": "56309183a33af8d3266f39c1a6befb4ce5f06310e3a0e9b71a738cd74a758e8c"
+          "bytes": 40449,
+          "sha256": "1ec143bddf0b409d570c46e5eb423bf5ba8b38800fc76589b33126f56e905ab8"
         },
         "contactSheet": {
           "path": "clear-impact/contact-sheet.webp",
-          "bytes": 696394,
-          "sha256": "b55d6eab8d23ff4facedc011bbf1647728f15364b45a02d99dfef602183a80cf",
+          "bytes": 697094,
+          "sha256": "777e509e4401e6528fb85820f0a84069f8f9ef9382e0b92336a2e33eee0b68cf",
           "quality": 86
         },
         "content": {
           "path": "clear-impact/content.json",
-          "bytes": 17446,
-          "sha256": "3e62d4aac23ed5f2c1de5171028454d985a5dcf863e65730333079dc44fc7514"
+          "bytes": 17630,
+          "sha256": "4b67f32256dfb44472c4159c3e0ca3178ebec91c08cb7d7461f73b33c8906175"
         },
         "brief": {
           "path": "clear-impact/brief.md",
           "bytes": 679,
-          "sha256": "6af2a85faf655f58dd1575dff67a0034544370f5ceb2ec9cb8d703487eb61d69"
+          "sha256": "91e89ebf2130c1bbb797ccef7d8315567ae527f45a19db7a0a542f62371e0f54"
         },
         "summary": {
           "path": "clear-impact/summary.json",
           "bytes": 2748,
-          "sha256": "72c5315b6ae2c66587bb5bf9b6445e0fe854aaacf21c97f0d438c4df8211ceb2"
+          "sha256": "e08636f670418399baa6aded58819673d625a198ffa8070754d4c7d38f8fa61a"
         }
       },
       "validation": {
@@ -1040,7 +1048,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 1362
+        "ops": 1338
       },
       "vision": {
         "status": "success",
@@ -1185,7 +1193,7 @@
       "caseId": "amber-ledger.golden-operations",
       "kind": "golden",
       "readiness": "production",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "title": "Annual operations report",
       "bestFor": [
         "annual report",
@@ -1198,29 +1206,29 @@
       "files": {
         "deck": {
           "path": "amber-ledger/deck.pptx",
-          "bytes": 36172,
-          "sha256": "64086096d67c4327f5a9c9fe44703dc1e16f544a1413a2ba0185b334c815ae50"
+          "bytes": 37681,
+          "sha256": "425c8f8f6b2003cbd6f6674a335eb3cff859d71138c1e36429b67201636b7891"
         },
         "contactSheet": {
           "path": "amber-ledger/contact-sheet.webp",
-          "bytes": 499100,
-          "sha256": "4f37433116afd80b1355a246d74e67c452ab1b2e98bb8315a657abb9dd93af97",
+          "bytes": 500234,
+          "sha256": "3d4c33575110926c206d55ef46d7c3d2b51d1b5f9aa5306a8b415d6ff949992b",
           "quality": 86
         },
         "content": {
           "path": "amber-ledger/content.json",
-          "bytes": 13685,
-          "sha256": "b1786c797810c4344a356ec2c4811aa97cb09ce144b292a3b52ef858d9335f07"
+          "bytes": 13786,
+          "sha256": "9f7404d965734d8180e56c5799545a53bd68e63aed3e21e588d4bb482035b8b4"
         },
         "brief": {
           "path": "amber-ledger/brief.md",
           "bytes": 713,
-          "sha256": "72c29e6c16f38f4222e6af4cfa23155df2cb38b46289ea1144bd0b2b111d5493"
+          "sha256": "7055290df3e94b855f2bd6d633470eecddf6eb061a30fc25b39bc46d97f11511"
         },
         "summary": {
           "path": "amber-ledger/summary.json",
           "bytes": 2767,
-          "sha256": "9c671f62ae4f5dc6a0921789f6cc05aadaab8a2f1b9319163d36f0101fbdd428"
+          "sha256": "5c03ea85ab76c2f69dfbb59a9b37facb430e6a1d9d5e4ec21b212869f97746b4"
         }
       },
       "validation": {
@@ -1232,7 +1240,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 855
+        "ops": 858
       },
       "vision": {
         "status": "success",
@@ -1284,7 +1292,7 @@
       "caseId": "midnight-pulse.golden-operations",
       "kind": "golden",
       "readiness": "production",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "title": "Volume grew; efficiency needs a reset",
       "bestFor": [
         "operations review",
@@ -1297,29 +1305,29 @@
       "files": {
         "deck": {
           "path": "midnight-pulse/deck.pptx",
-          "bytes": 58101,
-          "sha256": "ac3e864ff51e6689cec5769f604e67a5a9630bac4139a395f4f55b2157ff551a"
+          "bytes": 59367,
+          "sha256": "466fed1e0f27bfc2cd7147e0d06683038c9623ec263db2f88df7284944668df3"
         },
         "contactSheet": {
           "path": "midnight-pulse/contact-sheet.webp",
-          "bytes": 470144,
-          "sha256": "67a8f49f438868d8c28dc73a1c73018b99ccce279d40eccd2dfb072a7079c4f6",
+          "bytes": 471386,
+          "sha256": "1e46e56b60bef63a64ae025f4feba76966114c343a795a844011610d720417e0",
           "quality": 86
         },
         "content": {
           "path": "midnight-pulse/content.json",
-          "bytes": 13462,
-          "sha256": "e26b4376b75a03f5f5923dcf383967e3837f3b66aebd7b2a8b59ff5c167cd6ab"
+          "bytes": 13556,
+          "sha256": "04c47200e8b562afbcbd0b33ad28fd66f04e880fca4bfe690ed437da65bd34d3"
         },
         "brief": {
           "path": "midnight-pulse/brief.md",
           "bytes": 732,
-          "sha256": "6e6cfac3bc73ca7eef001d230eaea616b3d42b43a2d8d8402cab702c18f52bc0"
+          "sha256": "c7d58d4c2cae665133b8f8bef4d270c9db874a5bc1b2c300ea6990385e18196c"
         },
         "summary": {
           "path": "midnight-pulse/summary.json",
           "bytes": 2795,
-          "sha256": "067702fdbb9cfd05355d6fa4bf2dc71408ae97354fc8d0e13dc29934729716ee"
+          "sha256": "69c0088b671d1819869b4a8e9324f635d855771a157b5392a7d51546cb317670"
         }
       },
       "validation": {
@@ -1331,7 +1339,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 1115
+        "ops": 1118
       },
       "vision": {
         "status": "success",
@@ -1383,7 +1391,7 @@
       "caseId": "sky-compass.golden-operations",
       "kind": "golden",
       "readiness": "default",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "title": "Community support Operations review",
       "bestFor": [
         "operating review",
@@ -1397,29 +1405,29 @@
       "files": {
         "deck": {
           "path": "sky-compass/deck.pptx",
-          "bytes": 44762,
-          "sha256": "6a752a317e631b390bc770353a86f04e22dbd543be438cf4481267197ac95575"
+          "bytes": 46528,
+          "sha256": "0fe7e5eadcc204f86746a54b35323caf24846e6a2cf324d63ecfa77c672c9827"
         },
         "contactSheet": {
           "path": "sky-compass/contact-sheet.webp",
-          "bytes": 826014,
-          "sha256": "3b6797543434e5515df189e87fe1e9a4ada2018172e971ff0b4fd19ce21dc3ee",
+          "bytes": 828684,
+          "sha256": "fc6043c443abda23c4b3bde2997e3ae9798784791503160e4840c7147b95f913",
           "quality": 86
         },
         "content": {
           "path": "sky-compass/content.json",
-          "bytes": 18860,
-          "sha256": "37901ceb287890a3aee89c05e33c995b2250383d0c295ed6d9142328d6f7fe00"
+          "bytes": 19026,
+          "sha256": "405dcd2ba99f812d053527c5bd6f8e302ee94c884d966833021d714895e42e6f"
         },
         "brief": {
           "path": "sky-compass/brief.md",
           "bytes": 730,
-          "sha256": "857dffb2fc267b3b00b084bc3e01ac9e1116879fc16d21d1aaaca5e786a497c4"
+          "sha256": "d5736e93649555531d53053c58e25e614184bb9966a88c357965ceb50ebeb8b5"
         },
         "summary": {
           "path": "sky-compass/summary.json",
           "bytes": 2776,
-          "sha256": "21db7c5f9c53d8f2e9b2a3e85df0d81ef028523c2c18d3ac95562eb0271cf8d8"
+          "sha256": "2c3ba5dc07095a271de638cb2384d8e446234dfa690e3ae93def90beb836a45c"
         }
       },
       "validation": {
@@ -1431,7 +1439,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 1363
+        "ops": 1368
       },
       "vision": {
         "status": "success",
@@ -1483,7 +1491,7 @@
       "caseId": "violet-momentum.golden-operations",
       "kind": "golden",
       "readiness": "production",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "title": "Fleet operations review and next-quarter priorities",
       "bestFor": [
         "operating review",
@@ -1495,29 +1503,29 @@
       "files": {
         "deck": {
           "path": "violet-momentum/deck.pptx",
-          "bytes": 34325,
-          "sha256": "23c572b12f6e107445fa21ae462ecd7fe98c03b300f087aa03e88046a5d93465"
+          "bytes": 36504,
+          "sha256": "956d642d876ed7c05ab80b77700f94bb6deb1aaf522ad564b2d92049e0210ea6"
         },
         "contactSheet": {
           "path": "violet-momentum/contact-sheet.webp",
-          "bytes": 523946,
-          "sha256": "242633bb845c383aab8adc3a64c3de417315cd96232897d250ddf4cb3237d958",
+          "bytes": 526398,
+          "sha256": "d064e020fe6797fe4c2464b6b9b2442cd5f99a632c3a0140051a14ed861b095d",
           "quality": 86
         },
         "content": {
           "path": "violet-momentum/content.json",
-          "bytes": 13037,
-          "sha256": "ed504441cdc620a5a060134d43577e39abf5767558c14ab51bf24b79fe867528"
+          "bytes": 13191,
+          "sha256": "98810d8164ad8d988051f1b0904e6767c7e26016ee820969859f5b362d5ae5db"
         },
         "brief": {
           "path": "violet-momentum/brief.md",
           "bytes": 743,
-          "sha256": "175caaecee7170fedce6b6456f0d4ef309595bf56f72313f90a221180bf3943b"
+          "sha256": "82685861ac3ad716b7fd4f76ac4f8f3288086290019dbeef54933b9e83b45a9f"
         },
         "summary": {
           "path": "violet-momentum/summary.json",
           "bytes": 2816,
-          "sha256": "69284b12cb40c2ac87608c0718929c88a4eebacc74df19b9784279a68e1963ae"
+          "sha256": "4e2f69fadae2549293333fccbdca55a035714c61449820e0a5c9f4ea0a66de09"
         }
       },
       "validation": {
@@ -1529,7 +1537,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 1018
+        "ops": 1023
       },
       "vision": {
         "status": "success",
@@ -1581,7 +1589,7 @@
       "caseId": "teal-journal.golden-handbook",
       "kind": "golden",
       "readiness": "default",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "title": "VISIT ONCE, RETURN ALL YEAR.",
       "bestFor": [
         "editorial handbook",
@@ -1595,29 +1603,29 @@
       "files": {
         "deck": {
           "path": "teal-journal/deck.pptx",
-          "bytes": 32500,
-          "sha256": "56cc6a9a6c9680c32bba11f87c71c0a1598566d4191d65412be31e32b4400397"
+          "bytes": 33776,
+          "sha256": "72862124b663ab77e9ce7b9328584059f7187fdf18447118c6bc1abed265e2e6"
         },
         "contactSheet": {
           "path": "teal-journal/contact-sheet.webp",
-          "bytes": 583704,
-          "sha256": "39d9edd8ab300f72b53f82847c028714e7f258e133e3d65369d76d2ae40315ac",
+          "bytes": 585140,
+          "sha256": "7c0dcfe3d028346572e306d88009b74993479e06da2409c90fffd4706c176505",
           "quality": 86
         },
         "content": {
           "path": "teal-journal/content.json",
-          "bytes": 12856,
-          "sha256": "8b46e21c2c09265e3b8d4176a83dca2856151a177563c135f12ab64ea9693422"
+          "bytes": 12955,
+          "sha256": "c2b77f800eeee48c708ef9640c241ed35ae8e9d8d0626c82f0f073eb855ab872"
         },
         "brief": {
           "path": "teal-journal/brief.md",
           "bytes": 728,
-          "sha256": "a3412319284d0c6638ca4d2181d65fc4c38122ca75292e7b76a79ed73feee55e"
+          "sha256": "9067a26dac103f3c0d6efa292ffc8cad294582e047f696287bd917acf81a9c6b"
         },
         "summary": {
           "path": "teal-journal/summary.json",
           "bytes": 2768,
-          "sha256": "b8b813d1443cebb077f9bf796e93786a980e234be949a80c324d66d55799467f"
+          "sha256": "8e2acb986e92aef26afd6072b72feb6b593f09ef07d1cf7c12b7b445a3972834"
         }
       },
       "validation": {
@@ -1629,7 +1637,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 1024
+        "ops": 1027
       },
       "vision": {
         "status": "success",
@@ -1680,8 +1688,8 @@
       "deckkit": "blue-research",
       "caseId": "blue-research.golden-learning",
       "kind": "golden",
-      "readiness": "candidate",
-      "version": "0.1.0",
+      "readiness": "production",
+      "version": "0.2.0",
       "title": "Community Learning Service Network Outlook",
       "bestFor": [
         "research report",
@@ -1694,29 +1702,29 @@
       "files": {
         "deck": {
           "path": "blue-research/deck.pptx",
-          "bytes": 40046,
-          "sha256": "c3f573f20efb2ca6e4140a664674986470af102abcacb0e7b9a6905fb575cf5b"
+          "bytes": 41462,
+          "sha256": "506f61f4c897054a88c4666384e9d779663f754472d834a2b2b081da45bf556f"
         },
         "contactSheet": {
           "path": "blue-research/contact-sheet.webp",
-          "bytes": 768766,
-          "sha256": "b8d4c24acdcfdc38c5d2cd36488af80df71a74b02e9707e6068173b4b66bc1ae",
+          "bytes": 766954,
+          "sha256": "4cc655119993aecf0864628b9e4df74c3ad502be72406bfebd2d7640bb5f7294",
           "quality": 86
         },
         "content": {
           "path": "blue-research/content.json",
-          "bytes": 17475,
-          "sha256": "fd8af1b6c7d0ed8f2b315dbeb6d76fbdf11cde22d84ed1055bd073633444b190"
+          "bytes": 17598,
+          "sha256": "0b41def005aba2fca37500068296ac248c7ee3b28a861e3b281896860f3acc3b"
         },
         "brief": {
           "path": "blue-research/brief.md",
-          "bytes": 735,
-          "sha256": "c177fe2bda8d3ee73b11bff5ac7bde6b97d50d69ab27e3cf15651265f53690b9"
+          "bytes": 736,
+          "sha256": "a780d6297b52b71519e843dcae058af28ce64b8948421ce42a46a7780d9d89ea"
         },
         "summary": {
           "path": "blue-research/summary.json",
-          "bytes": 2730,
-          "sha256": "30a6231012a2d47cd65b2dd91d89db5cfbc5b78aa00bc7612ae876714df71d83"
+          "bytes": 2789,
+          "sha256": "661d94f0986b6393a52abdff05ba5d24f3d5a8af464eeb5d77584397b5955a84"
         }
       },
       "validation": {
@@ -1728,7 +1736,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 1260
+        "ops": 1236
       },
       "vision": {
         "status": "success",
@@ -1748,17 +1756,17 @@
           "changed": 0,
           "resolved": 0,
           "reviewable": 0,
-          "baselineUnavailable": true,
+          "baselineUnavailable": false,
           "baselineUpdated": false
         },
         "lowByFamily": {},
         "newLowByFamily": {},
         "changedLowByFamily": {},
         "baseline": {
-          "schemaVersion": "",
-          "fingerprintVersion": "",
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
           "path": "pptx-nova/benchmarks/visual/baselines/blue-research.golden-learning.vision-baseline.json",
-          "available": false,
+          "available": true,
           "issueCount": 0
         },
         "stylePolicy": {
@@ -1779,8 +1787,8 @@
       "deckkit": "pink-script",
       "caseId": "pink-script.golden-editorial",
       "kind": "golden",
-      "readiness": "candidate",
-      "version": "1.0.0",
+      "readiness": "production",
+      "version": "1.1.0",
       "title": "After",
       "bestFor": [
         "editorial feature",
@@ -1793,29 +1801,29 @@
       "files": {
         "deck": {
           "path": "pink-script/deck.pptx",
-          "bytes": 37793,
-          "sha256": "2ca83fa80efe79d0b85ad6842e334c04e19724d011696ebb3a8cfa4249d81e30"
+          "bytes": 38848,
+          "sha256": "ff4c34ee12e7a0f5d717add82a0ac75eeea7f1820fd33613eb48e9568d13ef61"
         },
         "contactSheet": {
           "path": "pink-script/contact-sheet.webp",
-          "bytes": 460050,
-          "sha256": "383ac475f45418e1407eab1b256c8863126aa97423e0aada9de2a75b2589ecec",
+          "bytes": 459086,
+          "sha256": "f1f47734b0394757f14bd498ea65e51af1c559bbc86a91cdd6ba4b713bb3a071",
           "quality": 86
         },
         "content": {
           "path": "pink-script/content.json",
-          "bytes": 9442,
-          "sha256": "86e6c9f1528801b25e030c59423727271f0fd19ef4146c8766df127dff4aa6f7"
+          "bytes": 9533,
+          "sha256": "5b153a4c0d258c6134f4b1e7f2de02b7314fc2e04dc72049167b45aa9ac3c832"
         },
         "brief": {
           "path": "pink-script/brief.md",
-          "bytes": 689,
-          "sha256": "0e763eae00bb73bc609a1587e0c716ca3b3ac33f415235853b73864e3dc5f59f"
+          "bytes": 690,
+          "sha256": "62c658384ebb69839e6a84c9f4b5e9eb4319b2696e92430c09e682ae160813f1"
         },
         "summary": {
           "path": "pink-script/summary.json",
-          "bytes": 2700,
-          "sha256": "684556cb804c4c7f87bda7a0df165d009f2615dc1c66a1bd955a6aaddf30c7d9"
+          "bytes": 2742,
+          "sha256": "a2d4a08382222f2608d5efaeb44e9c872e2fddbd34e4ebe249b93f6308a91bd7"
         }
       },
       "validation": {
@@ -1827,7 +1835,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 1479
+        "ops": 1467
       },
       "vision": {
         "status": "success",
@@ -1847,17 +1855,17 @@
           "changed": 0,
           "resolved": 0,
           "reviewable": 0,
-          "baselineUnavailable": true,
+          "baselineUnavailable": false,
           "baselineUpdated": false
         },
         "lowByFamily": {},
         "newLowByFamily": {},
         "changedLowByFamily": {},
         "baseline": {
-          "schemaVersion": "",
-          "fingerprintVersion": "",
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
           "path": "pptx-nova/benchmarks/visual/baselines/pink-script.golden-editorial.vision-baseline.json",
-          "available": false,
+          "available": true,
           "issueCount": 0
         },
         "stylePolicy": {
@@ -1866,7 +1874,7 @@
           "minFontPt": 10.5,
           "labelFontPt": 10.5,
           "sourceFontPt": 10.5,
-          "note": "Upright editorial serif with actual font-specific paragraph spacing; all canonical gates remain active."
+          "note": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
         },
         "newLowSamples": [],
         "changedLowSamples": [],
@@ -1979,36 +1987,36 @@
       "caseId": "editorial-forest.golden-editorial",
       "kind": "golden",
       "readiness": "candidate",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "title": "Quarterly Review 2026",
       "bestFor": ["editorial review", "research recap", "studio update"],
       "defaultFor": [],
       "files": {
         "deck": {
           "path": "editorial-forest/deck.pptx",
-          "bytes": 27103,
-          "sha256": "790d22853566aa99df95120190615c373aaf0cb687c08d43c571f68cf218cb47"
+          "bytes": 28327,
+          "sha256": "699d14df23a5d5bce0236c8eb7741ebe5ab4a32bf52f901ed294202eb3cab2e7"
         },
         "contactSheet": {
           "path": "editorial-forest/contact-sheet.webp",
-          "bytes": 444632,
-          "sha256": "6a446490dba045496ce79a4087f1fb32aa42523b1386de01562aa96dc21dc76b",
+          "bytes": 447064,
+          "sha256": "91d77a2f398d02333b8bb11b848ccf5b007990470075560dc155e62517e79827",
           "quality": 86
         },
         "content": {
           "path": "editorial-forest/content.json",
-          "bytes": 7013,
-          "sha256": "cef1efc8a31c2f32ff7c2b0662ac8394218ac95a4b5234acd41d8d8292f1f7ab"
+          "bytes": 7120,
+          "sha256": "d307240e9b5524dd7d4d1657138803a05154328ac3c663256e328b35e5bca3d4"
         },
         "brief": {
           "path": "editorial-forest/brief.md",
           "bytes": 678,
-          "sha256": "1dc0348f77fff4679f632549f7e51101fe82f5f75d0463afd3852a0d0d50501e"
+          "sha256": "4983c051d49c184ae8ca8c36e4a98b42ab46567fb0b3b7a8f658b8da90c118ae"
         },
         "summary": {
           "path": "editorial-forest/summary.json",
           "bytes": 2718,
-          "sha256": "f6cfc5bc07307427cb19c7a32a29809d9eed26ee4ea51176a4485be50160ab22"
+          "sha256": "e8347fa72c365681f0accc99c528592422dc00d810119853ec9c218bfef8a3f9"
         }
       },
       "validation": {
@@ -2020,7 +2028,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 593
+        "ops": 596
       },
       "vision": {
         "status": "success",
@@ -2072,36 +2080,36 @@
       "caseId": "monochrome.golden-library",
       "kind": "golden",
       "readiness": "candidate",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "title": "Community reading A service ledger",
       "bestFor": ["research synthesis", "literary report", "policy brief", "bilingual editorial"],
       "defaultFor": [],
       "files": {
         "deck": {
           "path": "monochrome/deck.pptx",
-          "bytes": 41780,
-          "sha256": "14770af5fac3528078f825c225752a46fb50493b5c0306783fb55bbfe7c9a46e"
+          "bytes": 44881,
+          "sha256": "3d13e4a87b23bd8197a3f6f2fef8fbcbf26431986045f297cc701388988b7d9b"
         },
         "contactSheet": {
           "path": "monochrome/contact-sheet.webp",
-          "bytes": 460684,
-          "sha256": "328eda67eef8a6d8ec3c12a1088fe32192209c19fe0bdc683be353b76081753e",
+          "bytes": 462624,
+          "sha256": "2ca221e032bca02e7513e9b292a808b2ffb3b6d9ae69f672c6e79f2a952a4067",
           "quality": 86
         },
         "content": {
           "path": "monochrome/content.json",
-          "bytes": 9855,
-          "sha256": "a9c125bb409238cde7e2e2b37228471013b61699eedc73525dd044c7b2932d5a"
+          "bytes": 10000,
+          "sha256": "80531ab6a38f4b44ad8b33364838df839e2eb1214241e03eac181e1ed65ba961"
         },
         "brief": {
           "path": "monochrome/brief.md",
           "bytes": 696,
-          "sha256": "834412a007dae514828eb0e1813b59fafbc54d8a58bd0184a70f2000875def76"
+          "sha256": "8cd0e277189401c0200640c5c434cf970d16047381af6653efc6267ec882e180"
         },
         "summary": {
           "path": "monochrome/summary.json",
           "bytes": 2701,
-          "sha256": "618ba5dc66df0f4d7e098beb47d32b4b2e3901178cb4db916ad8edd15abad97f"
+          "sha256": "f5c5a3ced2c6c01acbe60d0980afa21c910ead385219c017da6f2bb6d40174d3"
         }
       },
       "validation": {
@@ -2113,7 +2121,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 1104
+        "ops": 1072
       },
       "vision": {
         "status": "success",

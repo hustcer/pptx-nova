@@ -54,13 +54,23 @@
         "required": ["num", "title", "body"],
         "properties": {
           "num": {
-            "type": "string"
+            "type": "string",
+            "x-slotRole": "control",
+            "x-slotProbeValue": "01"
           },
           "title": {
             "type": "string"
           },
           "body": {
             "type": "string"
+          },
+          "icon": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "x-slotRole": "control",
+            "x-iconFamily": "tabler-outline",
+            "x-slotProbeValue": "book",
+            "description": "Optional bundled Tabler outline icon; replaces the peer marker. Default stroke 1.2; maximum 1.5."
           }
         },
         "additionalProperties": false

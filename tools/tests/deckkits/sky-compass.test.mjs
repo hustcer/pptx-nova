@@ -1,3 +1,4 @@
+import { withoutSemanticIcons } from '../helpers/semantic-icons.mjs'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
@@ -6,11 +7,14 @@ import {
 } from '../../../pptx-nova/assets/deckkits/sky-compass/sky-compass.kit.mjs'
 import { readFileSync } from 'node:fs'
 const fixture = () =>
-  JSON.parse(
-    readFileSync(
-      new URL(
-        '../../../pptx-nova/assets/deckkits/sky-compass/examples/content.json',
-        import.meta.url,
+  withoutSemanticIcons(
+    'sky-compass',
+    JSON.parse(
+      readFileSync(
+        new URL(
+          '../../../pptx-nova/assets/deckkits/sky-compass/examples/content.json',
+          import.meta.url,
+        ),
       ),
     ),
   )
@@ -35,11 +39,14 @@ import { validateDeckkitContent } from '../../../pptx-nova/assets/deckkits/share
 import { skySpecimen } from '../../../pptx-nova/assets/deckkits/sky-compass/registry.mjs'
 const excerpt = (slides) => ({ meta: { deckkit: 'sky-compass', designScope: 'excerpt' }, slides })
 function specimen(type, maximum) {
-  const schema = JSON.parse(
-    readFileSync(
-      new URL(
-        `../../../pptx-nova/assets/deckkits/sky-compass/schemas/${type}.schema.json`,
-        import.meta.url,
+  const schema = withoutSemanticIcons(
+    'sky-compass',
+    JSON.parse(
+      readFileSync(
+        new URL(
+          `../../../pptx-nova/assets/deckkits/sky-compass/schemas/${type}.schema.json`,
+          import.meta.url,
+        ),
       ),
     ),
   )

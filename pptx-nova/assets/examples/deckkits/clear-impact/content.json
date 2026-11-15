@@ -79,19 +79,23 @@
         "findings": [
           {
             "label": "Scale",
-            "body": "Network grew from 6 to 9 cities; 580k flights in the latest year."
+            "body": "Network grew from 6 to 9 cities; 580k flights in the latest year.",
+            "icon": "network"
           },
           {
             "label": "Safety",
-            "body": "No attributable accidents; every response event entered review."
+            "body": "No attributable accidents; every response event entered review.",
+            "icon": "shield-check"
           },
           {
             "label": "Environment",
-            "body": "Ground travel displaced while energy per flight fell by 18%."
+            "body": "Ground travel displaced while energy per flight fell by 18%.",
+            "icon": "leaf"
           },
           {
             "label": "Community",
-            "body": "0.3 complaints per 1,000 flights, below the 0.5 commitment."
+            "body": "0.3 complaints per 1,000 flights, below the 0.5 commitment.",
+            "icon": "users"
           }
         ],
         "verdict": "Scale doubled; the operating boundaries held."
@@ -541,13 +545,15 @@
             "ask": "Approve the recycler agreement",
             "impact": "Secure capacity for the material-recovery commitment.",
             "owner": "Supply chain",
-            "due": "30 November"
+            "due": "30 November",
+            "icon": "recycle"
           },
           {
             "ask": "Authorize four feeder pilots",
             "impact": "Test access to remote communities before scaling.",
             "owner": "Network team",
-            "due": "15 December"
+            "due": "15 December",
+            "icon": "route"
           }
         ],
         "consequence": "Delay would defer recovery capacity and the remote-route evidence programme."

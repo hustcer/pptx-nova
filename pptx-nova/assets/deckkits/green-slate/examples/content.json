@@ -48,15 +48,18 @@
         "findings": [
           {
             "heading": "Value is concentrated",
-            "body": "Six repeatable workflows offer the clearest initial evidence of benefit"
+            "body": "Six repeatable workflows offer the clearest initial evidence of benefit",
+            "icon": "chart-bar"
           },
           {
             "heading": "Judgment stays accountable",
-            "body": "People retain ownership of exceptions, approvals and consequential decisions"
+            "body": "People retain ownership of exceptions, approvals and consequential decisions",
+            "icon": "user-check"
           },
           {
             "heading": "Readiness governs pace",
-            "body": "Reliable data and named owners are preconditions for scaling"
+            "body": "Reliable data and named owners are preconditions for scaling",
+            "icon": "shield-check"
           }
         ],
         "metrics": [

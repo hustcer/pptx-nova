@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "monochrome",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -494,5 +494,27 @@
         }
       }
     }
+  },
+  "semanticIcons": {
+    "bindings": [
+      {
+        "slideType": "monoListSlide",
+        "items": "items",
+        "target": "BulletMark{i}",
+        "placement": "replace",
+        "color": "ink",
+        "sizeIn": 0.25,
+        "iconArray": "itemIcons"
+      },
+      {
+        "slideType": "monoSplitSlide",
+        "items": "items",
+        "target": "BulletMark{i}",
+        "placement": "replace",
+        "color": "ink",
+        "sizeIn": 0.25,
+        "iconArray": "itemIcons"
+      }
+    ]
   }
 }

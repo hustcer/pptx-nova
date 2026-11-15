@@ -36,3 +36,7 @@ Full-deck rhythm alternates opening/summary, evidence, method and close. `meta.d
 supports standalone evidence excerpts. Layout selection is deterministic, constrained by content fit
 and recent geometry; it does not invent content or produce unbounded layouts. This is a creation
 adapter, not a verified arbitrary-PPTX refurbishment workflow.
+
+## Semantic concept icons (0.2.0)
+
+Optional bundled Tabler outline icons are supported in `slateSummarySlide: data.findings[].icon`. Choose symbols for the actual concepts. The registered marker compiler uses the kit's existing palette and layout owners, with a 1.2 stroke. Omitted icons retain the previous output and capacity. An explicit icon replaces the peer marker where registered; edition numbers, metrics, dates, status and references remain separate. Inset headings are rechecked at their available width; split or choose a fitting layout instead of shrinking text. Review the actual PNGs, including alternative layouts and mixed-language content.

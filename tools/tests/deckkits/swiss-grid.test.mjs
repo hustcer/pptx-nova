@@ -1,3 +1,4 @@
+import { withoutSemanticIcons } from '../helpers/semantic-icons.mjs'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -13,9 +14,15 @@ import {
 import { validateDeckkitContent } from '../../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
 import { SWISS_LAYOUTS } from '../../../pptx-nova/assets/deckkits/swiss-grid/registry.mjs'
 
-const fixture = JSON.parse(
-  readFileSync(
-    new URL('../../../pptx-nova/assets/deckkits/swiss-grid/examples/content.json', import.meta.url),
+const fixture = withoutSemanticIcons(
+  'swiss-grid',
+  JSON.parse(
+    readFileSync(
+      new URL(
+        '../../../pptx-nova/assets/deckkits/swiss-grid/examples/content.json',
+        import.meta.url,
+      ),
+    ),
   ),
 )
 const excerpt = (slides) => ({
@@ -43,7 +50,7 @@ const strings = (v, k = '') =>
 test('Swiss Grid has one deterministic registered plan for every public responsibility', () => {
   const a = createDeck(fixture),
     b = createDeck(fixture)
-  assert.equal(DESIGN.version, '2.0.2')
+  assert.equal(DESIGN.version, '2.1.0')
   assert.equal(a.designCheck.status, 'pass')
   assert.equal(a.designPlan.layouts.length, 15)
   assert.equal(designHash(a.patch), designHash(b.patch))

@@ -2,9 +2,9 @@
 
 DeckKit: `pink-script`
 Showcase case: `pink-script.golden-editorial`
-Readiness: `candidate`
+Readiness: `production`
 Slides: 9
-Patch ops: 1479
+Patch ops: 1467
 Title: After
 
 ## Best For

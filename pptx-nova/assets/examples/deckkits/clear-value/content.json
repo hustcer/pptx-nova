@@ -49,15 +49,18 @@
         "items": [
           {
             "heading": "Start from observable cash flow",
-            "body": "Coupon and operating cash flow support the core case; repricing remains conditional."
+            "body": "Coupon and operating cash flow support the core case; repricing remains conditional.",
+            "icon": "coins"
           },
           {
             "heading": "Separate assumptions from evidence",
-            "body": "Scenario ranges show how the result changes. A single expected value is insufficient."
+            "body": "Scenario ranges show how the result changes. A single expected value is insufficient.",
+            "icon": "scale"
           },
           {
             "heading": "Make the decision reversible",
-            "body": "Stage implementation and assign each trigger to a named owner before deployment."
+            "body": "Stage implementation and assign each trigger to a named owner before deployment.",
+            "icon": "arrows-exchange"
           }
         ],
         "side": [
@@ -694,19 +697,23 @@
         "items": [
           {
             "heading": "Approve the bounded allocation",
-            "body": "Confirm the proposed weights and the first-tranche funding reconciliation."
+            "body": "Confirm the proposed weights and the first-tranche funding reconciliation.",
+            "icon": "chart-pie"
           },
           {
             "heading": "Approve the risk budget",
-            "body": "Retain the 12.0% illustrative drawdown budget and record the definition."
+            "body": "Retain the 12.0% illustrative drawdown budget and record the definition.",
+            "icon": "shield-check"
           },
           {
             "heading": "Approve the response triggers",
-            "body": "Assign an owner to each threshold and require a documented reassessment."
+            "body": "Assign an owner to each threshold and require a documented reassessment.",
+            "icon": "bell"
           },
           {
             "heading": "Approve the review cadence",
-            "body": "Report outcomes, assumptions and deviations at every scheduled checkpoint."
+            "body": "Report outcomes, assumptions and deviations at every scheduled checkpoint.",
+            "icon": "calendar"
           }
         ],
         "side": [

@@ -1,3 +1,4 @@
+import { withoutSemanticIcons } from '../helpers/semantic-icons.mjs'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
@@ -14,14 +15,20 @@ import {
 import { validateDeckkitContent } from '../../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
 import { createAssetContext } from '../../../pptx-nova/scripts/lib/assets/asset-manifest.mjs'
 const file = (p) =>
-  JSON.parse(
-    readFileSync(new URL('../../../pptx-nova/assets/deckkits/pink-script/' + p, import.meta.url)),
+  withoutSemanticIcons(
+    'pink-script',
+    JSON.parse(
+      readFileSync(new URL('../../../pptx-nova/assets/deckkits/pink-script/' + p, import.meta.url)),
+    ),
   )
 const assetPath = new URL(
   '../../../pptx-nova/assets/examples/deckkits/pink-script/assets_manifest.json',
   import.meta.url,
 )
-const assets = createAssetContext(JSON.parse(readFileSync(assetPath)), fileURLToPath(assetPath))
+const assets = createAssetContext(
+  withoutSemanticIcons('pink-script', JSON.parse(readFileSync(assetPath))),
+  fileURLToPath(assetPath),
+)
 const fixture = () => file('examples/content.json')
 const excerpt = (slides) => ({ meta: { deckkit: 'pink-script', designScope: 'excerpt' }, slides })
 test('pink-script: source grammar and explicit no-frame / QR-only refinements', () => {

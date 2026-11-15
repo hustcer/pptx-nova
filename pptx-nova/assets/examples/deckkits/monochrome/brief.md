@@ -4,7 +4,7 @@ DeckKit: `monochrome`
 Showcase case: `monochrome.golden-library`
 Readiness: `candidate`
 Slides: 16
-Patch ops: 1104
+Patch ops: 1072
 Title: Community reading A service ledger
 
 ## Best For

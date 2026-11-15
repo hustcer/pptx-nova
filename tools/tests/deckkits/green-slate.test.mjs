@@ -1,3 +1,4 @@
+import { withoutSemanticIcons } from '../helpers/semantic-icons.mjs'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -13,11 +14,14 @@ import {
   checkDesignReadback,
 } from '../../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
 
-const original = JSON.parse(
-  readFileSync(
-    new URL(
-      '../../../pptx-nova/assets/deckkits/green-slate/examples/content.json',
-      import.meta.url,
+const original = withoutSemanticIcons(
+  'green-slate',
+  JSON.parse(
+    readFileSync(
+      new URL(
+        '../../../pptx-nova/assets/deckkits/green-slate/examples/content.json',
+        import.meta.url,
+      ),
     ),
   ),
 )
@@ -39,11 +43,14 @@ const byType = (type) => clone(original.slides.find((s) => s.type === type))
 test('Green Slate: every family builds minimum unrelated content without source leakage', () => {
   for (const type of Object.keys(DESIGN.strategy.families)) {
     const slide = byType(type),
-      schema = JSON.parse(
-        readFileSync(
-          new URL(
-            `../../../pptx-nova/assets/deckkits/green-slate/schemas/${type}.schema.json`,
-            import.meta.url,
+      schema = withoutSemanticIcons(
+        'green-slate',
+        JSON.parse(
+          readFileSync(
+            new URL(
+              `../../../pptx-nova/assets/deckkits/green-slate/schemas/${type}.schema.json`,
+              import.meta.url,
+            ),
           ),
         ),
       )
@@ -117,6 +124,10 @@ test('Green Slate: semantic color token renaming leaves output unchanged', () =>
   renamed.colors = Object.fromEntries(Object.entries(renamed.colors).map(([k, v]) => [names[k], v]))
   for (const map of [renamed.roles, renamed.theme.colors, renamed.refurbish.palette])
     for (const k of Object.keys(map)) map[k] = names[map[k]]
+  for (const binding of renamed.semanticIcons.bindings) {
+    binding.color = names[binding.color]
+    if (binding.focusColor) binding.focusColor = names[binding.focusColor]
+  }
   assertDesignContract(renamed)
   assert.deepEqual(createStrategyDeck(renamed, original).patch, createDeck(original).patch)
 })

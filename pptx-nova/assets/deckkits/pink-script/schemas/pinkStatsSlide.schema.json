@@ -9,11 +9,11 @@
       "pattern": "\\S",
       "description": "Top-left brand; no business default.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 11,
+        "widthIn": 5.75,
+        "heightIn": 0.3,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "section": {
@@ -22,11 +22,11 @@
       "pattern": "\\S",
       "description": "Top-right section metadata.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 10.5,
+        "widthIn": 6.13,
+        "heightIn": 0.3,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "kicker": {
@@ -35,11 +35,11 @@
       "pattern": "\\S",
       "description": "Pink editorial eyebrow.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 11,
+        "widthIn": 12.23,
+        "heightIn": 0.3,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "source": {
@@ -48,11 +48,11 @@
       "pattern": "\\S",
       "description": "Visible source, assumptions and/or date from content.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 10.5,
+        "widthIn": 10.7,
+        "heightIn": 0.28,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "title": {
@@ -61,11 +61,11 @@
       "pattern": "\\S",
       "description": "Editorial assertion; explicit line breaks preserved.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
-        "lineHeight": 1.12,
-        "maxLines": 3
+        "fontPt": 62,
+        "widthIn": 6.15,
+        "heightIn": 3.65,
+        "lineHeight": 1,
+        "maxLines": 2
       }
     },
     "intro": {
@@ -75,10 +75,10 @@
       "description": "Interpretation and synthetic/real evidence disclosure.",
       "x-slotBudget": {
         "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "widthIn": 5.25,
+        "heightIn": 1.25,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 4
       }
     },
     "stats": {
@@ -97,11 +97,11 @@
             "pattern": "\\S",
             "description": "Explicit unit or suffix, painted smaller than value.",
             "x-slotBudget": {
-              "fontPt": 12,
-              "widthIn": 4,
-              "heightIn": 0.8,
-              "lineHeight": 1.12,
-              "maxLines": 3
+              "fontPt": 48,
+              "widthIn": 2.0502000000000002,
+              "heightIn": 0.85,
+              "lineHeight": 1,
+              "maxLines": 1
             }
           },
           "label": {
@@ -110,11 +110,11 @@
             "pattern": "\\S",
             "description": "Metric label.",
             "x-slotBudget": {
-              "fontPt": 12,
-              "widthIn": 4,
-              "heightIn": 0.8,
+              "fontPt": 11,
+              "widthIn": 3.7998,
+              "heightIn": 0.3,
               "lineHeight": 1.12,
-              "maxLines": 3
+              "maxLines": 1
             }
           },
           "description": {
@@ -124,10 +124,10 @@
             "description": "Metric context.",
             "x-slotBudget": {
               "fontPt": 12,
-              "widthIn": 4,
-              "heightIn": 0.8,
+              "widthIn": 3.7998,
+              "heightIn": 1.29,
               "lineHeight": 1.12,
-              "maxLines": 3
+              "maxLines": 5
             }
           }
         },

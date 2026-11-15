@@ -100,7 +100,8 @@
           "Publish what the team learns"
         ],
         "page": "07",
-        "footerRight": "ILLUSTRATIVE PROGRAMME · 2026"
+        "footerRight": "ILLUSTRATIVE PROGRAMME · 2026",
+        "itemIcons": ["target", "chart-bar", "message-circle", "book"]
       }
     },
     {

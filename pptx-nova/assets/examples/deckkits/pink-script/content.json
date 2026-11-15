@@ -307,15 +307,18 @@
         "actions": [
           {
             "title": "Reserve",
-            "description": "Hold a private appointment for the preview week."
+            "description": "Hold a private appointment for the preview week.",
+            "icon": "calendar"
           },
           {
             "title": "Preview",
-            "description": "Three looks in the rue Saint-Honoré room."
+            "description": "Three looks in the rue Saint-Honoré room.",
+            "icon": "eye"
           },
           {
             "title": "Commission",
-            "description": "A piece made to measure for the new season."
+            "description": "A piece made to measure for the new season.",
+            "icon": "scissors"
           }
         ]
       },

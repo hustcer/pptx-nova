@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "blue-research",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -397,5 +397,17 @@
         }
       }
     }
+  },
+  "semanticIcons": {
+    "bindings": [
+      {
+        "slideType": "researchFindingsSlide",
+        "items": "items",
+        "target": "FindingNumber{i}",
+        "placement": "replace",
+        "color": "deep",
+        "sizeIn": 0.32
+      }
+    ]
   }
 }

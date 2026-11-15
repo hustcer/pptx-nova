@@ -71,3 +71,7 @@ Current acceptance is recorded in the
 [golden review](../../../benchmarks/visual/cases/violet-momentum/golden-operations/review.md).
 Current selection readiness comes from the [catalog](../catalog.json), which registers
 Violet Momentum as production and eligible for automatic delivery selection.
+
+## Semantic concept icons (0.3.0)
+
+Optional bundled Tabler outline icons are supported in `violetDiagnosisSlide: data.cases[].icon`; `violetActionsSlide: data.decisions[].icon`. Choose symbols for the actual concepts. The registered marker compiler uses the kit's existing palette and layout owners, with a 1.2 stroke. Omitted icons retain the previous output and capacity. An explicit icon replaces the peer marker where registered; edition numbers, metrics, dates, status and references remain separate. Inset headings are rechecked at their available width; split or choose a fitting layout instead of shrinking text. Review the actual PNGs, including alternative layouts and mixed-language content.

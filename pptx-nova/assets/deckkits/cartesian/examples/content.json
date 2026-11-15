@@ -98,17 +98,20 @@
           {
             "marker": "I",
             "title": "Analytical Depth",
-            "body": "Rigorous data-driven methodologies that transform raw information into actionable strategic intelligence."
+            "body": "Rigorous data-driven methodologies that transform raw information into actionable strategic intelligence.",
+            "icon": "search"
           },
           {
             "marker": "II",
             "title": "Operational Scale",
-            "body": "Streamlined processes designed to expand seamlessly while maintaining quality and consistency."
+            "body": "Streamlined processes designed to expand seamlessly while maintaining quality and consistency.",
+            "icon": "network"
           },
           {
             "marker": "III",
             "title": "Adaptive Design",
-            "body": "Flexible frameworks that evolve with changing conditions and emerging opportunities."
+            "body": "Flexible frameworks that evolve with changing conditions and emerging opportunities.",
+            "icon": "palette"
           }
         ]
       }

@@ -279,6 +279,68 @@
     },
     "monochrome": {
       "$ref": "#/$defs/monochrome"
+    },
+    "semanticIcons": {
+      "type": "object",
+      "properties": {
+        "bindings": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "slideType": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9]*$"
+              },
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9]*(?:\\.[A-Za-z][A-Za-z0-9]*)*$"
+              },
+              "target": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9]*\\{i\\}[A-Za-z0-9]*$"
+              },
+              "placement": {
+                "enum": ["replace", "inset"]
+              },
+              "color": {
+                "type": "string"
+              },
+              "focusColor": {
+                "type": "string"
+              },
+              "sizeIn": {
+                "type": "number",
+                "minimum": 0.2,
+                "maximum": 0.5
+              },
+              "gapIn": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 0.3
+              },
+              "iconArray": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9]*$"
+              },
+              "alternates": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 2,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9]*\\{i\\}[A-Za-z0-9]*$"
+                }
+              }
+            },
+            "required": ["slideType", "items", "target", "placement", "color", "sizeIn"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["bindings"],
+      "additionalProperties": false
     }
   },
   "required": [

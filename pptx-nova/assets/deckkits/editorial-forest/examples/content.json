@@ -219,16 +219,19 @@
         "title": "Three\nthings to take",
         "items": [
           {
-            "label": "ONE",
-            "body": "The strategy holds. We are doing fewer things, and the right things."
+            "label": "FOCUS",
+            "body": "The strategy holds. We are doing fewer things, and the right things.",
+            "icon": "target"
           },
           {
-            "label": "TWO",
-            "body": "The numbers back the bets. Growth, retention, and reach are ahead of plan."
+            "label": "EVIDENCE",
+            "body": "The numbers back the bets. Growth, retention, and reach are ahead of plan.",
+            "icon": "chart-line"
           },
           {
-            "label": "THREE",
-            "body": "Next quarter, keep the pace and add focus where the data points us."
+            "label": "NEXT CYCLE",
+            "body": "Next quarter, keep the pace and add focus where the data points us.",
+            "icon": "compass"
           }
         ],
         "source": "ILLUSTRATIVE TEMPLATE · NOT ACTUAL RESULTS"

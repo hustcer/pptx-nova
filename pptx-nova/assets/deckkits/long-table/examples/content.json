@@ -46,21 +46,24 @@
             "city": "Mexico City",
             "title": "A PLATE\nOF QUIET",
             "text": "Eight courses cooked entirely on a single induction ring. The room agreed not to use phones for the entire evening, and almost kept the agreement.",
-            "meta": ["22 seats", "14 March 2025"]
+            "meta": ["22 seats", "14 March 2025"],
+            "icon": "bowl"
           },
           {
             "no": "No. 04",
             "city": "Tokyo",
             "title": "A SOUP\nOF LETTERS",
             "text": "A reading evening, with a single course served slowly. Four guest writers, one bowl per person, and the longest pause we have ever held between courses.",
-            "meta": ["18 seats", "06 July 2025"]
+            "meta": ["18 seats", "06 July 2025"],
+            "icon": "book"
           },
           {
             "no": "No. 05",
             "city": "Lisbon",
             "title": "DECEMBER\nEDITION",
             "text": "A long winter dinner. Twenty-two seats, one shared roast, and a quiet bookshop next door we'll wander to between courses, when the rain agrees.",
-            "meta": ["22 seats", "11 December 2025"]
+            "meta": ["22 seats", "11 December 2025"],
+            "icon": "calendar"
           }
         ]
       }

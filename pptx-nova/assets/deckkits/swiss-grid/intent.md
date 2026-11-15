@@ -71,3 +71,7 @@ for Mac 16.114 原生打开、保存、关闭重开及对象回读；标题、�
 本次晋级重跑三项 live benchmark，并通过 default readiness；原生宿主证据沿用迁移验收的范围。
 机器、视觉、原生宿主的范围和未验证项见
 迁移报告（未随本仓库发布：`swiss-grid-v2-migration-results.md`）。新生成的每份 PPTX 仍须完成其交付检查。
+
+## Semantic concept icons (2.1.0)
+
+Optional bundled Tabler outline icons are supported in `swissPrinciplesSlide: data.items[].icon`; `swissColumnSlide: data.items[].icon`. Choose symbols for the actual concepts. The registered marker compiler uses the kit's existing palette and layout owners, with a 1.2 stroke. Omitted icons retain the previous output and capacity. An explicit icon replaces the peer marker where registered; edition numbers, metrics, dates, status and references remain separate. Inset headings are rechecked at their available width; split or choose a fitting layout instead of shrinking text. Review the actual PNGs, including alternative layouts and mixed-language content.

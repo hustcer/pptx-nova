@@ -1,3 +1,4 @@
+import { withoutSemanticIcons } from '../helpers/semantic-icons.mjs'
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync } from 'node:fs'
 import { test } from 'node:test'
@@ -14,7 +15,8 @@ import {
 import { execFileSync } from 'node:child_process'
 
 const assetRoot = new URL('../../../pptx-nova/assets/deckkits/', import.meta.url)
-const readJson = (path) => JSON.parse(readFileSync(new URL(path, assetRoot), 'utf8'))
+const readJson = (path) =>
+  withoutSemanticIcons('cartesian', JSON.parse(readFileSync(new URL(path, assetRoot), 'utf8')))
 
 function fontSizes(value, path = '$') {
   if (!value || typeof value !== 'object') return []

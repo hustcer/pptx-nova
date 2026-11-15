@@ -133,3 +133,7 @@ geometry. The renderer and style gate both reject the retired folded-corner lang
 The refurbishment fallback shares the dark palette and Arial font roles. It preserves source object
 geometry and does not convert arbitrary source layouts into these open compositions. Its color/font
 configuration is distinct from the content-first generator's composition and native readback gates.
+
+## Semantic concept icons (2.3.0)
+
+Optional bundled Tabler outline icons are supported in `kpiRowSlide: data.items[].icon`; `multiCardSlide: data.cards[].icon`. Choose symbols for the actual concepts. The registered marker compiler uses the kit's existing palette and layout owners, with a 1.2 stroke. Omitted icons retain the previous output and capacity. An explicit icon replaces the peer marker where registered; edition numbers, metrics, dates, status and references remain separate. Inset headings are rechecked at their available width; split or choose a fitting layout instead of shrinking text. Review the actual PNGs, including alternative layouts and mixed-language content.

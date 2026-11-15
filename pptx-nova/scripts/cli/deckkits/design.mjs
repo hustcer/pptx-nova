@@ -93,6 +93,7 @@ try {
       contractHash: designHash(d),
       colors: d.colors,
       fonts: d.fonts,
+      ...(d.semanticIcons ? { semanticIcons: d.semanticIcons } : {}),
       rules: d.rules,
       registeredSlideTypes: [
         ...Object.keys(

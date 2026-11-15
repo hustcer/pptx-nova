@@ -1,6 +1,6 @@
 {
   "id": "swiss-grid",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -515,5 +515,27 @@
       "id": "swiss-language",
       "check": "swiss-language"
     }
-  ]
+  ],
+  "semanticIcons": {
+    "bindings": [
+      {
+        "slideType": "swissPrinciplesSlide",
+        "items": "items",
+        "target": "Index{i}",
+        "placement": "replace",
+        "color": "ink",
+        "sizeIn": 0.34,
+        "focusColor": "red"
+      },
+      {
+        "slideType": "swissColumnSlide",
+        "items": "items",
+        "target": "Index{i}",
+        "placement": "replace",
+        "color": "ink",
+        "sizeIn": 0.28,
+        "focusColor": "red"
+      }
+    ]
+  }
 }

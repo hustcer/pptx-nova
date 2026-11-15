@@ -2,9 +2,9 @@
 
 DeckKit: `blue-research`
 Showcase case: `blue-research.golden-learning`
-Readiness: `candidate`
+Readiness: `production`
 Slides: 10
-Patch ops: 1260
+Patch ops: 1236
 Title: Community Learning Service Network Outlook
 
 ## Best For

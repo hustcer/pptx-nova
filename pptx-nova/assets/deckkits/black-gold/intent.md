@@ -32,3 +32,7 @@ secondary diagram. Gold pixel-area share is visually reviewed, not inferred from
 This skin does not impose investment advice, valuation models or allocation decisions on unrelated
 content. Financial thesis, scenario, sensitivity and risk policy is separate; read the optional finance
 policy only when the requested content requires it. All bundled numbers/claims are illustrative.
+
+## Semantic concept icons (0.2.0)
+
+Optional bundled Tabler outline icons are supported in `ledgerSummarySlide: data.judgments[].icon`. Choose symbols for the actual concepts. The registered marker compiler uses the kit's existing palette and layout owners, with a 1.2 stroke. Omitted icons retain the previous output and capacity. An explicit icon replaces the peer marker where registered; edition numbers, metrics, dates, status and references remain separate. Inset headings are rechecked at their available width; split or choose a fitting layout instead of shrinking text. Review the actual PNGs, including alternative layouts and mixed-language content.

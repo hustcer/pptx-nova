@@ -178,6 +178,7 @@ function buildReference(deckkit) {
         hasSchema: Boolean(schema),
         requiredSlots: contract.requiredSlots ?? [],
         assetSlots: normalizeAssetSlots(contract),
+        semanticIconSlots: contract?.semanticIconSlots ?? [],
         rows: rows.map((row) => ({
           ...row,
           required: hasRequired(contract, row.path),
@@ -221,6 +222,19 @@ function renderMarkdown(ref) {
       }
     }
     lines.push('')
+    if (slide.semanticIconSlots.length) {
+      lines.push(
+        '### Semantic icon slots',
+        '',
+        '| field | family | stroke |',
+        '| --- | --- | --- |',
+      )
+      for (const slot of slide.semanticIconSlots)
+        lines.push(
+          `| \`${escapeCell(slot.path)}\` | ${escapeCell(slot.family)} | ${slot.defaultStrokeWidth} (maximum ${slot.maxStrokeWidth}) |`,
+        )
+      lines.push('')
+    }
     if (slide.assetSlots.length > 0) {
       lines.push('### Asset slots')
       lines.push('')

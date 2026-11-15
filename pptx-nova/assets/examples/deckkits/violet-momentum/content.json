@@ -252,7 +252,8 @@
             "unit": "10k",
             "targetLabel": "Target",
             "evidence": "Cycle 27 min; cost RMB 4.4",
-            "action": "Reuse this operating playbook."
+            "action": "Reuse this operating playbook.",
+            "icon": "map-pin"
           },
           {
             "name": "Central",
@@ -263,7 +264,8 @@
             "unit": "10k",
             "targetLabel": "Target",
             "evidence": "Cycle 31 min; cost RMB 5.2",
-            "action": "Improve local coverage first."
+            "action": "Improve local coverage first.",
+            "icon": "building"
           },
           {
             "name": "South",
@@ -274,7 +276,8 @@
             "unit": "10k",
             "targetLabel": "Target",
             "evidence": "Cycle 35 min; cost RMB 6.0",
-            "action": "Complete route mapping."
+            "action": "Complete route mapping.",
+            "icon": "compass"
           }
         ]
       }
@@ -391,14 +394,16 @@
             "rationale": "Mapping, batteries and launch cover",
             "owner": "Finance",
             "date": "Oct 15",
-            "consequence": "Delay risks the launch gate."
+            "consequence": "Delay risks the launch gate.",
+            "icon": "route"
           },
           {
             "request": "Phase the remaining renewal",
             "rationale": "Retain service while supply recovers",
             "owner": "Asset team",
             "date": "Oct 18",
-            "consequence": "Delay adds holding cost."
+            "consequence": "Delay adds holding cost.",
+            "icon": "battery"
           }
         ],
         "decisionHeading": "Management decisions"

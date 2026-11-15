@@ -35,3 +35,7 @@
 新增 `journalNarrativeSlide`，适用于贡献、客户场景、策略、计划与合作诉求。必填公共字段与其他页型相同，正文使用 `lead: { heading, body }` 与 `sections: [{ heading, body }]`。标题/正文来自输入，不内置行业政策、业务词或示例数字。`leadLeft` 是导语加开放横栏，适合短句；`columns` 是导语加开放纵栏，适合较长解释。两者均接受 2–4 项，实际容量仍由解析器逐实例检查，无法容纳时换布局或拆页，不缩字或删项。主导语 24pt，分项标题 18pt，正文 16pt。
 
 这是向后兼容的新增入口，旧八类页型与内容无需迁移。跨主题、中英混排及容量边界示例见 `examples/narrative-content.json`，两种布局均纳入 `golden-narrative` 视觉回归。数值对比继续使用 outlook、results 等既有职责，不以定性页替换必需图表或表格。
+
+## Semantic concept icons (1.2.0)
+
+Optional bundled Tabler outline icons are supported in `journalOutlookSlide: data.notes[].icon`. Choose symbols for the actual concepts. The registered marker compiler uses the kit's existing palette and layout owners, with a 1.2 stroke. Omitted icons retain the previous output and capacity. An explicit icon replaces the peer marker where registered; edition numbers, metrics, dates, status and references remain separate. Inset headings are rechecked at their available width; split or choose a fitting layout instead of shrinking text. Review the actual PNGs, including alternative layouts and mixed-language content.

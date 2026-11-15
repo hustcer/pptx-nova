@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "broadside",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -648,5 +648,18 @@
       }
     },
     "family": "broadside-poster/v1"
+  },
+  "semanticIcons": {
+    "bindings": [
+      {
+        "slideType": "broadsideListSlide",
+        "items": "items",
+        "target": "ListSlash{i}",
+        "placement": "replace",
+        "color": "orange",
+        "sizeIn": 0.26,
+        "iconArray": "itemIcons"
+      }
+    ]
   }
 }

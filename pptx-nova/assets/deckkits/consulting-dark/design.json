@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "consulting-dark",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -313,7 +313,9 @@
             }
           },
           "metrics": {
-            "regions": { "items": [0.8, 2.05, 11.7, 4.5] }
+            "regions": {
+              "items": [0.8, 2.05, 11.7, 4.5]
+            }
           }
         }
       },
@@ -450,5 +452,26 @@
         }
       }
     }
+  },
+  "semanticIcons": {
+    "bindings": [
+      {
+        "slideType": "kpiRowSlide",
+        "items": "items",
+        "target": "AchievementIndex{i}",
+        "placement": "replace",
+        "color": "warm",
+        "sizeIn": 0.3,
+        "alternates": ["MetricIndex{i}"]
+      },
+      {
+        "slideType": "multiCardSlide",
+        "items": "cards",
+        "target": "AudienceIndex{i}",
+        "placement": "replace",
+        "color": "warm",
+        "sizeIn": 0.4
+      }
+    ]
   }
 }

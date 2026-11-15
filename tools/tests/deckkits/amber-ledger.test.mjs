@@ -1,3 +1,4 @@
+import { withoutSemanticIcons } from '../helpers/semantic-icons.mjs'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
@@ -11,7 +12,11 @@ import {
 } from '../../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
 import { validateDeckkitContent } from '../../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
 import { amberTrendScale } from '../../../pptx-nova/assets/deckkits/amber-ledger/layouts.mjs'
-const read = (p) => JSON.parse(readFileSync(new URL('../../../' + p, import.meta.url)))
+const read = (p) =>
+  withoutSemanticIcons(
+    'amber-ledger',
+    JSON.parse(readFileSync(new URL('../../../' + p, import.meta.url))),
+  )
 const fixture = () => read('pptx-nova/assets/deckkits/amber-ledger/examples/content.json')
 const excerpt = (slides) => ({ meta: { deckkit: 'amber-ledger', designScope: 'excerpt' }, slides })
 function specimen(s, maximum = false) {

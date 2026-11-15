@@ -73,6 +73,29 @@ const raw = readFileSync(path, 'utf8')
 const catalog = JSON.parse(raw)
 const entry = catalog.entries.find((e) => e.id === id)
 const before = JSON.stringify(entry)
+entry.version = design.version
+function semanticIconSlots(schema, base = 'data', doc = schema) {
+  if (schema.$ref) return semanticIconSlots(doc.$defs[schema.$ref.split('/').at(-1)], base, doc)
+  const out = []
+  if (schema.type === 'object')
+    for (const [key, child] of Object.entries(schema.properties ?? {})) {
+      const path = `${base}.${key}`
+      if ((key === 'icon' || child['x-iconFamily']) && child.type === 'string')
+        out.push({ path, family: 'tabler-outline', defaultStrokeWidth: 1.2, maxStrokeWidth: 1.5 })
+      else out.push(...semanticIconSlots(child, path, doc))
+    }
+  if (schema.type === 'array') {
+    if (schema.items?.['x-iconFamily'])
+      out.push({
+        path: `${base}[]`,
+        family: 'tabler-outline',
+        defaultStrokeWidth: 1.2,
+        maxStrokeWidth: 1.5,
+      })
+    else out.push(...semanticIconSlots(schema.items ?? {}, `${base}[]`, doc))
+  }
+  return out
+}
 if (registered || design.editorial || design.strategy || design.annual || design.biennale) {
   const families = (
     registered
@@ -93,6 +116,7 @@ if (registered || design.editorial || design.strategy || design.annual || design
       ...entry.layoutContract.slideTypes[type],
       requiredSlots: schema.required.map((key) => `data.${key}`),
       allowedLayoutIds: ['auto', ...Object.keys(family.variants)],
+      semanticIconSlots: semanticIconSlots(schema),
     }
     const group = registered?.groups
       ? Object.entries(registered.groups).find(([, roles]) => roles.includes(family.role))?.[0]

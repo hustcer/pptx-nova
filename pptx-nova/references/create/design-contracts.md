@@ -11,6 +11,25 @@ native columns/doughnuts, dated timelines, cycles and ordinal tiers. Read its
 
 ## Agent workflow
 
+### Semantic icon inputs
+
+Use the selected kit's slot reference and schemas to find optional semantic icon fields. All
+bundled kits expose at least one suitable route; support belongs to particular peer-concept page
+types, rather than every chart, cell or bullet. Icons use the bundled Tabler outline family with
+stroke 1.2 (maximum 1.5). Content supplies names, while the contract owns visual placement.
+
+For kits with `semanticIcons.bindings`, the registered marker compiler runs before design checking,
+plan hashing and readback capture. A binding either replaces a peer marker or reserves heading
+space with an actual fit check. Omitted icons preserve the previous output. Explicit icons can
+replace legacy `index`, `num` or `marker` controls where documented; they do not replace measured
+values, dates, status or references. String lists use an aligned `itemIcons[]` field when specified.
+Arbitrary SVG bytes and raw geometry remain unsupported content inputs. Existing native asset
+slots keep their own contracts.
+
+Inspect `semanticIconSlots` in the generated catalog/slot reference and `semanticIcons` in design
+discovery. Examples demonstrate actual choices; the compiler does not infer semantic names from
+text. Review recognition, optical size, first-line alignment and repeated page composition in PNGs.
+
 Discover only the selected design and its layout capacities:
 
 ```bash
@@ -150,7 +169,7 @@ replace unavailable reference fonts; fonts are not bundled. The flat paper fill 
 the source grain because the tested native pattern differed between PowerPoint and canonical rendering.
 The native calendar preserves every header and cell. Its separate status outlines do not follow
 manual row-height or column-width edits; regenerate from content to synchronize them. No chart or
-image ingestion is provided. Candidate readiness does not prove arbitrary existing-deck refurbishment.
+external image ingestion is provided; registered bundled semantic icons are supported. Candidate readiness does not prove arbitrary existing-deck refurbishment.
 
 ### Warm editorial family: Cartesian
 

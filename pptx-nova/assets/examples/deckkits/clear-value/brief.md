@@ -4,7 +4,7 @@ DeckKit: `clear-value`
 Showcase case: `clear-value.golden-design`
 Readiness: `production`
 Slides: 12
-Patch ops: 897
+Patch ops: 876
 Title: Clear value Evidence before conviction
 
 ## Best For

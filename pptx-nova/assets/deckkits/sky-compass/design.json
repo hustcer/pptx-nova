@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "sky-compass",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -433,5 +433,27 @@
       "decisions": [1, 3],
       "trendPoints": [3, 8]
     }
+  },
+  "semanticIcons": {
+    "bindings": [
+      {
+        "slideType": "skyCoverageSlide",
+        "items": "notes",
+        "target": "NoteHeading{i}",
+        "placement": "inset",
+        "color": "accent",
+        "sizeIn": 0.28,
+        "gapIn": 0.1
+      },
+      {
+        "slideType": "skyProjectSlide",
+        "items": "items",
+        "target": "ProjectHeading{i}",
+        "placement": "inset",
+        "color": "accent",
+        "sizeIn": 0.28,
+        "gapIn": 0.1
+      }
+    ]
   }
 }

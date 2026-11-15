@@ -4,7 +4,7 @@ DeckKit: `swiss-grid`
 Showcase case: `swiss-grid.golden-lecture`
 Readiness: `production`
 Slides: 15
-Patch ops: 1960
+Patch ops: 1912
 Title: 网格系统
 
 ## Best For

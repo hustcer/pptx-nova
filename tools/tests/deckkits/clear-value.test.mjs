@@ -1,3 +1,4 @@
+import { withoutSemanticIcons } from '../helpers/semantic-icons.mjs'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
@@ -18,7 +19,8 @@ import {
   checkDesignPatch,
   checkDesignReadback,
 } from '../../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
-const read = (p) => JSON.parse(fs.readFileSync(new URL(p, import.meta.url))),
+const read = (p) =>
+    withoutSemanticIcons('clear-value', JSON.parse(fs.readFileSync(new URL(p, import.meta.url)))),
   source = read('../../../pptx-nova/assets/deckkits/clear-value/examples/content.json'),
   clone = structuredClone,
   excerpt = (slides) => ({ meta: { deckkit: 'clear-value', designScope: 'excerpt' }, slides })

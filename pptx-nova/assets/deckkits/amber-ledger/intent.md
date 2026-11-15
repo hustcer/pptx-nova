@@ -76,3 +76,7 @@ production 可参与自动交付选择。完整报告声明 `meta.designScope: "
 八页全部文字序列、三个原生图表的类别和数值缓存、三个嵌入工作簿保持一致；三个表格仍为原生对象。
 ZIP/XML、完整包语义及兼容检查通过，本机 PowerPoint clean-open 通过。
 本轮未新增交互编辑、跨平台或像素等价认证，readiness 为 production。
+
+## Semantic concept icons (0.3.0)
+
+Optional bundled Tabler outline icons are supported in `amberProjectsSlide: data.projects[].icon`. Choose symbols for the actual concepts. The registered marker compiler uses the kit's existing palette and layout owners, with a 1.2 stroke. Omitted icons retain the previous output and capacity. An explicit icon replaces the peer marker where registered; edition numbers, metrics, dates, status and references remain separate. Inset headings are rechecked at their available width; split or choose a fitting layout instead of shrinking text. Review the actual PNGs, including alternative layouts and mixed-language content.

@@ -9,11 +9,11 @@
       "pattern": "\\S",
       "description": "Top-left brand; no business default.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 11,
+        "widthIn": 5.75,
+        "heightIn": 0.3,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "section": {
@@ -22,11 +22,11 @@
       "pattern": "\\S",
       "description": "Top-right section metadata.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 10.5,
+        "widthIn": 6.13,
+        "heightIn": 0.3,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "kicker": {
@@ -35,11 +35,11 @@
       "pattern": "\\S",
       "description": "Pink editorial eyebrow.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 11,
+        "widthIn": 12.23,
+        "heightIn": 0.3,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "source": {
@@ -48,11 +48,11 @@
       "pattern": "\\S",
       "description": "Visible source, assumptions and/or date from content.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 10.5,
+        "widthIn": 10.7,
+        "heightIn": 0.28,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "title": {
@@ -61,10 +61,10 @@
       "pattern": "\\S",
       "description": "Closing invitation.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
-        "lineHeight": 1.12,
+        "fontPt": 44,
+        "widthIn": 6.05,
+        "heightIn": 3.4,
+        "lineHeight": 1,
         "maxLines": 3
       }
     },
@@ -81,11 +81,11 @@
             "pattern": "\\S",
             "description": "Action heading.",
             "x-slotBudget": {
-              "fontPt": 12,
-              "widthIn": 4,
-              "heightIn": 0.8,
-              "lineHeight": 1.12,
-              "maxLines": 3
+              "fontPt": 24,
+              "widthIn": 4.41,
+              "heightIn": 0.55,
+              "lineHeight": 1,
+              "maxLines": 1
             }
           },
           "description": {
@@ -95,11 +95,19 @@
             "description": "Action detail.",
             "x-slotBudget": {
               "fontPt": 12,
-              "widthIn": 4,
-              "heightIn": 0.8,
+              "widthIn": 4.41,
+              "heightIn": 0.7,
               "lineHeight": 1.12,
-              "maxLines": 3
+              "maxLines": 2
             }
+          },
+          "icon": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "x-slotRole": "control",
+            "x-iconFamily": "tabler-outline",
+            "x-slotProbeValue": "book",
+            "description": "Optional bundled Tabler outline icon; replaces the peer marker. Default stroke 1.2; maximum 1.5."
           }
         },
         "required": ["title", "description"],

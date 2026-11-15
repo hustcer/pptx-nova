@@ -25,3 +25,7 @@
 `pinkClosingSlide.imageSlots["contact.qr"]` 可绑定 `assets_manifest.json` 中的图片；声明 `ratio: "1:1"` 与 `fitPolicy: "no-crop"` 或 `contain`，保留二维码自身 quiet zone。未绑定时该区域为空，不绘制假二维码。请提供透明背景、浅色码点且可独立解码的资产；套件不负责从 URL 编码二维码，也不验证任意输入图片的扫码语义。示例 QR 已独立验证指向用户指定的 `https://structurify.io/en`，网址只在示例资产清单中。二维码作为可替换图片保留位置/尺寸编辑，不承诺码点或 URL 在 PowerPoint 中直接编辑。
 
 原 HTML 的动画、导航和伪 QR 不迁移。稀疏原生颗粒与轻量光晕近似网页气氛，不承诺 SVG 噪声逐像素一致；原生焦点标记替代 SVG 圆环/垂线组合。未声明原生换肤、任意旧稿保真、动画或其他比例。具体证据与未验证宿主见 [验收记录](../../../benchmarks/visual/cases/pink-script/golden-editorial/review.md)。
+
+## Semantic concept icons (1.1.0)
+
+Optional bundled Tabler outline icons are supported in `pinkClosingSlide: data.actions[].icon`. Choose symbols for the actual concepts. The registered marker compiler uses the kit's existing palette and layout owners, with a 1.2 stroke. Omitted icons retain the previous output and capacity. An explicit icon replaces the peer marker where registered; edition numbers, metrics, dates, status and references remain separate. Inset headings are rechecked at their available width; split or choose a fitting layout instead of shrinking text. Review the actual PNGs, including alternative layouts and mixed-language content.

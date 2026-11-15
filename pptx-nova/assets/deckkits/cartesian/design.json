@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "cartesian",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -651,5 +651,17 @@
       "timeline": [3, 4],
       "team": [2, 4]
     }
+  },
+  "semanticIcons": {
+    "bindings": [
+      {
+        "slideType": "cartesianCardsSlide",
+        "items": "cards",
+        "target": "CardIcon{i}",
+        "placement": "replace",
+        "color": "ink",
+        "sizeIn": 0.34
+      }
+    ]
   }
 }

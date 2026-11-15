@@ -9,11 +9,11 @@
       "pattern": "\\S",
       "description": "Top-left brand; no business default.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 11,
+        "widthIn": 5.75,
+        "heightIn": 0.3,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "section": {
@@ -22,11 +22,11 @@
       "pattern": "\\S",
       "description": "Top-right section metadata.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 10.5,
+        "widthIn": 6.13,
+        "heightIn": 0.3,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "kicker": {
@@ -35,11 +35,11 @@
       "pattern": "\\S",
       "description": "Pink editorial eyebrow.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 11,
+        "widthIn": 12.23,
+        "heightIn": 0.3,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "source": {
@@ -48,11 +48,11 @@
       "pattern": "\\S",
       "description": "Visible source, assumptions and/or date from content.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 10.5,
+        "widthIn": 10.7,
+        "heightIn": 0.28,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "title": {
@@ -61,11 +61,11 @@
       "pattern": "\\S",
       "description": "Short oversized index title.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
-        "lineHeight": 1.12,
-        "maxLines": 3
+        "fontPt": 100,
+        "widthIn": 3.2,
+        "heightIn": 2,
+        "lineHeight": 1,
+        "maxLines": 1
       }
     },
     "continuation": {
@@ -74,11 +74,11 @@
       "pattern": "\\S",
       "description": "Index continuation.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
-        "lineHeight": 1.12,
-        "maxLines": 3
+        "fontPt": 38,
+        "widthIn": 3.2,
+        "heightIn": 0.9,
+        "lineHeight": 1,
+        "maxLines": 1
       }
     },
     "items": {
@@ -94,11 +94,11 @@
             "pattern": "\\S",
             "description": "Chapter title.",
             "x-slotBudget": {
-              "fontPt": 12,
-              "widthIn": 4,
-              "heightIn": 0.8,
-              "lineHeight": 1.12,
-              "maxLines": 3
+              "fontPt": 24,
+              "widthIn": 6.22,
+              "heightIn": 0.47,
+              "lineHeight": 1,
+              "maxLines": 1
             }
           },
           "description": {
@@ -108,10 +108,10 @@
             "description": "Chapter description.",
             "x-slotBudget": {
               "fontPt": 12,
-              "widthIn": 4,
-              "heightIn": 0.8,
+              "widthIn": 6.22,
+              "heightIn": 1.1433333333333335,
               "lineHeight": 1.12,
-              "maxLines": 3
+              "maxLines": 4
             }
           },
           "meta": {
@@ -120,11 +120,11 @@
             "pattern": "\\S",
             "description": "Short chapter folio or category.",
             "x-slotBudget": {
-              "fontPt": 12,
-              "widthIn": 4,
-              "heightIn": 0.8,
+              "fontPt": 10.5,
+              "widthIn": 1.4,
+              "heightIn": 0.55,
               "lineHeight": 1.12,
-              "maxLines": 3
+              "maxLines": 2
             }
           },
           "focus": {

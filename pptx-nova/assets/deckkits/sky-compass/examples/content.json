@@ -128,7 +128,8 @@
               "value": 41,
               "total": 100,
               "unit": "%"
-            }
+            },
+            "icon": "clock"
           },
           {
             "heading": "Guided completion",
@@ -138,7 +139,8 @@
               "value": 38,
               "total": 100,
               "unit": "%"
-            }
+            },
+            "icon": "user-check"
           }
         ],
         "mixNote": "Mix check: 54% digital + 30% counter + 16% self-service = 100%"
@@ -399,21 +401,24 @@
             "evidence": "Four of six checks are complete.",
             "action": "Close the remaining checks",
             "owner": "Pilot owner",
-            "date": "15 Aug"
+            "date": "15 Aug",
+            "icon": "clipboard-check"
           },
           {
             "heading": "Dependency has an owner",
             "evidence": "Access approval remains outstanding.",
             "action": "Resolve the approval",
             "owner": "Sponsor",
-            "date": "31 Aug"
+            "date": "31 Aug",
+            "icon": "user-check"
           },
           {
             "heading": "Next gate is measurable",
             "evidence": "The final check is a stable queue.",
             "action": "Review the pilot",
             "owner": "Pilot owner",
-            "date": "30 Sep"
+            "date": "30 Sep",
+            "icon": "target"
           }
         ],
         "status": "amber",

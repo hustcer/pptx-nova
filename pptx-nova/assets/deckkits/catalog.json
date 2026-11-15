@@ -3,7 +3,7 @@
   "entries": [
     {
       "id": "consulting-dark",
-      "version": "2.2.0",
+      "version": "2.3.0",
       "path": "consulting-dark/consulting-dark.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
@@ -219,7 +219,8 @@
               "data.infoL",
               "data.infoR"
             ],
-            "allowedLayoutIds": ["auto", "split", "stacked"]
+            "allowedLayoutIds": ["auto", "split", "stacked"],
+            "semanticIconSlots": []
           },
           "profileTableSlide": {
             "requiredSlots": [
@@ -229,11 +230,20 @@
               "data.rows",
               "data.metrics"
             ],
-            "allowedLayoutIds": ["auto", "ledger", "bands"]
+            "allowedLayoutIds": ["auto", "ledger", "bands"],
+            "semanticIconSlots": []
           },
           "kpiRowSlide": {
             "requiredSlots": ["data.eyebrow", "data.title", "data.source", "data.items"],
-            "allowedLayoutIds": ["auto", "quadrants", "ledger", "metrics"]
+            "allowedLayoutIds": ["auto", "quadrants", "ledger", "metrics"],
+            "semanticIconSlots": [
+              {
+                "path": "data.items[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "previewProductSlide": {
             "requiredSlots": [
@@ -246,7 +256,8 @@
               "data.capLeft",
               "data.capRight"
             ],
-            "allowedLayoutIds": ["auto", "strip", "rail"]
+            "allowedLayoutIds": ["auto", "strip", "rail"],
+            "semanticIconSlots": []
           },
           "landscapeSlide": {
             "requiredSlots": [
@@ -259,7 +270,8 @@
               "data.comps",
               "data.conclusion"
             ],
-            "allowedLayoutIds": ["auto", "columns", "ledger"]
+            "allowedLayoutIds": ["auto", "columns", "ledger"],
+            "semanticIconSlots": []
           },
           "multiCardSlide": {
             "requiredSlots": [
@@ -269,7 +281,15 @@
               "data.intro",
               "data.cards"
             ],
-            "allowedLayoutIds": ["auto", "columns", "ledger"]
+            "allowedLayoutIds": ["auto", "columns", "ledger"],
+            "semanticIconSlots": [
+              {
+                "path": "data.cards[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "convertFlowSlide": {
             "requiredSlots": [
@@ -285,7 +305,8 @@
               "data.featLeft",
               "data.featRight"
             ],
-            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"],
+            "semanticIconSlots": []
           },
           "benchmarkSlide": {
             "requiredSlots": [
@@ -299,11 +320,13 @@
               "data.calloutNum",
               "data.calloutText"
             ],
-            "allowedLayoutIds": ["auto", "rail", "stacked"]
+            "allowedLayoutIds": ["auto", "rail", "stacked"],
+            "semanticIconSlots": []
           },
           "timelineSlide": {
             "requiredSlots": ["data.eyebrow", "data.title", "data.source", "data.steps"],
-            "allowedLayoutIds": ["auto", "horizontal", "ledger"]
+            "allowedLayoutIds": ["auto", "horizontal", "ledger"],
+            "semanticIconSlots": []
           },
           "askSlide": {
             "requiredSlots": [
@@ -315,7 +338,8 @@
               "data.closing",
               "data.closingR"
             ],
-            "allowedLayoutIds": ["auto", "columns", "rows", "decision-led"]
+            "allowedLayoutIds": ["auto", "columns", "rows", "decision-led"],
+            "semanticIconSlots": []
           }
         }
       },
@@ -826,7 +850,8 @@
               "data.primaryMetric",
               "data.lossMetric"
             ],
-            "allowedLayoutIds": ["auto", "split", "band"]
+            "allowedLayoutIds": ["auto", "split", "band"],
+            "semanticIconSlots": []
           },
           "mckCrisisSnapshotSlide": {
             "requiredSlots": [
@@ -843,7 +868,8 @@
               "data.gap",
               "data.lever"
             ],
-            "allowedLayoutIds": ["auto", "stacked", "rail"]
+            "allowedLayoutIds": ["auto", "stacked", "rail"],
+            "semanticIconSlots": []
           },
           "mckDemographicProfileSlide": {
             "requiredSlots": [
@@ -861,7 +887,8 @@
               "data.interests",
               "data.interestNote"
             ],
-            "allowedLayoutIds": ["auto", "quadrants", "bands"]
+            "allowedLayoutIds": ["auto", "quadrants", "bands"],
+            "semanticIconSlots": []
           },
           "mckPriorityMatrixSlide": {
             "requiredSlots": [
@@ -873,7 +900,8 @@
               "data.labels",
               "data.finding"
             ],
-            "allowedLayoutIds": ["auto", "rail", "reversed"]
+            "allowedLayoutIds": ["auto", "rail", "reversed"],
+            "semanticIconSlots": []
           },
           "mckLossDriverSlide": {
             "requiredSlots": [
@@ -888,7 +916,8 @@
               "data.uncontrollable",
               "data.pareto"
             ],
-            "allowedLayoutIds": ["auto", "rail", "wide"]
+            "allowedLayoutIds": ["auto", "rail", "wide"],
+            "semanticIconSlots": []
           },
           "mckPillarsSlide": {
             "requiredSlots": [
@@ -899,7 +928,15 @@
               "data.defaultTimeframe",
               "data.pillars"
             ],
-            "allowedLayoutIds": ["auto", "columns", "rows"]
+            "allowedLayoutIds": ["auto", "columns", "rows"],
+            "semanticIconSlots": [
+              {
+                "path": "data.pillars[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "mckInitiativeRankingSlide": {
             "requiredSlots": [
@@ -910,7 +947,15 @@
               "data.labels",
               "data.initiatives"
             ],
-            "allowedLayoutIds": ["auto", "columns", "ledger"]
+            "allowedLayoutIds": ["auto", "columns", "ledger"],
+            "semanticIconSlots": [
+              {
+                "path": "data.initiatives[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "mckRoadmapSlide": {
             "requiredSlots": [
@@ -921,7 +966,15 @@
               "data.metrics",
               "data.governance"
             ],
-            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"],
+            "semanticIconSlots": [
+              {
+                "path": "data.phases[].items[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           }
         }
       },
@@ -1179,7 +1232,7 @@
     },
     {
       "id": "swiss-grid",
-      "version": "2.0.2",
+      "version": "2.1.0",
       "path": "swiss-grid/swiss-grid.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
@@ -1358,11 +1411,13 @@
         "slideTypes": {
           "swissCoverSlide": {
             "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.tag"],
-            "allowedLayoutIds": ["auto", "poster", "upper"]
+            "allowedLayoutIds": ["auto", "poster", "upper"],
+            "semanticIconSlots": []
           },
           "swissQuoteSlide": {
             "requiredSlots": ["data.quote", "data.body", "data.author", "data.source"],
-            "allowedLayoutIds": ["auto", "bracket", "wide"]
+            "allowedLayoutIds": ["auto", "bracket", "wide"],
+            "semanticIconSlots": []
           },
           "swissTimelineSlide": {
             "requiredSlots": [
@@ -1373,7 +1428,8 @@
               "data.calloutTitle",
               "data.callout"
             ],
-            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"],
+            "semanticIconSlots": []
           },
           "swissProgressSlide": {
             "requiredSlots": [
@@ -1383,23 +1439,49 @@
               "data.steps",
               "data.callout"
             ],
-            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"],
+            "semanticIconSlots": []
           },
           "swissPrinciplesSlide": {
             "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.items"],
-            "allowedLayoutIds": ["auto", "matrix"]
+            "allowedLayoutIds": ["auto", "matrix"],
+            "semanticIconSlots": [
+              {
+                "path": "data.items[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "swissPeopleGridSlide": {
             "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.people"],
-            "allowedLayoutIds": ["auto", "matrix"]
+            "allowedLayoutIds": ["auto", "matrix"],
+            "semanticIconSlots": []
           },
           "swissColumnSlide": {
             "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.items"],
-            "allowedLayoutIds": ["auto", "columns"]
+            "allowedLayoutIds": ["auto", "columns"],
+            "semanticIconSlots": [
+              {
+                "path": "data.items[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "swissBrandGridSlide": {
             "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.brands"],
-            "allowedLayoutIds": ["auto", "matrix"]
+            "allowedLayoutIds": ["auto", "matrix"],
+            "semanticIconSlots": [
+              {
+                "path": "data.brands[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "swissProfileSlide": {
             "requiredSlots": [
@@ -1412,7 +1494,8 @@
               "data.meta",
               "data.events"
             ],
-            "allowedLayoutIds": ["auto", "left", "reversed"]
+            "allowedLayoutIds": ["auto", "left", "reversed"],
+            "semanticIconSlots": []
           },
           "swissTypefaceSlide": {
             "requiredSlots": [
@@ -1422,11 +1505,13 @@
               "data.sampleText",
               "data.cards"
             ],
-            "allowedLayoutIds": ["auto", "columns"]
+            "allowedLayoutIds": ["auto", "columns"],
+            "semanticIconSlots": []
           },
           "swissGridTypesSlide": {
             "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.items"],
-            "allowedLayoutIds": ["auto", "quadrants"]
+            "allowedLayoutIds": ["auto", "quadrants"],
+            "semanticIconSlots": []
           },
           "swissSystemSlide": {
             "requiredSlots": [
@@ -1438,11 +1523,13 @@
               "data.model",
               "data.labels"
             ],
-            "allowedLayoutIds": ["auto", "annotated", "reversed"]
+            "allowedLayoutIds": ["auto", "annotated", "reversed"],
+            "semanticIconSlots": []
           },
           "swissStatementSlide": {
             "requiredSlots": ["data.label", "data.title", "data.subtitle", "data.body"],
-            "allowedLayoutIds": ["auto", "right", "left"]
+            "allowedLayoutIds": ["auto", "right", "left"],
+            "semanticIconSlots": []
           },
           "swissTableSlide": {
             "requiredSlots": [
@@ -1453,7 +1540,8 @@
               "data.rows",
               "data.source"
             ],
-            "allowedLayoutIds": ["auto", "full", "rail"]
+            "allowedLayoutIds": ["auto", "full", "rail"],
+            "semanticIconSlots": []
           },
           "swissClosingSlide": {
             "requiredSlots": [
@@ -1464,7 +1552,8 @@
               "data.footerL",
               "data.footerR"
             ],
-            "allowedLayoutIds": ["auto", "lower", "upper"]
+            "allowedLayoutIds": ["auto", "lower", "upper"],
+            "semanticIconSlots": []
           }
         }
       },
@@ -1727,7 +1816,7 @@
     },
     {
       "id": "broadside",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "path": "broadside/broadside.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
@@ -1958,15 +2047,18 @@
         "slideTypes": {
           "broadsideCoverSlide": {
             "requiredSlots": ["data.title", "data.subtitle"],
-            "allowedLayoutIds": ["auto", "poster", "reading"]
+            "allowedLayoutIds": ["auto", "poster", "reading"],
+            "semanticIconSlots": []
           },
           "broadsideChapterSlide": {
             "requiredSlots": ["data.title"],
-            "allowedLayoutIds": ["auto", "declaration"]
+            "allowedLayoutIds": ["auto", "declaration"],
+            "semanticIconSlots": []
           },
           "broadsideStatementSlide": {
             "requiredSlots": ["data.kicker", "data.title"],
-            "allowedLayoutIds": ["auto", "wide", "rail"]
+            "allowedLayoutIds": ["auto", "wide", "rail"],
+            "semanticIconSlots": []
           },
           "broadsideSplitSlide": {
             "requiredSlots": ["data.kicker", "data.title", "data.lead", "data.bullets"],
@@ -1980,27 +2072,40 @@
                 "note": "This split layout renders an editable placeholder shell. No image asset can be injected through content.json."
               }
             },
-            "allowedLayoutIds": ["auto", "image-right", "image-left"]
+            "allowedLayoutIds": ["auto", "image-right", "image-left"],
+            "semanticIconSlots": []
           },
           "broadsideStatsSlide": {
             "requiredSlots": ["data.items"],
-            "allowedLayoutIds": ["auto", "row", "register"]
+            "allowedLayoutIds": ["auto", "row", "register"],
+            "semanticIconSlots": []
           },
           "broadsideFadeListSlide": {
             "requiredSlots": ["data.items", "data.title"],
-            "allowedLayoutIds": ["auto", "stack"]
+            "allowedLayoutIds": ["auto", "stack"],
+            "semanticIconSlots": []
           },
           "broadsideListSlide": {
             "requiredSlots": ["data.kicker", "data.title", "data.items"],
-            "allowedLayoutIds": ["auto", "split", "stacked"]
+            "allowedLayoutIds": ["auto", "split", "stacked"],
+            "semanticIconSlots": [
+              {
+                "path": "data.itemIcons[]",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "broadsideQuoteSlide": {
             "requiredSlots": ["data.kicker", "data.quote", "data.author"],
-            "allowedLayoutIds": ["auto", "reading", "wide"]
+            "allowedLayoutIds": ["auto", "reading", "wide"],
+            "semanticIconSlots": []
           },
           "broadsideCompareSlide": {
             "requiredSlots": ["data.left", "data.right"],
-            "allowedLayoutIds": ["auto", "equal", "weighted"]
+            "allowedLayoutIds": ["auto", "equal", "weighted"],
+            "semanticIconSlots": []
           },
           "broadsideBarChartSlide": {
             "requiredSlots": [
@@ -2010,11 +2115,13 @@
               "data.source",
               "data.seriesName"
             ],
-            "allowedLayoutIds": ["auto", "column", "horizontal"]
+            "allowedLayoutIds": ["auto", "column", "horizontal"],
+            "semanticIconSlots": []
           },
           "broadsideFlowSlide": {
             "requiredSlots": ["data.title", "data.steps"],
-            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"],
+            "semanticIconSlots": []
           },
           "broadsideDonutSlide": {
             "requiredSlots": [
@@ -2024,23 +2131,28 @@
               "data.source",
               "data.seriesName"
             ],
-            "allowedLayoutIds": ["auto", "ring-left", "ring-right"]
+            "allowedLayoutIds": ["auto", "ring-left", "ring-right"],
+            "semanticIconSlots": []
           },
           "broadsidePyramidSlide": {
             "requiredSlots": ["data.title", "data.levels"],
-            "allowedLayoutIds": ["auto", "levels"]
+            "allowedLayoutIds": ["auto", "levels"],
+            "semanticIconSlots": []
           },
           "broadsideTimelineSlide": {
             "requiredSlots": ["data.title", "data.events"],
-            "allowedLayoutIds": ["auto", "vertical", "horizontal"]
+            "allowedLayoutIds": ["auto", "vertical", "horizontal"],
+            "semanticIconSlots": []
           },
           "broadsideCycleSlide": {
             "requiredSlots": ["data.title", "data.steps"],
-            "allowedLayoutIds": ["auto", "loop"]
+            "allowedLayoutIds": ["auto", "loop"],
+            "semanticIconSlots": []
           },
           "broadsideEndSlide": {
             "requiredSlots": ["data.title", "data.contact"],
-            "allowedLayoutIds": ["auto", "poster", "wide"]
+            "allowedLayoutIds": ["auto", "poster", "wide"],
+            "semanticIconSlots": []
           }
         }
       },
@@ -2298,7 +2410,7 @@
     },
     {
       "id": "cartesian",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "path": "cartesian/cartesian.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
@@ -2467,15 +2579,18 @@
         "slideTypes": {
           "cartesianCoverSlide": {
             "requiredSlots": ["data.label", "data.title", "data.subtitle"],
-            "allowedLayoutIds": ["auto", "hero", "wide"]
+            "allowedLayoutIds": ["auto", "hero", "wide"],
+            "semanticIconSlots": []
           },
           "cartesianAgendaSlide": {
             "requiredSlots": ["data.label", "data.title", "data.body", "data.items"],
-            "allowedLayoutIds": ["auto", "split", "stacked"]
+            "allowedLayoutIds": ["auto", "split", "stacked"],
+            "semanticIconSlots": []
           },
           "cartesianStatementSlide": {
             "requiredSlots": ["data.quote", "data.attribution"],
-            "allowedLayoutIds": ["auto", "centered", "reading"]
+            "allowedLayoutIds": ["auto", "centered", "reading"],
+            "semanticIconSlots": []
           },
           "cartesianBarChartSlide": {
             "requiredSlots": [
@@ -2486,7 +2601,8 @@
               "data.unit",
               "data.source"
             ],
-            "allowedLayoutIds": ["auto", "rail", "wide"]
+            "allowedLayoutIds": ["auto", "rail", "wide"],
+            "semanticIconSlots": []
           },
           "cartesianImageStatsSlide": {
             "requiredSlots": [
@@ -2506,11 +2622,20 @@
                 "labelSlot": "data.imageLabel",
                 "note": "Bind a registered local image through content.json imageSlots and assets_manifest.json. The image is contained inside the editorial frame; omitting the binding preserves the editable crossed placeholder shell."
               }
-            }
+            },
+            "semanticIconSlots": []
           },
           "cartesianCardsSlide": {
             "requiredSlots": ["data.label", "data.title", "data.cards"],
-            "allowedLayoutIds": ["auto", "row", "register"]
+            "allowedLayoutIds": ["auto", "row", "register"],
+            "semanticIconSlots": [
+              {
+                "path": "data.cards[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "cartesianLineChartSlide": {
             "requiredSlots": [
@@ -2521,19 +2646,23 @@
               "data.unit",
               "data.source"
             ],
-            "allowedLayoutIds": ["auto", "wide", "rail"]
+            "allowedLayoutIds": ["auto", "wide", "rail"],
+            "semanticIconSlots": []
           },
           "cartesianTimelineSlide": {
             "requiredSlots": ["data.label", "data.title", "data.items"],
-            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"],
+            "semanticIconSlots": []
           },
           "cartesianTeamSlide": {
             "requiredSlots": ["data.label", "data.title", "data.members"],
-            "allowedLayoutIds": ["auto", "row"]
+            "allowedLayoutIds": ["auto", "row"],
+            "semanticIconSlots": []
           },
           "cartesianClosingSlide": {
             "requiredSlots": ["data.label", "data.title", "data.cta", "data.contact"],
-            "allowedLayoutIds": ["auto", "centered"]
+            "allowedLayoutIds": ["auto", "centered"],
+            "semanticIconSlots": []
           },
           "cartesianExhibitSlide": {
             "requiredSlots": [
@@ -2543,7 +2672,8 @@
               "data.source",
               "data.specimen"
             ],
-            "allowedLayoutIds": ["auto", "wide", "rail"]
+            "allowedLayoutIds": ["auto", "wide", "rail"],
+            "semanticIconSlots": []
           },
           "cartesianAnalyticalSlide": {
             "requiredSlots": [
@@ -2553,7 +2683,8 @@
               "data.source",
               "data.specimen"
             ],
-            "allowedLayoutIds": ["auto", "wide", "rail"]
+            "allowedLayoutIds": ["auto", "wide", "rail"],
+            "semanticIconSlots": []
           },
           "cartesianComparisonSlide": {
             "requiredSlots": [
@@ -2563,7 +2694,8 @@
               "data.source",
               "data.specimen"
             ],
-            "allowedLayoutIds": ["auto", "wide", "rail"]
+            "allowedLayoutIds": ["auto", "wide", "rail"],
+            "semanticIconSlots": []
           },
           "cartesianSceneSlide": {
             "requiredSlots": [
@@ -2573,7 +2705,8 @@
               "data.source",
               "data.specimen"
             ],
-            "allowedLayoutIds": ["auto", "wide", "rail"]
+            "allowedLayoutIds": ["auto", "wide", "rail"],
+            "semanticIconSlots": []
           },
           "cartesianFormulaSlide": {
             "requiredSlots": [
@@ -2583,7 +2716,8 @@
               "data.source",
               "data.specimen"
             ],
-            "allowedLayoutIds": ["auto", "wide", "rail"]
+            "allowedLayoutIds": ["auto", "wide", "rail"],
+            "semanticIconSlots": []
           }
         }
       },
@@ -2813,7 +2947,7 @@
     },
     {
       "id": "long-table",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "path": "long-table/long-table.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
@@ -3007,7 +3141,8 @@
               "data.tagline",
               "data.description"
             ],
-            "allowedLayoutIds": ["auto", "split", "verso"]
+            "allowedLayoutIds": ["auto", "split", "verso"],
+            "semanticIconSlots": []
           },
           "longTableManifestoSlide": {
             "requiredSlots": [
@@ -3018,11 +3153,20 @@
               "data.signature",
               "data.source"
             ],
-            "allowedLayoutIds": ["auto", "letter", "wide"]
+            "allowedLayoutIds": ["auto", "letter", "wide"],
+            "semanticIconSlots": []
           },
           "longTableIndexSlide": {
             "requiredSlots": ["data.title", "data.subtitle", "data.cards"],
-            "allowedLayoutIds": ["auto", "cards", "register"]
+            "allowedLayoutIds": ["auto", "cards", "register"],
+            "semanticIconSlots": [
+              {
+                "path": "data.cards[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "longTableFeaturedSlide": {
             "requiredSlots": [
@@ -3033,19 +3177,23 @@
               "data.pills",
               "data.details"
             ],
-            "allowedLayoutIds": ["auto", "right", "left"]
+            "allowedLayoutIds": ["auto", "right", "left"],
+            "semanticIconSlots": []
           },
           "longTableMenuSlide": {
             "requiredSlots": ["data.title", "data.subtitle", "data.items"],
-            "allowedLayoutIds": ["auto", "ledger", "programme"]
+            "allowedLayoutIds": ["auto", "ledger", "programme"],
+            "semanticIconSlots": []
           },
           "longTableQuoteSlide": {
             "requiredSlots": ["data.label", "data.quote", "data.author", "data.role"],
-            "allowedLayoutIds": ["auto", "centered", "reading"]
+            "allowedLayoutIds": ["auto", "centered", "reading"],
+            "semanticIconSlots": []
           },
           "longTableCalendarSlide": {
             "requiredSlots": ["data.title", "data.subtitle", "data.columns", "data.rows"],
-            "allowedLayoutIds": ["auto", "ledger"]
+            "allowedLayoutIds": ["auto", "ledger"],
+            "semanticIconSlots": []
           },
           "longTableClosingSlide": {
             "requiredSlots": [
@@ -3057,7 +3205,8 @@
               "data.cta",
               "data.footer"
             ],
-            "allowedLayoutIds": ["auto", "left", "centered"]
+            "allowedLayoutIds": ["auto", "left", "centered"],
+            "semanticIconSlots": []
           }
         }
       },
@@ -3205,7 +3354,7 @@
     },
     {
       "id": "biennale-yellow",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "path": "biennale-yellow/biennale-yellow.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
@@ -3401,11 +3550,13 @@
         "slideTypes": {
           "biennaleCoverSlide": {
             "requiredSlots": ["data.dateRange", "data.title", "data.subline", "data.footerItems"],
-            "allowedLayoutIds": ["auto", "poster", "wide"]
+            "allowedLayoutIds": ["auto", "poster", "wide"],
+            "semanticIconSlots": []
           },
           "biennaleManifestoSlide": {
             "requiredSlots": ["data.quote", "data.attribution"],
-            "allowedLayoutIds": ["auto", "statement", "reading"]
+            "allowedLayoutIds": ["auto", "statement", "reading"],
+            "semanticIconSlots": []
           },
           "biennaleProgrammeSlide": {
             "requiredSlots": [
@@ -3415,11 +3566,20 @@
               "data.headLabel",
               "data.strands"
             ],
-            "allowedLayoutIds": ["auto", "split"]
+            "allowedLayoutIds": ["auto", "split"],
+            "semanticIconSlots": [
+              {
+                "path": "data.strands[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "biennaleChapterSlide": {
             "requiredSlots": ["data.rail", "data.number", "data.title", "data.lede"],
-            "allowedLayoutIds": ["auto", "monument"]
+            "allowedLayoutIds": ["auto", "monument"],
+            "semanticIconSlots": []
           },
           "biennaleDataSlide": {
             "requiredSlots": [
@@ -3430,19 +3590,23 @@
               "data.unit",
               "data.source"
             ],
-            "allowedLayoutIds": ["auto", "ledger"]
+            "allowedLayoutIds": ["auto", "ledger"],
+            "semanticIconSlots": []
           },
           "biennaleQuoteSlide": {
             "requiredSlots": ["data.kicker", "data.quote", "data.author", "data.role"],
-            "allowedLayoutIds": ["auto", "margin"]
+            "allowedLayoutIds": ["auto", "margin"],
+            "semanticIconSlots": []
           },
           "biennaleCalendarSlide": {
             "requiredSlots": ["data.title", "data.label", "data.columns", "data.rows"],
-            "allowedLayoutIds": ["auto", "table"]
+            "allowedLayoutIds": ["auto", "table"],
+            "semanticIconSlots": []
           },
           "biennaleColophonSlide": {
             "requiredSlots": ["data.kicker", "data.title", "data.footerItems"],
-            "allowedLayoutIds": ["auto", "echo"]
+            "allowedLayoutIds": ["auto", "echo"],
+            "semanticIconSlots": []
           },
           "biennaleEvidenceSlide": {
             "requiredSlots": [
@@ -3672,7 +3836,7 @@
     },
     {
       "id": "black-gold",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "path": "black-gold/black-gold.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
@@ -3759,7 +3923,8 @@
               "data.disclosure",
               "data.metrics"
             ],
-            "allowedLayoutIds": ["auto", "snapshot"]
+            "allowedLayoutIds": ["auto", "snapshot"],
+            "semanticIconSlots": []
           },
           "ledgerSummarySlide": {
             "requiredSlots": [
@@ -3773,7 +3938,15 @@
               "data.judgments",
               "data.metrics"
             ],
-            "allowedLayoutIds": ["auto", "judgments"]
+            "allowedLayoutIds": ["auto", "judgments"],
+            "semanticIconSlots": [
+              {
+                "path": "data.judgments[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "ledgerTrendSlide": {
             "requiredSlots": [
@@ -3786,7 +3959,8 @@
               "data.chart",
               "data.notes"
             ],
-            "allowedLayoutIds": ["auto", "wide", "rail", "paired"]
+            "allowedLayoutIds": ["auto", "wide", "rail", "paired"],
+            "semanticIconSlots": []
           },
           "ledgerMatrixSlide": {
             "requiredSlots": [
@@ -3800,7 +3974,8 @@
               "data.rows",
               "data.totalLabel"
             ],
-            "allowedLayoutIds": ["auto", "ledger", "compact"]
+            "allowedLayoutIds": ["auto", "ledger", "compact"],
+            "semanticIconSlots": []
           },
           "ledgerRankingSlide": {
             "requiredSlots": [
@@ -3813,7 +3988,8 @@
               "data.chart",
               "data.metrics"
             ],
-            "allowedLayoutIds": ["auto", "rail", "wide"]
+            "allowedLayoutIds": ["auto", "rail", "wide"],
+            "semanticIconSlots": []
           },
           "ledgerDecisionSlide": {
             "requiredSlots": [
@@ -3827,7 +4003,8 @@
               "data.actions",
               "data.decision"
             ],
-            "allowedLayoutIds": ["auto", "triggers"]
+            "allowedLayoutIds": ["auto", "triggers"],
+            "semanticIconSlots": []
           }
         }
       },
@@ -3970,7 +4147,7 @@
     },
     {
       "id": "green-slate",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "path": "green-slate/green-slate.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
@@ -4084,7 +4261,8 @@
               "data.metrics",
               "data.callout"
             ],
-            "allowedLayoutIds": ["auto", "standard"]
+            "allowedLayoutIds": ["auto", "standard"],
+            "semanticIconSlots": []
           },
           "slateSummarySlide": {
             "requiredSlots": [
@@ -4097,7 +4275,15 @@
               "data.findings",
               "data.metrics"
             ],
-            "allowedLayoutIds": ["auto", "standard"]
+            "allowedLayoutIds": ["auto", "standard"],
+            "semanticIconSlots": [
+              {
+                "path": "data.findings[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "slateRangeSlide": {
             "requiredSlots": [
@@ -4110,7 +4296,8 @@
               "data.range",
               "data.notes"
             ],
-            "allowedLayoutIds": ["auto", "rail", "wide"]
+            "allowedLayoutIds": ["auto", "rail", "wide"],
+            "semanticIconSlots": []
           },
           "slateMatrixSlide": {
             "requiredSlots": [
@@ -4124,7 +4311,8 @@
               "data.rows",
               "data.legend"
             ],
-            "allowedLayoutIds": ["auto", "full", "compact"]
+            "allowedLayoutIds": ["auto", "full", "compact"],
+            "semanticIconSlots": []
           },
           "slateRoadmapSlide": {
             "requiredSlots": [
@@ -4138,7 +4326,8 @@
               "data.phases",
               "data.tracks"
             ],
-            "allowedLayoutIds": ["auto", "standard"]
+            "allowedLayoutIds": ["auto", "standard"],
+            "semanticIconSlots": []
           },
           "slateValueSlide": {
             "requiredSlots": [
@@ -4152,7 +4341,8 @@
               "data.investment",
               "data.notes"
             ],
-            "allowedLayoutIds": ["auto", "standard"]
+            "allowedLayoutIds": ["auto", "standard"],
+            "semanticIconSlots": []
           },
           "slateFlowSlide": {
             "requiredSlots": [
@@ -4165,7 +4355,8 @@
               "data.steps",
               "data.notes"
             ],
-            "allowedLayoutIds": ["auto", "vertical", "horizontal"]
+            "allowedLayoutIds": ["auto", "vertical", "horizontal"],
+            "semanticIconSlots": []
           },
           "slateSectionSlide": {
             "requiredSlots": [
@@ -4175,7 +4366,8 @@
               "data.asOf",
               "data.abstract"
             ],
-            "allowedLayoutIds": ["auto", "standard"]
+            "allowedLayoutIds": ["auto", "standard"],
+            "semanticIconSlots": []
           },
           "slateNoticeSlide": {
             "requiredSlots": [
@@ -4185,7 +4377,8 @@
               "data.asOf",
               "data.paragraphs"
             ],
-            "allowedLayoutIds": ["auto", "standard"]
+            "allowedLayoutIds": ["auto", "standard"],
+            "semanticIconSlots": []
           },
           "slateClosingSlide": {
             "requiredSlots": [
@@ -4197,7 +4390,8 @@
               "data.next",
               "data.contact"
             ],
-            "allowedLayoutIds": ["auto", "standard"]
+            "allowedLayoutIds": ["auto", "standard"],
+            "semanticIconSlots": []
           }
         }
       },
@@ -4347,7 +4541,7 @@
     },
     {
       "id": "clear-value",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "path": "clear-value/clear-value.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
@@ -4459,7 +4653,8 @@
               "data.abstract",
               "data.metrics"
             ],
-            "allowedLayoutIds": ["auto", "standard"]
+            "allowedLayoutIds": ["auto", "standard"],
+            "semanticIconSlots": []
           },
           "valueSummarySlide": {
             "requiredSlots": [
@@ -4471,7 +4666,15 @@
               "data.items",
               "data.side"
             ],
-            "allowedLayoutIds": ["auto", "standard"]
+            "allowedLayoutIds": ["auto", "standard"],
+            "semanticIconSlots": [
+              {
+                "path": "data.items[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "valueEvidenceSlide": {
             "requiredSlots": [
@@ -4482,7 +4685,8 @@
               "data.verdict",
               "data.charts"
             ],
-            "allowedLayoutIds": ["auto", "rail", "wide", "paired", "lead", "quad"]
+            "allowedLayoutIds": ["auto", "rail", "wide", "paired", "lead", "quad"],
+            "semanticIconSlots": []
           },
           "valueMatrixSlide": {
             "requiredSlots": [
@@ -4496,7 +4700,8 @@
               "data.rows",
               "data.note"
             ],
-            "allowedLayoutIds": ["auto", "full", "compact"]
+            "allowedLayoutIds": ["auto", "full", "compact"],
+            "semanticIconSlots": []
           },
           "valueCompositeSlide": {
             "requiredSlots": [
@@ -4511,7 +4716,8 @@
               "data.note",
               "data.charts"
             ],
-            "allowedLayoutIds": ["auto", "standard"]
+            "allowedLayoutIds": ["auto", "standard"],
+            "semanticIconSlots": []
           },
           "valueTimelineSlide": {
             "requiredSlots": [
@@ -4526,7 +4732,8 @@
               "data.note",
               "data.phases"
             ],
-            "allowedLayoutIds": ["auto", "standard"]
+            "allowedLayoutIds": ["auto", "standard"],
+            "semanticIconSlots": []
           },
           "valueDecisionSlide": {
             "requiredSlots": [
@@ -4538,7 +4745,15 @@
               "data.items",
               "data.side"
             ],
-            "allowedLayoutIds": ["auto", "standard"]
+            "allowedLayoutIds": ["auto", "standard"],
+            "semanticIconSlots": [
+              {
+                "path": "data.items[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "valueArgumentSlide": {
             "requiredSlots": [
@@ -4549,7 +4764,8 @@
               "data.verdict",
               "data.paragraphs"
             ],
-            "allowedLayoutIds": ["auto", "column", "split"]
+            "allowedLayoutIds": ["auto", "column", "split"],
+            "semanticIconSlots": []
           }
         }
       },
@@ -4697,7 +4913,7 @@
     },
     {
       "id": "clear-impact",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "path": "clear-impact/clear-impact.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
@@ -4817,7 +5033,8 @@
               "data.sections",
               "data.metrics"
             ],
-            "allowedLayoutIds": ["auto", "verdict", "bandFirst"]
+            "allowedLayoutIds": ["auto", "verdict", "bandFirst"],
+            "semanticIconSlots": []
           },
           "impactReviewSlide": {
             "requiredSlots": [
@@ -4830,7 +5047,15 @@
               "data.findings",
               "data.verdict"
             ],
-            "allowedLayoutIds": ["auto", "rail", "band"]
+            "allowedLayoutIds": ["auto", "rail", "band"],
+            "semanticIconSlots": [
+              {
+                "path": "data.findings[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "impactChartSlide": {
             "requiredSlots": [
@@ -4845,7 +5070,8 @@
               "data.notes",
               "data.summary"
             ],
-            "allowedLayoutIds": ["auto", "chartLeft", "chartRight"]
+            "allowedLayoutIds": ["auto", "chartLeft", "chartRight"],
+            "semanticIconSlots": []
           },
           "impactComparisonSlide": {
             "requiredSlots": [
@@ -4860,7 +5086,8 @@
               "data.tableNote",
               "data.evidence"
             ],
-            "allowedLayoutIds": ["auto", "side", "stacked"]
+            "allowedLayoutIds": ["auto", "side", "stacked"],
+            "semanticIconSlots": []
           },
           "impactProcessSlide": {
             "requiredSlots": [
@@ -4874,7 +5101,8 @@
               "data.feedback",
               "data.assurance"
             ],
-            "allowedLayoutIds": ["auto", "chain", "vertical"]
+            "allowedLayoutIds": ["auto", "chain", "vertical"],
+            "semanticIconSlots": []
           },
           "impactCapacitySlide": {
             "requiredSlots": [
@@ -4887,7 +5115,8 @@
               "data.explanation",
               "data.outlook"
             ],
-            "allowedLayoutIds": ["auto", "strip", "rail"]
+            "allowedLayoutIds": ["auto", "strip", "rail"],
+            "semanticIconSlots": []
           },
           "impactScorecardSlide": {
             "requiredSlots": [
@@ -4900,7 +5129,8 @@
               "data.rows",
               "data.note"
             ],
-            "allowedLayoutIds": ["auto", "wide", "inset"]
+            "allowedLayoutIds": ["auto", "wide", "inset"],
+            "semanticIconSlots": []
           },
           "impactCommitmentsSlide": {
             "requiredSlots": [
@@ -4913,7 +5143,8 @@
               "data.verificationLabel",
               "data.verification"
             ],
-            "allowedLayoutIds": ["auto", "columns", "ledger"]
+            "allowedLayoutIds": ["auto", "columns", "ledger"],
+            "semanticIconSlots": []
           },
           "impactProgressSlide": {
             "requiredSlots": [
@@ -4925,7 +5156,8 @@
               "data.items",
               "data.basis"
             ],
-            "allowedLayoutIds": ["auto", "rows", "columns"]
+            "allowedLayoutIds": ["auto", "rows", "columns"],
+            "semanticIconSlots": []
           },
           "impactVarianceSlide": {
             "requiredSlots": [
@@ -4942,7 +5174,8 @@
               "data.drivers",
               "data.explanation"
             ],
-            "allowedLayoutIds": ["auto", "wide", "split"]
+            "allowedLayoutIds": ["auto", "wide", "split"],
+            "semanticIconSlots": []
           },
           "impactMilestonesSlide": {
             "requiredSlots": [
@@ -4954,7 +5187,8 @@
               "data.items",
               "data.governance"
             ],
-            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"],
+            "semanticIconSlots": []
           },
           "impactDecisionsSlide": {
             "requiredSlots": [
@@ -4966,7 +5200,15 @@
               "data.items",
               "data.consequence"
             ],
-            "allowedLayoutIds": ["auto", "ledger", "split"]
+            "allowedLayoutIds": ["auto", "ledger", "split"],
+            "semanticIconSlots": [
+              {
+                "path": "data.items[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           }
         }
       },
@@ -5229,7 +5471,8 @@
                 "labelSlot": "data.assetLabel",
                 "captionSlot": "data.assetCaption"
               }
-            }
+            },
+            "semanticIconSlots": []
           },
           "clayOverviewSlide": {
             "requiredSlots": [
@@ -5241,7 +5484,15 @@
               "data.metrics",
               "data.findings"
             ],
-            "allowedLayoutIds": ["auto", "rail", "band"]
+            "allowedLayoutIds": ["auto", "rail", "band"],
+            "semanticIconSlots": [
+              {
+                "path": "data.findings[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "clayChartSlide": {
             "requiredSlots": [
@@ -5258,7 +5509,8 @@
               "data.analysis",
               "data.conclusion"
             ],
-            "allowedLayoutIds": ["auto", "chartLeft", "chartRight"]
+            "allowedLayoutIds": ["auto", "chartLeft", "chartRight"],
+            "semanticIconSlots": []
           },
           "clayComparisonSlide": {
             "requiredSlots": [
@@ -5274,7 +5526,8 @@
               "data.quote",
               "data.attribution"
             ],
-            "allowedLayoutIds": ["auto", "side", "stacked"]
+            "allowedLayoutIds": ["auto", "side", "stacked"],
+            "semanticIconSlots": []
           },
           "clayProcessSlide": {
             "requiredSlots": [
@@ -5286,7 +5539,8 @@
               "data.metrics",
               "data.steps"
             ],
-            "allowedLayoutIds": ["auto", "chain", "vertical"]
+            "allowedLayoutIds": ["auto", "chain", "vertical"],
+            "semanticIconSlots": []
           },
           "clayKpiSlide": {
             "requiredSlots": [
@@ -5298,7 +5552,8 @@
               "data.metrics",
               "data.explanation"
             ],
-            "allowedLayoutIds": ["auto", "strip", "rail"]
+            "allowedLayoutIds": ["auto", "strip", "rail"],
+            "semanticIconSlots": []
           },
           "clayStatusSlide": {
             "requiredSlots": [
@@ -5311,7 +5566,8 @@
               "data.rows",
               "data.tableNote"
             ],
-            "allowedLayoutIds": ["auto", "wide"]
+            "allowedLayoutIds": ["auto", "wide"],
+            "semanticIconSlots": []
           },
           "clayCommitmentsSlide": {
             "requiredSlots": [
@@ -5323,7 +5579,8 @@
               "data.items",
               "data.mechanism"
             ],
-            "allowedLayoutIds": ["auto", "columns", "ledger"]
+            "allowedLayoutIds": ["auto", "columns", "ledger"],
+            "semanticIconSlots": []
           },
           "clayNarrativeSlide": {
             "requiredSlots": [
@@ -5335,7 +5592,15 @@
               "data.lead",
               "data.sections"
             ],
-            "allowedLayoutIds": ["auto", "leadLeft", "columns", "quadrants", "hub"]
+            "allowedLayoutIds": ["auto", "leadLeft", "columns", "quadrants", "hub"],
+            "semanticIconSlots": [
+              {
+                "path": "data.sections[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           }
         }
       },
@@ -5478,7 +5743,7 @@
     },
     {
       "id": "amber-ledger",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "path": "amber-ledger/amber-ledger.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
@@ -5602,7 +5867,8 @@
               "data.description",
               "data.metadata"
             ],
-            "allowedLayoutIds": ["auto", "circleRight", "circleLeft"]
+            "allowedLayoutIds": ["auto", "circleRight", "circleLeft"],
+            "semanticIconSlots": []
           },
           "amberSummarySlide": {
             "requiredSlots": [
@@ -5619,7 +5885,8 @@
               "data.analysis",
               "data.notes"
             ],
-            "allowedLayoutIds": ["auto", "verdictCenter", "verdictBand"]
+            "allowedLayoutIds": ["auto", "verdictCenter", "verdictBand"],
+            "semanticIconSlots": []
           },
           "amberMixSlide": {
             "requiredSlots": [
@@ -5637,7 +5904,8 @@
               "data.segments",
               "data.metrics"
             ],
-            "allowedLayoutIds": ["auto", "evidenceRail", "evidenceBand"]
+            "allowedLayoutIds": ["auto", "evidenceRail", "evidenceBand"],
+            "semanticIconSlots": []
           },
           "amberTrendSlide": {
             "requiredSlots": [
@@ -5653,7 +5921,8 @@
               "data.notes",
               "data.annotation"
             ],
-            "allowedLayoutIds": ["auto", "chartRail", "chartBand"]
+            "allowedLayoutIds": ["auto", "chartRail", "chartBand"],
+            "semanticIconSlots": []
           },
           "amberBridgeSlide": {
             "requiredSlots": [
@@ -5676,7 +5945,8 @@
               "data.tableNote",
               "data.baseline"
             ],
-            "allowedLayoutIds": ["auto", "bridgeRail", "bridgeBand"]
+            "allowedLayoutIds": ["auto", "bridgeRail", "bridgeBand"],
+            "semanticIconSlots": []
           },
           "amberProjectsSlide": {
             "requiredSlots": [
@@ -5691,7 +5961,15 @@
               "data.projects",
               "data.recovery"
             ],
-            "allowedLayoutIds": ["auto", "progressRows", "progressColumns"]
+            "allowedLayoutIds": ["auto", "progressRows", "progressColumns"],
+            "semanticIconSlots": [
+              {
+                "path": "data.projects[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "amberMatrixSlide": {
             "requiredSlots": [
@@ -5707,7 +5985,8 @@
               "data.focusTone",
               "data.note"
             ],
-            "allowedLayoutIds": ["auto", "matrixWide", "matrixRail"]
+            "allowedLayoutIds": ["auto", "matrixWide", "matrixRail"],
+            "semanticIconSlots": []
           },
           "amberDecisionsSlide": {
             "requiredSlots": [
@@ -5721,7 +6000,8 @@
               "data.items",
               "data.closing"
             ],
-            "allowedLayoutIds": ["auto", "decisionTable", "decisionLedger"]
+            "allowedLayoutIds": ["auto", "decisionTable", "decisionLedger"],
+            "semanticIconSlots": []
           }
         }
       },
@@ -5867,7 +6147,7 @@
     },
     {
       "id": "midnight-pulse",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "path": "midnight-pulse/midnight-pulse.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
@@ -5999,7 +6279,8 @@
                 "labelSlot": "data.imageLabel",
                 "note": "Optional independent content-owned photo; never copy the reference photograph."
               }
-            }
+            },
+            "semanticIconSlots": []
           },
           "pulseOverviewSlide": {
             "requiredSlots": [
@@ -6015,7 +6296,8 @@
               "data.actualLabel",
               "data.targetLabel"
             ],
-            "allowedLayoutIds": ["auto", "gaugeRail", "gaugeBand"]
+            "allowedLayoutIds": ["auto", "gaugeRail", "gaugeBand"],
+            "semanticIconSlots": []
           },
           "pulseAuditSlide": {
             "requiredSlots": [
@@ -6029,7 +6311,8 @@
               "data.rows",
               "data.note"
             ],
-            "allowedLayoutIds": ["auto", "auditWide", "auditRail"]
+            "allowedLayoutIds": ["auto", "auditWide", "auditRail"],
+            "semanticIconSlots": []
           },
           "pulseTrendSlide": {
             "requiredSlots": [
@@ -6046,7 +6329,8 @@
               "data.boundary",
               "data.boundaryLabel"
             ],
-            "allowedLayoutIds": ["auto", "trendRail", "trendBand"]
+            "allowedLayoutIds": ["auto", "trendRail", "trendBand"],
+            "semanticIconSlots": []
           },
           "pulseAttributionSlide": {
             "requiredSlots": [
@@ -6065,7 +6349,8 @@
               "data.groups",
               "data.factors"
             ],
-            "allowedLayoutIds": ["auto", "targetRight", "targetLeft"]
+            "allowedLayoutIds": ["auto", "targetRight", "targetLeft"],
+            "semanticIconSlots": []
           },
           "pulseComparisonSlide": {
             "requiredSlots": [
@@ -6079,7 +6364,15 @@
               "data.overviewNote",
               "data.subjects"
             ],
-            "allowedLayoutIds": ["auto", "compareColumns", "compareRows"]
+            "allowedLayoutIds": ["auto", "compareColumns", "compareRows"],
+            "semanticIconSlots": [
+              {
+                "path": "data.subjects[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "pulseStatusSlide": {
             "requiredSlots": [
@@ -6091,7 +6384,8 @@
               "data.verdict",
               "data.projects"
             ],
-            "allowedLayoutIds": ["auto", "statusRows", "statusColumns"]
+            "allowedLayoutIds": ["auto", "statusRows", "statusColumns"],
+            "semanticIconSlots": []
           },
           "pulseCloseSlide": {
             "requiredSlots": [
@@ -6104,7 +6398,8 @@
               "data.phases",
               "data.decisions"
             ],
-            "allowedLayoutIds": ["auto", "routeTop", "routeLeft"]
+            "allowedLayoutIds": ["auto", "routeTop", "routeLeft"],
+            "semanticIconSlots": []
           }
         }
       },
@@ -6251,7 +6546,7 @@
     },
     {
       "id": "sky-compass",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "path": "sky-compass/sky-compass.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "default",
@@ -6385,7 +6680,8 @@
               "data.masthead",
               "data.reportLabel"
             ],
-            "allowedLayoutIds": ["auto", "verdict", "rail"]
+            "allowedLayoutIds": ["auto", "verdict", "rail"],
+            "semanticIconSlots": []
           },
           "skyPerformanceSlide": {
             "requiredSlots": [
@@ -6399,7 +6695,8 @@
               "data.metrics",
               "data.context"
             ],
-            "allowedLayoutIds": ["auto", "wide", "rail"]
+            "allowedLayoutIds": ["auto", "wide", "rail"],
+            "semanticIconSlots": []
           },
           "skyCoverageSlide": {
             "requiredSlots": [
@@ -6416,7 +6713,15 @@
               "data.notes",
               "data.mixNote"
             ],
-            "allowedLayoutIds": ["auto", "plotLeft", "plotRight"]
+            "allowedLayoutIds": ["auto", "plotLeft", "plotRight"],
+            "semanticIconSlots": [
+              {
+                "path": "data.notes[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "skyRankingSlide": {
             "requiredSlots": [
@@ -6434,7 +6739,8 @@
               "data.notes",
               "data.changeLabel"
             ],
-            "allowedLayoutIds": ["auto", "plotLeft", "plotRight"]
+            "allowedLayoutIds": ["auto", "plotLeft", "plotRight"],
+            "semanticIconSlots": []
           },
           "skyProcessSlide": {
             "requiredSlots": [
@@ -6453,7 +6759,8 @@
               "data.notes",
               "data.targetMarkerLabel"
             ],
-            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"],
+            "semanticIconSlots": []
           },
           "skyDiagnosisSlide": {
             "requiredSlots": [
@@ -6469,7 +6776,8 @@
               "data.reconciliationLabel",
               "data.issues"
             ],
-            "allowedLayoutIds": ["auto", "wide", "compact"]
+            "allowedLayoutIds": ["auto", "wide", "compact"],
+            "semanticIconSlots": []
           },
           "skyActionsSlide": {
             "requiredSlots": [
@@ -6484,7 +6792,8 @@
               "data.endDate",
               "data.ticks"
             ],
-            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"],
+            "semanticIconSlots": []
           },
           "skyProjectSlide": {
             "requiredSlots": [
@@ -6500,7 +6809,15 @@
               "data.metadata",
               "data.items"
             ],
-            "allowedLayoutIds": ["auto", "arcLeft", "arcRight"]
+            "allowedLayoutIds": ["auto", "arcLeft", "arcRight"],
+            "semanticIconSlots": [
+              {
+                "path": "data.items[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "skyTrendSlide": {
             "requiredSlots": [
@@ -6518,7 +6835,8 @@
               "data.points",
               "data.notes"
             ],
-            "allowedLayoutIds": ["auto", "plotLeft", "plotRight"]
+            "allowedLayoutIds": ["auto", "plotLeft", "plotRight"],
+            "semanticIconSlots": []
           },
           "skyBridgeSlide": {
             "requiredSlots": [
@@ -6536,7 +6854,8 @@
               "data.drivers",
               "data.notes"
             ],
-            "allowedLayoutIds": ["auto", "plotLeft", "plotRight"]
+            "allowedLayoutIds": ["auto", "plotLeft", "plotRight"],
+            "semanticIconSlots": []
           },
           "skyAppendixSlide": {
             "requiredSlots": [
@@ -6551,7 +6870,8 @@
               "data.rows",
               "data.methodology"
             ],
-            "allowedLayoutIds": ["auto", "wide", "inset"]
+            "allowedLayoutIds": ["auto", "wide", "inset"],
+            "semanticIconSlots": []
           },
           "skyDecisionsSlide": {
             "requiredSlots": [
@@ -6565,7 +6885,8 @@
               "data.items",
               "data.commitment"
             ],
-            "allowedLayoutIds": ["auto", "wide", "compact"]
+            "allowedLayoutIds": ["auto", "wide", "compact"],
+            "semanticIconSlots": []
           }
         }
       },
@@ -6713,7 +7034,7 @@
     },
     {
       "id": "violet-momentum",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "path": "violet-momentum/violet-momentum.kit.mjs",
       "designContract": "violet-momentum/design.json",
       "primitiveDependency": "core-primitives@0.1.0",
@@ -6817,7 +7138,8 @@
               "data.source",
               "data.metrics"
             ],
-            "allowedLayoutIds": ["auto", "split", "band"]
+            "allowedLayoutIds": ["auto", "split", "band"],
+            "semanticIconSlots": []
           },
           "violetSummarySlide": {
             "requiredSlots": [
@@ -6831,7 +7153,8 @@
               "data.headers",
               "data.metrics"
             ],
-            "allowedLayoutIds": ["auto", "rail", "band"]
+            "allowedLayoutIds": ["auto", "rail", "band"],
+            "semanticIconSlots": []
           },
           "violetScorecardSlide": {
             "requiredSlots": [
@@ -6843,7 +7166,8 @@
               "data.headers",
               "data.rows"
             ],
-            "allowedLayoutIds": ["auto", "wide"]
+            "allowedLayoutIds": ["auto", "wide"],
+            "semanticIconSlots": []
           },
           "violetTrendSlide": {
             "requiredSlots": [
@@ -6861,7 +7185,8 @@
               "data.notes",
               "data.events"
             ],
-            "allowedLayoutIds": ["auto", "rail", "wide"]
+            "allowedLayoutIds": ["auto", "rail", "wide"],
+            "semanticIconSlots": []
           },
           "violetAttributionSlide": {
             "requiredSlots": [
@@ -6876,7 +7201,8 @@
               "data.totalLabel",
               "data.unit"
             ],
-            "allowedLayoutIds": ["auto", "converge", "stack"]
+            "allowedLayoutIds": ["auto", "converge", "stack"],
+            "semanticIconSlots": []
           },
           "violetDiagnosisSlide": {
             "requiredSlots": [
@@ -6888,7 +7214,15 @@
               "data.context",
               "data.cases"
             ],
-            "allowedLayoutIds": ["auto", "columns", "rows"]
+            "allowedLayoutIds": ["auto", "columns", "rows"],
+            "semanticIconSlots": [
+              {
+                "path": "data.cases[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "violetProjectsSlide": {
             "requiredSlots": [
@@ -6899,7 +7233,8 @@
               "data.title",
               "data.projects"
             ],
-            "allowedLayoutIds": ["auto", "rows", "columns"]
+            "allowedLayoutIds": ["auto", "rows", "columns"],
+            "semanticIconSlots": []
           },
           "violetActionsSlide": {
             "requiredSlots": [
@@ -6912,7 +7247,15 @@
               "data.decisions",
               "data.decisionHeading"
             ],
-            "allowedLayoutIds": ["auto", "timeline", "stack"]
+            "allowedLayoutIds": ["auto", "timeline", "stack"],
+            "semanticIconSlots": [
+              {
+                "path": "data.decisions[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "violetSectionSlide": {
             "requiredSlots": [
@@ -6922,7 +7265,8 @@
               "data.source",
               "data.period"
             ],
-            "allowedLayoutIds": ["auto", "full"]
+            "allowedLayoutIds": ["auto", "full"],
+            "semanticIconSlots": []
           },
           "violetRatingSlide": {
             "requiredSlots": [
@@ -6933,7 +7277,8 @@
               "data.title",
               "data.ratings"
             ],
-            "allowedLayoutIds": ["auto", "rows", "columns"]
+            "allowedLayoutIds": ["auto", "rows", "columns"],
+            "semanticIconSlots": []
           }
         },
         "severity": "warning",
@@ -7084,7 +7429,7 @@
     },
     {
       "id": "teal-journal",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "path": "teal-journal/teal-journal.kit.mjs",
       "designContract": "teal-journal/design.json",
       "primitiveDependency": "core-primitives@0.1.0",
@@ -7202,7 +7547,8 @@
               "data.markers",
               "data.assetCaption"
             ],
-            "allowedLayoutIds": ["auto", "angular", "inset"]
+            "allowedLayoutIds": ["auto", "angular", "inset"],
+            "semanticIconSlots": []
           },
           "journalOutlookSlide": {
             "requiredSlots": [
@@ -7217,7 +7563,15 @@
               "data.points",
               "data.notes"
             ],
-            "allowedLayoutIds": ["auto", "leadLeft", "leadRight"]
+            "allowedLayoutIds": ["auto", "leadLeft", "leadRight"],
+            "semanticIconSlots": [
+              {
+                "path": "data.notes[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "journalAudienceSlide": {
             "requiredSlots": [
@@ -7232,7 +7586,8 @@
               "data.focusColumn",
               "data.methodology"
             ],
-            "allowedLayoutIds": ["auto", "leadLeft", "leadBottom"]
+            "allowedLayoutIds": ["auto", "leadLeft", "leadBottom"],
+            "semanticIconSlots": []
           },
           "journalCalendarSlide": {
             "requiredSlots": [
@@ -7248,7 +7603,8 @@
               "data.phases",
               "data.allocation"
             ],
-            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"],
+            "semanticIconSlots": []
           },
           "journalJourneySlide": {
             "requiredSlots": [
@@ -7262,7 +7618,8 @@
               "data.unit",
               "data.steps"
             ],
-            "allowedLayoutIds": ["auto", "arc", "linear"]
+            "allowedLayoutIds": ["auto", "arc", "linear"],
+            "semanticIconSlots": []
           },
           "journalAnatomySlide": {
             "requiredSlots": [
@@ -7276,7 +7633,8 @@
               "data.unit",
               "data.comparison"
             ],
-            "allowedLayoutIds": ["auto", "center", "offset"]
+            "allowedLayoutIds": ["auto", "center", "offset"],
+            "semanticIconSlots": []
           },
           "journalResultsSlide": {
             "requiredSlots": [
@@ -7289,7 +7647,8 @@
               "data.outputs",
               "data.kpis"
             ],
-            "allowedLayoutIds": ["auto", "rail", "band"]
+            "allowedLayoutIds": ["auto", "rail", "band"],
+            "semanticIconSlots": []
           },
           "journalRoadmapSlide": {
             "requiredSlots": [
@@ -7304,7 +7663,8 @@
               "data.targets",
               "data.actions"
             ],
-            "allowedLayoutIds": ["auto", "rail", "stacked"]
+            "allowedLayoutIds": ["auto", "rail", "stacked"],
+            "semanticIconSlots": []
           },
           "journalNarrativeSlide": {
             "requiredSlots": [
@@ -7316,7 +7676,8 @@
               "data.lead",
               "data.sections"
             ],
-            "allowedLayoutIds": ["auto", "leadLeft", "columns"]
+            "allowedLayoutIds": ["auto", "leadLeft", "columns"],
+            "semanticIconSlots": []
           }
         }
       },
@@ -7502,7 +7863,7 @@
     },
     {
       "id": "blue-research",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "path": "blue-research/blue-research.kit.mjs",
       "designContract": "blue-research/design.json",
       "primitiveDependency": "core-primitives@0.1.0",
@@ -7628,7 +7989,8 @@
               "data.editionLabel",
               "data.disclosure"
             ],
-            "allowedLayoutIds": ["auto", "spine", "split"]
+            "allowedLayoutIds": ["auto", "spine", "split"],
+            "semanticIconSlots": []
           },
           "researchOverviewSlide": {
             "requiredSlots": [
@@ -7644,7 +8006,8 @@
               "data.agenda",
               "data.reportTitle"
             ],
-            "allowedLayoutIds": ["auto", "rail", "reverse"]
+            "allowedLayoutIds": ["auto", "rail", "reverse"],
+            "semanticIconSlots": []
           },
           "researchEvidenceSlide": {
             "requiredSlots": [
@@ -7660,7 +8023,8 @@
               "data.metric",
               "data.reportTitle"
             ],
-            "allowedLayoutIds": ["auto", "rail", "band"]
+            "allowedLayoutIds": ["auto", "rail", "band"],
+            "semanticIconSlots": []
           },
           "researchMatrixSlide": {
             "requiredSlots": [
@@ -7678,7 +8042,8 @@
               "data.attribution",
               "data.reportTitle"
             ],
-            "allowedLayoutIds": ["auto", "rail", "reverse"]
+            "allowedLayoutIds": ["auto", "rail", "reverse"],
+            "semanticIconSlots": []
           },
           "researchBridgeSlide": {
             "requiredSlots": [
@@ -7697,7 +8062,8 @@
               "data.drivers",
               "data.reportTitle"
             ],
-            "allowedLayoutIds": ["auto", "rail", "reverse"]
+            "allowedLayoutIds": ["auto", "rail", "reverse"],
+            "semanticIconSlots": []
           },
           "researchTiersSlide": {
             "requiredSlots": [
@@ -7715,7 +8081,8 @@
               "data.notes",
               "data.reportTitle"
             ],
-            "allowedLayoutIds": ["auto", "rail", "reverse"]
+            "allowedLayoutIds": ["auto", "rail", "reverse"],
+            "semanticIconSlots": []
           },
           "researchTimelineSlide": {
             "requiredSlots": [
@@ -7732,7 +8099,8 @@
               "data.events",
               "data.reportTitle"
             ],
-            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"],
+            "semanticIconSlots": []
           },
           "researchScorecardSlide": {
             "requiredSlots": [
@@ -7750,7 +8118,8 @@
               "data.acceptanceGate",
               "data.reportTitle"
             ],
-            "allowedLayoutIds": ["auto", "steps", "register"]
+            "allowedLayoutIds": ["auto", "steps", "register"],
+            "semanticIconSlots": []
           },
           "researchFindingsSlide": {
             "requiredSlots": [
@@ -7764,7 +8133,15 @@
               "data.items",
               "data.reportTitle"
             ],
-            "allowedLayoutIds": ["auto", "register", "leadRail"]
+            "allowedLayoutIds": ["auto", "register", "leadRail"],
+            "semanticIconSlots": [
+              {
+                "path": "data.items[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "researchImplicationsSlide": {
             "requiredSlots": [
@@ -7783,7 +8160,8 @@
               "data.acceptance",
               "data.reportTitle"
             ],
-            "allowedLayoutIds": ["auto", "matrix", "ledger"]
+            "allowedLayoutIds": ["auto", "matrix", "ledger"],
+            "semanticIconSlots": []
           }
         }
       },
@@ -7929,7 +8307,7 @@
     },
     {
       "id": "pink-script",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "path": "pink-script/pink-script.kit.mjs",
       "designContract": "pink-script/design.json",
       "primitiveDependency": "core-primitives@0.1.0",
@@ -7938,7 +8316,7 @@
         "minFontPt": 10.5,
         "labelFontPt": 10.5,
         "sourceFontPt": 10.5,
-        "baseline": "Upright editorial serif with actual font-specific paragraph spacing; all canonical gates remain active."
+        "baseline": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
       },
       "defaultFor": [],
       "bestFor": [
@@ -8047,7 +8425,8 @@
               "data.continuation",
               "data.metadata"
             ],
-            "allowedLayoutIds": ["auto", "hanging", "offset"]
+            "allowedLayoutIds": ["auto", "hanging", "offset"],
+            "semanticIconSlots": []
           },
           "pinkIndexSlide": {
             "requiredSlots": [
@@ -8059,7 +8438,8 @@
               "data.continuation",
               "data.items"
             ],
-            "allowedLayoutIds": ["auto", "rail", "band"]
+            "allowedLayoutIds": ["auto", "rail", "band"],
+            "semanticIconSlots": []
           },
           "pinkStatsSlide": {
             "requiredSlots": [
@@ -8071,7 +8451,8 @@
               "data.intro",
               "data.stats"
             ],
-            "allowedLayoutIds": ["auto", "rail", "band"]
+            "allowedLayoutIds": ["auto", "rail", "band"],
+            "semanticIconSlots": []
           },
           "pinkSectionSlide": {
             "requiredSlots": [
@@ -8084,7 +8465,8 @@
               "data.intro",
               "data.sideLabel"
             ],
-            "allowedLayoutIds": ["auto", "left", "right"]
+            "allowedLayoutIds": ["auto", "left", "right"],
+            "semanticIconSlots": []
           },
           "pinkTrendSlide": {
             "requiredSlots": [
@@ -8099,7 +8481,8 @@
               "data.focusIndex",
               "data.callout"
             ],
-            "allowedLayoutIds": ["auto", "rail", "band"]
+            "allowedLayoutIds": ["auto", "rail", "band"],
+            "semanticIconSlots": []
           },
           "pinkProcessSlide": {
             "requiredSlots": [
@@ -8112,7 +8495,8 @@
               "data.steps",
               "data.timeline"
             ],
-            "allowedLayoutIds": ["auto", "columns", "rows"]
+            "allowedLayoutIds": ["auto", "columns", "rows"],
+            "semanticIconSlots": []
           },
           "pinkMatrixSlide": {
             "requiredSlots": [
@@ -8126,7 +8510,8 @@
               "data.focusColumn",
               "data.note"
             ],
-            "allowedLayoutIds": ["auto", "full", "inset"]
+            "allowedLayoutIds": ["auto", "full", "inset"],
+            "semanticIconSlots": []
           },
           "pinkQuoteSlide": {
             "requiredSlots": [
@@ -8138,7 +8523,8 @@
               "data.author",
               "data.role"
             ],
-            "allowedLayoutIds": ["auto", "rail", "broad"]
+            "allowedLayoutIds": ["auto", "rail", "broad"],
+            "semanticIconSlots": []
           },
           "pinkClosingSlide": {
             "requiredSlots": [
@@ -8156,7 +8542,15 @@
                 "acceptsAsset": true,
                 "placeholderBehavior": "Empty reserved region when unbound; square/no-crop QR with its own quiet zone, preferably transparent."
               }
-            }
+            },
+            "semanticIconSlots": [
+              {
+                "path": "data.actions[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           }
         }
       },
@@ -8418,7 +8812,8 @@
               "data.badge",
               "data.source"
             ],
-            "allowedLayoutIds": ["auto", "contour", "inset"]
+            "allowedLayoutIds": ["auto", "contour", "inset"],
+            "semanticIconSlots": []
           },
           "scholarMethodsSlide": {
             "requiredSlots": [
@@ -8430,7 +8825,8 @@
               "data.sources",
               "data.note"
             ],
-            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"],
+            "semanticIconSlots": []
           },
           "scholarFindingSlide": {
             "requiredSlots": [
@@ -8445,7 +8841,8 @@
               "data.gapUnit",
               "data.notes"
             ],
-            "allowedLayoutIds": ["auto", "leadLeft", "leadRight"]
+            "allowedLayoutIds": ["auto", "leadLeft", "leadRight"],
+            "semanticIconSlots": []
           },
           "scholarChartSlide": {
             "requiredSlots": [
@@ -8458,7 +8855,8 @@
               "data.notes",
               "data.plotNote"
             ],
-            "allowedLayoutIds": ["auto", "plotLeft", "plotRight"]
+            "allowedLayoutIds": ["auto", "plotLeft", "plotRight"],
+            "semanticIconSlots": []
           },
           "scholarMechanismSlide": {
             "requiredSlots": [
@@ -8476,7 +8874,8 @@
               "data.plotNote",
               "data.modelNote"
             ],
-            "allowedLayoutIds": ["auto", "center", "plotLeft"]
+            "allowedLayoutIds": ["auto", "center", "plotLeft"],
+            "semanticIconSlots": []
           },
           "scholarSegmentsSlide": {
             "requiredSlots": [
@@ -8490,7 +8889,15 @@
               "data.footnote",
               "data.takeaway"
             ],
-            "allowedLayoutIds": ["auto", "full", "rail"]
+            "allowedLayoutIds": ["auto", "full", "rail"],
+            "semanticIconSlots": [
+              {
+                "path": "data.rows[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "scholarCaseSlide": {
             "requiredSlots": [
@@ -8506,7 +8913,8 @@
               "data.resultNote",
               "data.caution"
             ],
-            "allowedLayoutIds": ["auto", "portrait", "resultFirst"]
+            "allowedLayoutIds": ["auto", "portrait", "resultFirst"],
+            "semanticIconSlots": []
           },
           "scholarClosingSlide": {
             "requiredSlots": [
@@ -8517,7 +8925,15 @@
               "data.reviewLabel",
               "data.review"
             ],
-            "allowedLayoutIds": ["auto", "bands", "ledger"]
+            "allowedLayoutIds": ["auto", "bands", "ledger"],
+            "semanticIconSlots": [
+              {
+                "path": "data.actions[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           }
         }
       },
@@ -8665,7 +9081,7 @@
     {
       "id": "editorial-forest",
       "name": "Editorial Forest",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "readiness": "candidate",
       "path": "editorial-forest/editorial-forest.kit.mjs",
       "designContract": "editorial-forest/design.json",
@@ -8749,11 +9165,13 @@
               "data.source",
               "data.monogram",
               "data.byline"
-            ]
+            ],
+            "semanticIconSlots": []
           },
           "forestIndexSlide": {
             "allowedLayoutIds": ["auto", "mosaic", "rows"],
-            "requiredSlots": ["data.eyebrow", "data.title", "data.source", "data.items"]
+            "requiredSlots": ["data.eyebrow", "data.title", "data.source", "data.items"],
+            "semanticIconSlots": []
           },
           "forestQuoteSlide": {
             "allowedLayoutIds": ["auto", "broad", "inset"],
@@ -8763,7 +9181,8 @@
               "data.source",
               "data.attribution",
               "data.role"
-            ]
+            ],
+            "semanticIconSlots": []
           },
           "forestFeatureSlide": {
             "allowedLayoutIds": ["auto", "left", "right"],
@@ -8784,7 +9203,8 @@
               "data.assetLabel",
               "data.paragraphs",
               "data.metadata"
-            ]
+            ],
+            "semanticIconSlots": []
           },
           "forestChartSlide": {
             "allowedLayoutIds": ["auto", "full", "rail"],
@@ -8795,15 +9215,18 @@
               "data.unit",
               "data.categories",
               "data.series"
-            ]
+            ],
+            "semanticIconSlots": []
           },
           "forestProcessSlide": {
             "allowedLayoutIds": ["auto", "columns", "rows"],
-            "requiredSlots": ["data.eyebrow", "data.title", "data.source", "data.steps"]
+            "requiredSlots": ["data.eyebrow", "data.title", "data.source", "data.steps"],
+            "semanticIconSlots": []
           },
           "forestStatsSlide": {
             "allowedLayoutIds": ["auto", "band", "rows"],
-            "requiredSlots": ["data.eyebrow", "data.title", "data.source", "data.stats"]
+            "requiredSlots": ["data.eyebrow", "data.title", "data.source", "data.stats"],
+            "semanticIconSlots": []
           },
           "forestMatrixSlide": {
             "allowedLayoutIds": ["auto", "full", "inset"],
@@ -8815,11 +9238,20 @@
               "data.rows",
               "data.focusColumn",
               "data.note"
-            ]
+            ],
+            "semanticIconSlots": []
           },
           "forestClosingSlide": {
             "allowedLayoutIds": ["auto", "broad", "rail"],
-            "requiredSlots": ["data.eyebrow", "data.title", "data.source", "data.items"]
+            "requiredSlots": ["data.eyebrow", "data.title", "data.source", "data.items"],
+            "semanticIconSlots": [
+              {
+                "path": "data.items[].icon",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           }
         },
         "customOps": {
@@ -8965,7 +9397,7 @@
     },
     {
       "id": "monochrome",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "path": "monochrome/monochrome.kit.mjs",
       "designContract": "monochrome/design.json",
       "primitiveDependency": "core-primitives@0.1.0",
@@ -9077,11 +9509,13 @@
         "slideTypes": {
           "monoCoverSlide": {
             "requiredSlots": ["data.section", "data.title", "data.source", "data.body"],
-            "allowedLayoutIds": ["auto", "bottom", "editorial"]
+            "allowedLayoutIds": ["auto", "bottom", "editorial"],
+            "semanticIconSlots": []
           },
           "monoOpeningSlide": {
             "requiredSlots": ["data.section", "data.title", "data.source", "data.body"],
-            "allowedLayoutIds": ["auto", "chapter", "statement"]
+            "allowedLayoutIds": ["auto", "chapter", "statement"],
+            "semanticIconSlots": []
           },
           "monoSplitSlide": {
             "assetSlots": {
@@ -9102,11 +9536,20 @@
               "data.assetLabel",
               "data.assetCaption"
             ],
-            "allowedLayoutIds": ["auto", "right", "left"]
+            "allowedLayoutIds": ["auto", "right", "left"],
+            "semanticIconSlots": [
+              {
+                "path": "data.itemIcons[]",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "monoMetricsSlide": {
             "requiredSlots": ["data.section", "data.title", "data.source", "data.metrics"],
-            "allowedLayoutIds": ["auto", "row", "rail"]
+            "allowedLayoutIds": ["auto", "row", "rail"],
+            "semanticIconSlots": []
           },
           "monoListSlide": {
             "requiredSlots": [
@@ -9116,19 +9559,30 @@
               "data.body",
               "data.items"
             ],
-            "allowedLayoutIds": ["auto", "split", "wide"]
+            "allowedLayoutIds": ["auto", "split", "wide"],
+            "semanticIconSlots": [
+              {
+                "path": "data.itemIcons[]",
+                "family": "tabler-outline",
+                "defaultStrokeWidth": 1.2,
+                "maxStrokeWidth": 1.5
+              }
+            ]
           },
           "monoComparisonSlide": {
             "requiredSlots": ["data.section", "data.title", "data.source", "data.panels"],
-            "allowedLayoutIds": ["auto", "side", "stacked"]
+            "allowedLayoutIds": ["auto", "side", "stacked"],
+            "semanticIconSlots": []
           },
           "monoQuoteSlide": {
             "requiredSlots": ["data.section", "data.title", "data.source", "data.body"],
-            "allowedLayoutIds": ["auto", "inset", "wide"]
+            "allowedLayoutIds": ["auto", "inset", "wide"],
+            "semanticIconSlots": []
           },
           "monoAnalysisSlide": {
             "requiredSlots": ["data.section", "data.title", "data.source", "data.blocks"],
-            "allowedLayoutIds": ["auto", "columns", "insights"]
+            "allowedLayoutIds": ["auto", "columns", "insights"],
+            "semanticIconSlots": []
           },
           "monoChartSlide": {
             "requiredSlots": [
@@ -9141,11 +9595,13 @@
               "data.points",
               "data.note"
             ],
-            "allowedLayoutIds": ["auto", "wide", "left", "right"]
+            "allowedLayoutIds": ["auto", "wide", "left", "right"],
+            "semanticIconSlots": []
           },
           "monoProcessSlide": {
             "requiredSlots": ["data.section", "data.title", "data.source", "data.steps"],
-            "allowedLayoutIds": ["auto", "sequence", "timeline", "cycle"]
+            "allowedLayoutIds": ["auto", "sequence", "timeline", "cycle"],
+            "semanticIconSlots": []
           },
           "monoHierarchySlide": {
             "requiredSlots": [
@@ -9155,11 +9611,13 @@
               "data.body",
               "data.levels"
             ],
-            "allowedLayoutIds": ["auto", "pyramid", "ladder"]
+            "allowedLayoutIds": ["auto", "pyramid", "ladder"],
+            "semanticIconSlots": []
           },
           "monoClosingSlide": {
             "requiredSlots": ["data.section", "data.title", "data.source", "data.body"],
-            "allowedLayoutIds": ["auto", "left", "center"]
+            "allowedLayoutIds": ["auto", "left", "center"],
+            "semanticIconSlots": []
           }
         },
         "severity": "warning",

@@ -5,6 +5,7 @@ import { resolveEditorialDeck } from '../black-gold/layouts.mjs'
 import { resolveStrategyDeck } from '../green-slate/layouts.mjs'
 import { resolveAnnualDeck } from '../clear-value/layouts.mjs'
 import { registeredDesignFamily } from './design-family-registry.mjs'
+import { validateSemanticIconContent } from './semantic-icons.mjs'
 
 // Keep legacy validation intact. Only registered design contracts add semantic checks.
 export function validateDeckkitContent(content, options = {}) {
@@ -29,6 +30,7 @@ export function validateDeckkitContent(content, options = {}) {
             : design.strategy
               ? resolveStrategyDeck(design, content)
               : resolveEditorialDeck(design, content)
+      validateSemanticIconContent(design, content, resolved.layouts)
       if (registered || design.annual || design.biennale) {
         // Annual frames depend on the resolved chart count, column weights and row count.
         // The resolver above checked actual instances; generic repeating budgets are discovery hints.

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "clear-value",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -290,5 +290,25 @@
       "plate": "plate",
       "sand": "sand"
     }
+  },
+  "semanticIcons": {
+    "bindings": [
+      {
+        "slideType": "valueSummarySlide",
+        "items": "items",
+        "target": "Item{i}Number",
+        "placement": "replace",
+        "color": "deep",
+        "sizeIn": 0.34
+      },
+      {
+        "slideType": "valueDecisionSlide",
+        "items": "items",
+        "target": "Item{i}Number",
+        "placement": "replace",
+        "color": "terracotta",
+        "sizeIn": 0.34
+      }
+    ]
   }
 }

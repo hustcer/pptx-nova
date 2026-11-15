@@ -57,3 +57,7 @@ Georgia / Songti SC 与 JetBrains Mono / Noto Sans SC 是当前明确选择的�
 为准。0.1.0 为显式选择的 candidate：英文完整示例、同内容第二构图、中文异题材、混排及
 18 布局压力样例已逐页检查。PowerPoint 原生 PDF 导出通过；Repair 对话框检查因 UI scripting
 不可用而跳过，交互编辑及保存重开探针超时，均未宣称通过。字体未嵌入，目标主机须有对应字体。
+
+## Semantic concept icons (0.2.0)
+
+Optional bundled Tabler outline icons are supported in `forestClosingSlide: data.items[].icon`. Choose symbols for the actual concepts. The registered marker compiler uses the kit's existing palette and layout owners, with a 1.2 stroke. Omitted icons retain the previous output and capacity. An explicit icon replaces the peer marker where registered; edition numbers, metrics, dates, status and references remain separate. Inset headings are rechecked at their available width; split or choose a fitting layout instead of shrinking text. Review the actual PNGs, including alternative layouts and mixed-language content.

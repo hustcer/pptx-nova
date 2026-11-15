@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "teal-journal",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -414,5 +414,18 @@
         }
       }
     }
+  },
+  "semanticIcons": {
+    "bindings": [
+      {
+        "slideType": "journalOutlookSlide",
+        "items": "notes",
+        "target": "NoteHeading{i}",
+        "placement": "inset",
+        "color": "ink",
+        "sizeIn": 0.28,
+        "gapIn": 0.1
+      }
+    ]
   }
 }

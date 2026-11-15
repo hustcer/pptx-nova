@@ -4,12 +4,12 @@ DeckKit: `consulting-dark`
 Showcase case: `consulting-dark.golden-roadshow`
 Readiness: `production`
 Slides: 10
-Patch ops: 1041
+Patch ops: 1009
 Title: A clearer path from signal to scale
 
 ## Best For
 
-roadshow, investor update, executive consulting, 技术路演
+roadshow, investor update, executive consulting, 技术路演, product-platform, engineering-platform
 
 ## Default For
 

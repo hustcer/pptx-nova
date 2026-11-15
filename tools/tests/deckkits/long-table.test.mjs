@@ -1,3 +1,4 @@
+import { withoutSemanticIcons } from '../helpers/semantic-icons.mjs'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -15,9 +16,15 @@ import {
 import { validateDeckkitContent } from '../../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
 import { LONG_TABLE_LAYOUTS } from '../../../pptx-nova/assets/deckkits/long-table/registry.mjs'
 
-const fixture = JSON.parse(
-  readFileSync(
-    new URL('../../../pptx-nova/assets/deckkits/long-table/examples/content.json', import.meta.url),
+const fixture = withoutSemanticIcons(
+  'long-table',
+  JSON.parse(
+    readFileSync(
+      new URL(
+        '../../../pptx-nova/assets/deckkits/long-table/examples/content.json',
+        import.meta.url,
+      ),
+    ),
   ),
 )
 const excerpt = (slides) => ({
@@ -41,7 +48,7 @@ function strings(value) {
 test('Long Table routes every role through a complete, deterministic plan', () => {
   const a = createDeck(fixture),
     b = createDeck(fixture)
-  assert.equal(DESIGN.version, '2.0.0')
+  assert.equal(DESIGN.version, '2.1.0')
   assert.equal(a.designCheck.status, 'pass')
   assert.equal(a.designPlan.layouts.length, 8)
   assert.equal(designHash(a.patch), designHash(b.patch))
@@ -221,8 +228,11 @@ test('table, text and shape-owned text participate in native readback instead of
 })
 
 test('design projections preserve registered refurbishment metadata and remain synchronized', () => {
-  const catalog = JSON.parse(
-      readFileSync(new URL('../../../pptx-nova/assets/deckkits/catalog.json', import.meta.url)),
+  const catalog = withoutSemanticIcons(
+      'long-table',
+      JSON.parse(
+        readFileSync(new URL('../../../pptx-nova/assets/deckkits/catalog.json', import.meta.url)),
+      ),
     ),
     entry = catalog.entries.find((e) => e.id === 'long-table')
   assert.ok(entry.refurbishProfile?.fallback?.fonts)
@@ -230,11 +240,14 @@ test('design projections preserve registered refurbishment metadata and remain s
   assert.equal(entry.refurbishProfile.fallback.fonts.heading, DESIGN.fonts.display.latin)
   assert.equal(entry.refurbishProfile.fallback.fonts.body, DESIGN.fonts.body.latin)
   assert.equal(entry.refurbishProfile.fallback.fonts.label, DESIGN.fonts.body.latin)
-  const coverSchema = JSON.parse(
-    readFileSync(
-      new URL(
-        '../../../pptx-nova/assets/deckkits/long-table/schemas/longTableCoverSlide.schema.json',
-        import.meta.url,
+  const coverSchema = withoutSemanticIcons(
+    'long-table',
+    JSON.parse(
+      readFileSync(
+        new URL(
+          '../../../pptx-nova/assets/deckkits/long-table/schemas/longTableCoverSlide.schema.json',
+          import.meta.url,
+        ),
       ),
     ),
   )

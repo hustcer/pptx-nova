@@ -4,7 +4,7 @@ DeckKit: `long-table`
 Showcase case: `long-table.golden-html`
 Readiness: `production`
 Slides: 8
-Patch ops: 634
+Patch ops: 637
 Title: LONG TABLE
 
 ## Best For

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "amber-ledger",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -367,5 +367,18 @@
     "rhythm": {
       "maxConsecutive": 2
     }
+  },
+  "semanticIcons": {
+    "bindings": [
+      {
+        "slideType": "amberProjectsSlide",
+        "items": "projects",
+        "target": "ProjectTitle{i}",
+        "placement": "inset",
+        "color": "sage",
+        "sizeIn": 0.28,
+        "gapIn": 0.1
+      }
+    ]
   }
 }

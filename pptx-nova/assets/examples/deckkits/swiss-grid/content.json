@@ -72,50 +72,58 @@
             "num": "01",
             "title": "客观先于表达",
             "subtitle": "OBJECTIVITY OVER EXPRESSION",
-            "body": "信息传达高于\n设计师个人情绪。"
+            "body": "信息传达高于\n设计师个人情绪。",
+            "icon": "eye"
           },
           {
             "num": "02",
             "title": "数学网格为骨架",
             "subtitle": "MATHEMATICAL GRID",
-            "body": "列、行、间距、模数\n皆从基本单位派生。"
+            "body": "列、行、间距、模数\n皆从基本单位派生。",
+            "icon": "grid-dots"
           },
           {
             "num": "03",
             "title": "非对称构图",
             "subtitle": "ASYMMETRIC LAYOUT",
-            "body": "拒绝古典对称\n带来的中心权威。"
+            "body": "拒绝古典对称\n带来的中心权威。",
+            "icon": "layout"
           },
           {
             "num": "04",
             "title": "无衬线字体",
             "subtitle": "SANS-SERIF TYPOGRAPHY",
-            "body": "Akzidenz · Helvetica\nUnivers 三足鼎立。"
+            "body": "Akzidenz · Helvetica\nUnivers 三足鼎立。",
+            "icon": "typography"
           },
           {
             "num": "05",
             "title": "齐左不齐右",
             "subtitle": "FLUSH-LEFT RAGGED-RIGHT",
-            "body": "字距均匀\n阅读节奏稳定。"
+            "body": "字距均匀\n阅读节奏稳定。",
+            "icon": "align-left"
           },
           {
             "num": "06",
             "title": "客观摄影",
             "subtitle": "OBJECTIVE PHOTOGRAPHY",
-            "body": "取代装饰性插画\n现代摄影登场。"
+            "body": "取代装饰性插画\n现代摄影登场。",
+            "icon": "camera"
           },
           {
             "num": "07",
             "title": "留白是结构",
             "subtitle": "NEGATIVE SPACE AS STRUCTURE",
             "body": "空白是信息的载体\n而非剩余。",
-            "focus": true
+            "focus": true,
+            "icon": "square"
           },
           {
             "num": "08",
             "title": "可重复可规模化",
             "subtitle": "REPRODUCIBLE AT SCALE",
-            "body": "跨语言、跨媒介\n跨规模复用。"
+            "body": "跨语言、跨媒介\n跨规模复用。",
+            "icon": "copy"
           }
         ]
       }
@@ -346,21 +354,24 @@
             "subtitle": "CORPORATE IDENTITY",
             "body": "把瑞士理性变成“识别系统”\n产业的开端",
             "examples": "IBM (Paul Rand)\nKnoll · Lufthansa\nOlivetti · Braun\nJMB 任 IBM 顾问",
-            "note": "JMB 任 IBM 顾问 · 1967 起"
+            "note": "JMB 任 IBM 顾问 · 1967 起",
+            "icon": "building"
           },
           {
             "title": "机场 / 地铁标识",
             "subtitle": "SIGNAGE SYSTEMS",
             "body": "公共空间的可读性\n是瑞士理性的延伸",
             "examples": "纽约地铁 Unimark\n巴黎机场 Frutiger 字体\n慕尼黑 Otl Aicher",
-            "note": "Vignelli · 纽约地铁手册"
+            "note": "Vignelli · 纽约地铁手册",
+            "icon": "sign-left"
           },
           {
             "title": "出版业",
             "subtitle": "EDITORIAL DESIGN",
             "body": "期刊 · 杂志 · 文化出版\n的版面语法",
             "examples": "Du 杂志\nEye Magazine\nDomus · Wallpaper*",
-            "note": "文化出版的版面语法"
+            "note": "文化出版的版面语法",
+            "icon": "book"
           },
           {
             "title": "设计教育",
@@ -368,7 +379,8 @@
             "body": "巴塞尔 + 苏黎世\n两条教学路径全球化",
             "examples": "Yale (Hofmann)\nRISD · Cooper Union\n东京 GS 学派",
             "focus": true,
-            "note": "教学方法与实践的延续"
+            "note": "教学方法与实践的延续",
+            "icon": "school"
           }
         ]
       }

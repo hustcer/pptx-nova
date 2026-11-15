@@ -289,7 +289,8 @@
                 "value": "0.8%"
               }
             ],
-            "diagnosis": "Maintain the benchmark"
+            "diagnosis": "Maintain the benchmark",
+            "icon": "anchor"
           },
           {
             "name": "Hillside",
@@ -312,7 +313,8 @@
                 "value": "1.3%"
               }
             ],
-            "diagnosis": "Increase route coverage"
+            "diagnosis": "Increase route coverage",
+            "icon": "mountain"
           },
           {
             "name": "Eastgate",
@@ -335,7 +337,8 @@
                 "value": "2%"
               }
             ],
-            "diagnosis": "Stabilize launch quality"
+            "diagnosis": "Stabilize launch quality",
+            "icon": "building"
           }
         ]
       }

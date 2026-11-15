@@ -71,25 +71,29 @@
             "index": "01",
             "title": "Fewer handoffs",
             "body": "Bring decisions closer to the teams doing the work.",
-            "badge": "−30%"
+            "badge": "−30%",
+            "icon": "arrows-exchange"
           },
           {
             "index": "02",
             "title": "Faster learning",
             "body": "Test smaller changes before committing more resources.",
-            "badge": "2×"
+            "badge": "2×",
+            "icon": "bolt"
           },
           {
             "index": "03",
             "title": "Shared evidence",
             "body": "Use one set of measures across every delivery stage.",
-            "badge": "1 view"
+            "badge": "1 view",
+            "icon": "chart-bar"
           },
           {
             "index": "04",
             "title": "Clear ownership",
             "body": "Give each outcome an accountable decision maker.",
-            "badge": "100%"
+            "badge": "100%",
+            "icon": "user-check"
           }
         ]
       },
@@ -182,22 +186,26 @@
           {
             "index": "01",
             "name": "Delivery teams",
-            "items": ["Plan small releases", "Resolve dependencies", "Review outcomes"]
+            "items": ["Plan small releases", "Resolve dependencies", "Review outcomes"],
+            "icon": "users"
           },
           {
             "index": "02",
             "name": "Team leaders",
-            "items": ["Set priorities", "Allocate capacity", "Remove obstacles"]
+            "items": ["Set priorities", "Allocate capacity", "Remove obstacles"],
+            "icon": "user-check"
           },
           {
             "index": "03",
             "name": "Operations",
-            "items": ["Monitor service", "Capture exceptions", "Close feedback loops"]
+            "items": ["Monitor service", "Capture exceptions", "Close feedback loops"],
+            "icon": "settings"
           },
           {
             "index": "04",
             "name": "Sponsors",
-            "items": ["Align investment", "Review evidence", "Decide the next step"]
+            "items": ["Align investment", "Review evidence", "Decide the next step"],
+            "icon": "briefcase"
           }
         ]
       },

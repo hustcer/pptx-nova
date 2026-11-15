@@ -9,11 +9,11 @@
       "pattern": "\\S",
       "description": "Top-left brand; no business default.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 11,
+        "widthIn": 5.75,
+        "heightIn": 0.3,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "section": {
@@ -22,11 +22,11 @@
       "pattern": "\\S",
       "description": "Top-right section metadata.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 10.5,
+        "widthIn": 6.13,
+        "heightIn": 0.3,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "kicker": {
@@ -35,11 +35,11 @@
       "pattern": "\\S",
       "description": "Pink editorial eyebrow.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 11,
+        "widthIn": 12.23,
+        "heightIn": 0.3,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "source": {
@@ -48,11 +48,11 @@
       "pattern": "\\S",
       "description": "Visible source, assumptions and/or date from content.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 10.5,
+        "widthIn": 10.7,
+        "heightIn": 0.28,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "title": {
@@ -61,11 +61,11 @@
       "pattern": "\\S",
       "description": "Comparison title.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
-        "lineHeight": 1.12,
-        "maxLines": 3
+        "fontPt": 28,
+        "widthIn": 3.15,
+        "heightIn": 3.1,
+        "lineHeight": 1,
+        "maxLines": 5
       }
     },
     "columns": {
@@ -81,11 +81,11 @@
             "pattern": "\\S",
             "description": "Column header.",
             "x-slotBudget": {
-              "fontPt": 12,
-              "widthIn": 4,
-              "heightIn": 0.8,
+              "fontPt": 10.5,
+              "widthIn": 2.713333333333333,
+              "heightIn": 1.105,
               "lineHeight": 1.12,
-              "maxLines": 3
+              "maxLines": 4
             }
           },
           "weight": {
@@ -115,10 +115,10 @@
           "pattern": "\\S",
           "description": "Native cell text. One paragraph; wraps automatically.",
           "x-slotBudget": {
-            "fontPt": 12,
-            "widthIn": 4,
-            "heightIn": 0.8,
-            "lineHeight": 1.12,
+            "fontPt": 16,
+            "widthIn": 2.713333333333333,
+            "heightIn": 1.105,
+            "lineHeight": 1,
             "maxLines": 3
           }
         },
@@ -142,11 +142,11 @@
       "pattern": "\\S",
       "description": "Visible methodology or scope note.",
       "x-slotBudget": {
-        "fontPt": 12,
-        "widthIn": 4,
-        "heightIn": 0.8,
+        "fontPt": 10.5,
+        "widthIn": 8.68,
+        "heightIn": 0.25,
         "lineHeight": 1.12,
-        "maxLines": 3
+        "maxLines": 1
       }
     },
     "statuses": {

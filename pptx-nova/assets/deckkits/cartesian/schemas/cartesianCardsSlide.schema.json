@@ -31,7 +31,7 @@
       "maxItems": 3,
       "items": {
         "type": "object",
-        "required": ["marker", "title", "body"],
+        "required": ["title", "body"],
         "properties": {
           "marker": {
             "type": "string",
@@ -42,7 +42,9 @@
               "lineHeight": 1.2,
               "maxLines": 2
             },
-            "pattern": "^.{1,3}$"
+            "pattern": "^.{1,3}$",
+            "x-slotRole": "control",
+            "x-slotProbeValue": "I"
           },
           "title": {
             "type": "string",
@@ -63,6 +65,14 @@
               "lineHeight": 1.3,
               "maxLines": 3
             }
+          },
+          "icon": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "x-slotRole": "control",
+            "x-iconFamily": "tabler-outline",
+            "x-slotProbeValue": "book",
+            "description": "Optional bundled Tabler outline icon; replaces the peer marker. Default stroke 1.2; maximum 1.5."
           }
         },
         "additionalProperties": false

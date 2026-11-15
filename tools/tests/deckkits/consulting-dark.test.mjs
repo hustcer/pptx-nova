@@ -1,3 +1,4 @@
+import { withoutSemanticIcons } from '../helpers/semantic-icons.mjs'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -12,11 +13,14 @@ import {
 } from '../../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
 import { validateDeckkitContent } from '../../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
 import { consultingProjectedBudgets } from '../../../pptx-nova/assets/deckkits/consulting-dark/registry.mjs'
-const golden = JSON.parse(
-  readFileSync(
-    new URL(
-      '../../../pptx-nova/assets/deckkits/consulting-dark/examples/content.json',
-      import.meta.url,
+const golden = withoutSemanticIcons(
+  'consulting-dark',
+  JSON.parse(
+    readFileSync(
+      new URL(
+        '../../../pptx-nova/assets/deckkits/consulting-dark/examples/content.json',
+        import.meta.url,
+      ),
     ),
   ),
 )
@@ -123,7 +127,7 @@ test('decision-led closure carries the actual requested action without invented 
 test('Consulting Dark covers all ten roles with deterministic complete plans and native evidence', () => {
   const a = createDeck(golden),
     b = createDeck(golden)
-  assert.equal(DESIGN.version, '2.2.0')
+  assert.equal(DESIGN.version, '2.3.0')
   assert.equal(Object.keys(DESIGN.consulting.families).length, 10)
   assert.equal(designHash(a), designHash(b))
   assert.equal(a.designPlan.layouts.length, 10)
@@ -333,8 +337,11 @@ test('the flow connection owns the output group and its guides survive node fill
 test('chart capacity and refurbishment aliases use the current dark contract', () => {
   const budgets = consultingProjectedBudgets(DESIGN, DESIGN.consulting.families.benchmarkSlide)
   assert.equal(budgets['chartData.categories[]'].fontPt, DESIGN.consulting.chart.fontPt)
-  const catalog = JSON.parse(
-    readFileSync(new URL('../../../pptx-nova/assets/deckkits/catalog.json', import.meta.url)),
+  const catalog = withoutSemanticIcons(
+    'consulting-dark',
+    JSON.parse(
+      readFileSync(new URL('../../../pptx-nova/assets/deckkits/catalog.json', import.meta.url)),
+    ),
   )
   const fallback = catalog.entries.find((e) => e.id === DESIGN.id).refurbishProfile.fallback
   for (const [alias, role] of Object.entries({

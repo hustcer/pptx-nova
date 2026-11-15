@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "biennale-yellow",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -604,5 +604,17 @@
         }
       }
     }
+  },
+  "semanticIcons": {
+    "bindings": [
+      {
+        "slideType": "biennaleProgrammeSlide",
+        "items": "strands",
+        "target": "StrandNum{i}",
+        "placement": "replace",
+        "color": "ink",
+        "sizeIn": 0.3
+      }
+    ]
   }
 }

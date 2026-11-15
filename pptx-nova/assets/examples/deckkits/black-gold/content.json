@@ -52,15 +52,18 @@
         "judgments": [
           {
             "heading": "Funding is up; deal breadth is not",
-            "body": "Large disclosed rounds lift the total while transaction count falls."
+            "body": "Large disclosed rounds lift the total while transaction count falls.",
+            "icon": "chart-line"
           },
           {
             "heading": "Early capital takes the largest share",
-            "body": "Seed and Series A reach 44.0% of the sample funding mix."
+            "body": "Seed and Series A reach 44.0% of the sample funding mix.",
+            "icon": "plant"
           },
           {
             "heading": "Late-stage valuation remains flat",
-            "body": "The late-stage sample shows no sustained valuation re-rating."
+            "body": "The late-stage sample shows no sustained valuation re-rating.",
+            "icon": "scale"
           }
         ],
         "metrics": [

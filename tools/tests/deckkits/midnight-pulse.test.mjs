@@ -1,3 +1,4 @@
+import { withoutSemanticIcons } from '../helpers/semantic-icons.mjs'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
@@ -15,11 +16,14 @@ import { validateDeckkitContent } from '../../../pptx-nova/assets/deckkits/share
 import { clippedPulseEllipse } from '../../../pptx-nova/assets/deckkits/midnight-pulse/atmosphere.mjs'
 import { textUnits } from '../../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
 import { pulseVariants, pulseStress, pulseLibrary } from '../fixtures/midnight-pulse-fixtures.mjs'
-const content = JSON.parse(
-  readFileSync(
-    new URL(
-      '../../../pptx-nova/assets/deckkits/midnight-pulse/examples/content.json',
-      import.meta.url,
+const content = withoutSemanticIcons(
+  'midnight-pulse',
+  JSON.parse(
+    readFileSync(
+      new URL(
+        '../../../pptx-nova/assets/deckkits/midnight-pulse/examples/content.json',
+        import.meta.url,
+      ),
     ),
   ),
 )
@@ -145,11 +149,14 @@ test('midnight-pulse every registered layout builds and changes actual geometry 
 
 test('midnight-pulse minimum schema-valid inputs build without example fallbacks', () => {
   for (const s of pulseLibrary().slides) {
-    const schema = JSON.parse(
-      readFileSync(
-        new URL(
-          `../../../pptx-nova/assets/deckkits/midnight-pulse/schemas/${s.type}.schema.json`,
-          import.meta.url,
+    const schema = withoutSemanticIcons(
+      'midnight-pulse',
+      JSON.parse(
+        readFileSync(
+          new URL(
+            `../../../pptx-nova/assets/deckkits/midnight-pulse/schemas/${s.type}.schema.json`,
+            import.meta.url,
+          ),
         ),
       ),
     )

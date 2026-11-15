@@ -440,7 +440,7 @@
       "data": {
         "eyebrow": "07 CONCLUSIONS",
         "title": "Growth requires a stronger operating system",
-        "subtitle": "Numbered judgments from the synthetic example",
+        "subtitle": "Four judgments from the synthetic example",
         "period": "2024–2028",
         "source": "Source: synthetic demonstration data; no real-world claims",
         "synthesisLabel": "INTERPRETATION",
@@ -450,25 +450,29 @@
             "heading": "Access drives use",
             "body": "Flexible hours create value only when people can rely on the service.",
             "emphasis": "rely on the service",
-            "evidence": "Synthetic visits: 40k → 96k"
+            "evidence": "Synthetic visits: 40k → 96k",
+            "icon": "door"
           },
           {
             "heading": "Quality needs evidence",
             "body": "Completion and wait time give teams a shared basis for improvement.",
             "emphasis": "shared basis",
-            "evidence": "Completion: 84% → 92%"
+            "evidence": "Completion: 84% → 92%",
+            "icon": "clipboard-check"
           },
           {
             "heading": "Formats should vary",
             "body": "Local demand determines the schedule; a common scorecard keeps the network comparable.",
             "emphasis": "Local demand",
-            "evidence": "Six synthetic locations"
+            "evidence": "Six synthetic locations",
+            "icon": "layout"
           },
           {
             "heading": "Sequence before scale",
             "body": "Validate definitions, quality and access in order.",
             "emphasis": "Gate before scale",
-            "evidence": "12-month synthetic pilot"
+            "evidence": "12-month synthetic pilot",
+            "icon": "stairs"
           }
         ],
         "reportTitle": "COMMUNITY LEARNING NETWORK | 2028 OUTLOOK"

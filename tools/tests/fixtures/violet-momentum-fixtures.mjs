@@ -1,12 +1,16 @@
+import { withoutSemanticIcons } from '../helpers/semantic-icons.mjs'
 import { readFileSync } from 'node:fs'
 export const violetGolden = () =>
-  JSON.parse(
-    readFileSync(
-      new URL(
-        '../../../pptx-nova/assets/deckkits/violet-momentum/examples/content.json',
-        import.meta.url,
+  withoutSemanticIcons(
+    'violet-momentum',
+    JSON.parse(
+      readFileSync(
+        new URL(
+          '../../../pptx-nova/assets/deckkits/violet-momentum/examples/content.json',
+          import.meta.url,
+        ),
+        'utf8',
       ),
-      'utf8',
     ),
   )
 export function violetDifferentDomain(language = 'en') {

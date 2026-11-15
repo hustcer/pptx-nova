@@ -82,3 +82,7 @@ The independent refurbishment profile is retained. A validated creation route do
 arbitrary existing-deck preservation, native skinning or animation playback. HTML navigation and
 entry animations are excluded. Current readiness and evidence are recorded in the catalog and the
 repository migration report, rather than inferred from this intent document.
+
+## Semantic concept icons (2.1.0)
+
+Optional bundled Tabler outline icons are supported in `broadsideListSlide: data.itemIcons[]`. Choose symbols for the actual concepts. The registered marker compiler uses the kit's existing palette and layout owners, with a 1.2 stroke. Omitted icons retain the previous output and capacity. An explicit icon replaces the peer marker where registered; edition numbers, metrics, dates, status and references remain separate. Inset headings are rechecked at their available width; split or choose a fitting layout instead of shrinking text. Review the actual PNGs, including alternative layouts and mixed-language content.

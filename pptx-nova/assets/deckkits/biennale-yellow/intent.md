@@ -47,3 +47,7 @@ must supply these fonts or independently review substitutions, regular/bold and 
 New 2.0 evidence controls readiness; old production status is not inherited. The catalog records the
 current status. Readability, native chart/table editing and no-Repair save/reopen checks concern the
 exact reviewed candidate, not arbitrary future content or historical PPTX files.
+
+## Semantic concept icons (2.1.0)
+
+Optional bundled Tabler outline icons are supported in `biennaleProgrammeSlide: data.strands[].icon`. Choose symbols for the actual concepts. The registered marker compiler uses the kit's existing palette and layout owners, with a 1.2 stroke. Omitted icons retain the previous output and capacity. An explicit icon replaces the peer marker where registered; edition numbers, metrics, dates, status and references remain separate. Inset headings are rechecked at their available width; split or choose a fitting layout instead of shrinking text. Review the actual PNGs, including alternative layouts and mixed-language content.

@@ -1,25 +1,22 @@
 ---
 name: pptx-nova
 description: >
-  Create and edit native editable PPTX decks with the local xdoc CLI.
-  When the user wants to create, build, generate, modify, edit, refactor,
-  rebrand, or fill a PowerPoint deck / slides / presentation / .pptx,
-  including: 创建 PPT / 做 PPT / 生成演示文稿 / 修改 PPTX / 改一下幻灯片 /
-  快速做一份 / 一句话生成 / 帮我快速出一版 / 简单提示词生成 / quick deck /
-  reference deck style matching with a new outline, data-driven decks, brand
-  checks, applying a corporate rebrand, creating or safely editing PPTX
-  animations/transitions, exporting PDF/PNG previews. Also use for xdoc Runtime
+  Create, edit, redesign, translate, and check native editable PowerPoint slides,
+  presentations, and slide decks (.pptx/PPT) with the local xdoc CLI.
+  Use as a slide generator and presentation editor for pitch decks, business
+  presentations, quick decks, template filling, reference deck style matching
+  with a new outline, data-driven slides, brand checks/rebranding, native PPTX
+  animations/transitions, and PDF/PNG previews. Triggers on slides, slide deck,
+  presentation, PowerPoint, PPT, PPTX, .pptx filenames, 幻灯片, 演示文稿,
+  创建 PPT, 做 PPT, 生成演示文稿, 修改 PPTX, 改一下幻灯片, 快速做一份,
+  一句话生成, 帮我快速出一版, or 简单提示词生成. Also use for xdoc Runtime
   license installation, renewal, activation, and authorization diagnostics for pptx-nova.
-  Triggers on .pptx filenames, words like
-  deck/slides/presentation/PPT/幻灯片/演示文稿, or any request that ends in
-  "a PowerPoint file". Prefer this skill over hand-writing python-pptx /
-  PptxGenJS / SVG-to-PPTX pipelines — xdoc CLI produces natively editable
-  PPTX with dry-run, sidecar replay, and structured error self-repair.
 ---
 
-# pptx-nova
+# pptx-nova — Editable PowerPoint Slides and Presentations
 
-Use the local `xdoc` CLI to create, modify, fill, export, and check native editable `.pptx` files.
+Create, edit, redesign, translate, fill, export, and check native editable PowerPoint slides,
+presentations, and slide decks (`.pptx`) with the local `xdoc` CLI.
 This skill uses declarative xdoc JSON patches, DeckKit, dry-run, sidecars, and visual gates; do not
 prefer python-pptx, PptxGenJS, or SVG-to-PPTX paths.
 

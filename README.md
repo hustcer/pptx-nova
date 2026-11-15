@@ -3,7 +3,8 @@
 English | [简体中文](README.zh-CN.md)
 
 `pptx-nova` is an agent skill for creating, editing, refurbishing, translating, and checking
-PowerPoint presentations. It is designed to deliver real, editable `.pptx`
+PowerPoint slides, presentations, and slide decks. Use it as an AI slide generator or
+presentation editor. It is designed to deliver real, editable `.pptx`
 files, not slide screenshots pasted into a deck.
 
 Use it when you want an AI agent to turn a brief, outline, Markdown/text

@@ -2,7 +2,8 @@
 
 [English](README.md) | 简体中文
 
-`pptx-nova` 是一个用于创建、编辑、翻新、翻译和检查 PowerPoint 演示文稿的 Agent 技能。
+`pptx-nova` 是一个用于创建、编辑、翻新、翻译和检查 PowerPoint 幻灯片与演示文稿的 Agent 技能，
+可以作为 AI 幻灯片生成器和演示文稿编辑器使用（PowerPoint slides、presentations、slide decks）。
 它旨在交付真正可编辑的 `.pptx` 文件，而不是将幻灯片截图粘贴成演示文稿。
 
 当你希望 AI Agent 将需求简述、大纲、Markdown/文本文档、粘贴的表格、CSV/JSON 数据、

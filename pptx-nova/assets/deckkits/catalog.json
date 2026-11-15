@@ -7068,7 +7068,7 @@
     },
     {
       "id": "teal-journal",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "path": "teal-journal/teal-journal.kit.mjs",
       "designContract": "teal-journal/design.json",
       "primitiveDependency": "core-primitives@0.1.0",
@@ -7099,7 +7099,8 @@
           "journalJourneySlide",
           "journalAnatomySlide",
           "journalResultsSlide",
-          "journalRoadmapSlide"
+          "journalRoadmapSlide",
+          "journalNarrativeSlide"
         ]
       },
       "supportedSlideTypes": [
@@ -7110,7 +7111,8 @@
         "journalJourneySlide",
         "journalAnatomySlide",
         "journalResultsSlide",
-        "journalRoadmapSlide"
+        "journalRoadmapSlide",
+        "journalNarrativeSlide"
       ],
       "visualGrammar": {
         "schemaVersion": "pptx-nova-visual-grammar/v1",
@@ -7145,7 +7147,7 @@
         "slideRhythm": {
           "anchor": ["journalCoverSlide", "journalRoadmapSlide"],
           "judgment": ["journalOutlookSlide", "journalResultsSlide"],
-          "evidence": ["journalAudienceSlide", "journalAnatomySlide"],
+          "evidence": ["journalAudienceSlide", "journalAnatomySlide", "journalNarrativeSlide"],
           "process": ["journalCalendarSlide", "journalJourneySlide"]
         },
         "compositionRules": [
@@ -7287,6 +7289,18 @@
               "data.actions"
             ],
             "allowedLayoutIds": ["auto", "rail", "stacked"]
+          },
+          "journalNarrativeSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.eyebrow",
+              "data.verdict",
+              "data.source",
+              "data.lead",
+              "data.sections"
+            ],
+            "allowedLayoutIds": ["auto", "leadLeft", "columns"]
           }
         }
       },
@@ -7298,7 +7312,7 @@
         "groups": {
           "anchor": ["journalCoverSlide", "journalRoadmapSlide"],
           "judgment": ["journalOutlookSlide", "journalResultsSlide"],
-          "evidence": ["journalAudienceSlide", "journalAnatomySlide"],
+          "evidence": ["journalAudienceSlide", "journalAnatomySlide", "journalNarrativeSlide"],
           "process": ["journalCalendarSlide", "journalJourneySlide"]
         },
         "thresholds": []
@@ -7317,7 +7331,7 @@
         "powerPoint": "PowerPoint for Mac: final golden-04 opened, saved and reopened with 8 slides and no Repair; saved 219-object/1-chart/1-table readback passed. Native text/table/embedded-chart edits persisted in golden-03 probe; mixed-04 negative/zero/tiny labels checked. CLI clean-open skipped (UI scripting unavailable); CUA native UI used. Other hosts, full pixel parity and freeform path-node UI editing unverified."
       },
       "quality": {
-        "lastBenchmark": "2026-10-26",
+        "lastBenchmark": "2026-11-15",
         "vision": {
           "high": 0,
           "medium": 0,
@@ -7331,17 +7345,17 @@
             "resolved": 0,
             "reviewable": 0,
             "baselineUnavailableCases": 0,
-            "baselineUpdatedCases": 1
+            "baselineUpdatedCases": 0
           }
         },
         "manualHardDefects": 0,
         "knownBlockingLimits": [],
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-10-26",
+          "date": "2026-11-15",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-production-20261026-fBFdCq"
+            "out": ".tmp/deckkit-teal-journal-review-20261115-01/benchmark/01"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -7360,7 +7374,7 @@
               "resolved": 0,
               "reviewable": 0,
               "baselineUnavailableCases": 0,
-              "baselineUpdatedCases": 1
+              "baselineUpdatedCases": 0
             }
           },
           "cases": [
@@ -7368,7 +7382,7 @@
               "caseId": "teal-journal.golden-handbook",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-production-20261026-fBFdCq/teal-journal/golden-handbook/summary.json",
+              "summaryPath": ".tmp/deckkit-teal-journal-review-20261115-01/benchmark/01/teal-journal/golden-handbook/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/teal-journal/golden-handbook/review.md",
               "validation": {
                 "valid": true,
@@ -7394,7 +7408,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": true
+                  "baselineUpdated": false
                 }
               },
               "previews": {
@@ -7405,10 +7419,56 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 206626
+                "bytes": 206692
               },
               "patchOps": 1024,
-              "p50TotalMs": 162.58
+              "p50TotalMs": 195.09
+            },
+            {
+              "caseId": "teal-journal.golden-narrative",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/deckkit-teal-journal-review-20261115-01/benchmark/01/teal-journal/golden-narrative/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/teal-journal/golden-narrative/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "lowBuckets": {
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": false
+                }
+              },
+              "previews": {
+                "count": 4,
+                "expectedCount": 4,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 85925
+              },
+              "patchOps": 341,
+              "p50TotalMs": 328.65
             }
           ],
           "blockers": []
@@ -7420,7 +7480,7 @@
         "Arial/Arial Unicode MS and Georgia/Songti SC are nonembedded substitutes; installed upright regular and bold must be available.",
         "Reference photographs are not redistributed; explicit editable asset shells only. External photo ingestion is not registered in 1.0.0.",
         "Native chart/table source data remain editable; route intervals, allocation segments, independent labels and annotation leaders require regeneration from content after edits.",
-        "Bounded 2–5 table rows, 3–4 phases/routes and exactly six specimen annotations; longer content must reorganize or split."
+        "Bounded 2–5 table rows, 3–4 phases/routes and exactly six specimen annotations, and 2–4 qualitative narrative sections; longer content must reorganize or split."
       ],
       "examples": ["teal-journal/examples/content.json"]
     },

@@ -174,6 +174,17 @@ Use it as the per-slide quick reference for fields, required slots, item limits,
 and approximate text budgets. Do not infer slot limits by reading `.kit.mjs`
 source when a schema row exists.
 
+Before filling slots, map each source responsibility to a compatible page type. Qualitative
+priorities, customer groups and contributions do not imply numeric allocations, baseline/target
+values, dates or owners. Never invent these to satisfy a reporting layout. Use a registered
+qualitative layout, or extend the named maintained kit with content-independent schema, capacities,
+examples and tests. Split oversized source tables across pages when the requested page count allows;
+retain every required row and distinguish an author's self-assessment from an independent benchmark.
+
+Teal Journal provides `journalNarrativeSlide` for an editorial lead and 2–4 qualitative sections,
+with open row (`leadLeft`) and column (`columns`) compositions. Read its
+[intent](../../assets/deckkits/teal-journal/intent.md) and generated slots before authoring.
+
 For formal persuasive decks, also read `narrative-quality.md` before
 `content.json`. The DeckKit chooses visual grammar; the narrative layer chooses
 what each slide must prove.

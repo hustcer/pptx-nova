@@ -8,6 +8,7 @@ export const JOURNAL_LAYOUTS = {
   },
   outlook: { leadLeft: ['metric', 'plot', 'notes'], leadRight: ['metric', 'plot', 'notes'] },
   audience: { leadLeft: ['lead', 'table', 'note'], leadBottom: ['lead', 'table', 'note'] },
+  narrative: { leadLeft: ['lead', 'sections'], columns: ['lead', 'sections'] },
   calendar: { horizontal: ['phases', 'allocation'], vertical: ['phases', 'allocation'] },
   journey: { arc: ['route'], linear: ['route'] },
   anatomy: {
@@ -61,7 +62,8 @@ function assertJournal(design, { assertFrame }) {
     deep: '164C5D',
   }))
     if (design.colors[k] !== v) throw Error(`Teal Journal identity requires ${k} ${v}`)
-  if (Object.keys(b.families).length !== 8) throw Error('Journal requires eight registered roles')
+  if (Object.keys(b.families).length !== Object.keys(JOURNAL_LAYOUTS).length)
+    throw Error('Journal requires every registered role')
   for (const [type, f] of Object.entries(b.families)) {
     const expected = JOURNAL_LAYOUTS[f.role]
     if (!type.startsWith('journal') || !expected || seen.has(f.role))
@@ -171,7 +173,7 @@ export const JOURNAL_FAMILY = {
   groups: {
     anchor: ['cover', 'roadmap'],
     judgment: ['outlook', 'results'],
-    evidence: ['audience', 'anatomy'],
+    evidence: ['audience', 'anatomy', 'narrative'],
     process: ['calendar', 'journey'],
   },
   projectedBudgets: budgets,
@@ -181,6 +183,7 @@ export const JOURNAL_FAMILY = {
       cover: { markers: c.markers },
       outlook: { points: c.points, notes: c.notes },
       audience: { columns: c.columns, rows: c.rows, 'rows[]': c.columns },
+      narrative: { sections: c.sections },
       calendar: { phases: c.phases, allocation: c.allocation },
       journey: { steps: c.steps },
       anatomy: { annotations: c.annotations },

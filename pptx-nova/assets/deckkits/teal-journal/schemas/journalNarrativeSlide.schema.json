@@ -1,0 +1,136 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "journalNarrativeSlide",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 28,
+        "widthIn": 11.73,
+        "heightIn": 0.55,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      },
+      "pattern": "\\S"
+    },
+    "subtitle": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 15,
+        "widthIn": 11.73,
+        "heightIn": 0.48,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      },
+      "pattern": "\\S"
+    },
+    "eyebrow": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 11.73,
+        "heightIn": 0.28,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      },
+      "pattern": "\\S"
+    },
+    "verdict": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 12,
+        "widthIn": 11.73,
+        "heightIn": 0.28,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      },
+      "pattern": "\\S"
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 10.65,
+        "heightIn": 0.25,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      },
+      "pattern": "\\S"
+    },
+    "lead": {
+      "type": "object",
+      "properties": {
+        "heading": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "x-slotBudget": {
+            "fontPt": 24,
+            "widthIn": 3.15,
+            "heightIn": 0.9,
+            "lineHeight": 1.12,
+            "maxLines": 1
+          }
+        },
+        "body": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "x-slotBudget": {
+            "fontPt": 16,
+            "widthIn": 3.15,
+            "heightIn": 3,
+            "lineHeight": 1.12,
+            "maxLines": 8
+          }
+        }
+      },
+      "required": ["heading", "body"],
+      "additionalProperties": false
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "properties": {
+          "heading": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "x-slotBudget": {
+              "fontPt": 18,
+              "widthIn": 3.8899999999999997,
+              "heightIn": 0.8,
+              "lineHeight": 1.12,
+              "maxLines": 2
+            }
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "x-slotBudget": {
+              "fontPt": 16,
+              "widthIn": 3.8899999999999997,
+              "heightIn": 3.17,
+              "lineHeight": 1.12,
+              "maxLines": 9
+            }
+          }
+        },
+        "required": ["heading", "body"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["title", "subtitle", "eyebrow", "verdict", "source", "lead", "sections"],
+  "additionalProperties": false
+}

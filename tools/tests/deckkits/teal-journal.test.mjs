@@ -18,6 +18,78 @@ const file = (p) =>
   )
 const fixture = () => file('examples/content.json')
 const excerpt = (slides) => ({ meta: { deckkit: 'teal-journal', designScope: 'excerpt' }, slides })
+test('teal-journal: qualitative narrative needs no invented numeric evidence', () => {
+  const data = {
+    title: 'Repair library',
+    subtitle: 'A qualitative service plan',
+    eyebrow: 'COMMUNITY',
+    verdict: 'Priorities are not budget allocations',
+    source: 'Workshop notes',
+    lead: { heading: 'Shared tools', body: 'Borrow, repair and return household equipment.' },
+    sections: [
+      { heading: 'Volunteer support', body: 'Provide training and supervised repair sessions.' },
+      { heading: 'Local access', body: 'Accept requests from residents and neighbourhood groups.' },
+    ],
+  }
+  for (const layoutId of ['leadLeft', 'columns']) {
+    const c = excerpt([{ type: 'journalNarrativeSlide', layoutId, data }])
+    const v = validateDeckkitContent(c, { mode: 'delivery' })
+    assert.equal(v.valid, true, JSON.stringify(v.errors))
+    const b = createDeck(c)
+    assert.equal(b.designCheck.status, 'pass')
+    assert.equal(
+      b.patch.ops.some((o) => ['add-chart', 'add-table'].includes(o.op)),
+      false,
+    )
+    for (const text of [
+      data.lead.heading,
+      data.lead.body,
+      ...data.sections.flatMap((s) => [s.heading, s.body]),
+    ])
+      assert.ok(
+        b.patch.ops.some((o) => o.text === text),
+        text,
+      )
+    for (const mutate of [
+      (d) => {
+        d.sections[0].body = '   '
+      },
+      (d) => {
+        d.sections.push(...Array(4).fill(d.sections[0]))
+      },
+      (d) => {
+        d.sections[0].body = 'unbounded content '.repeat(400)
+      },
+    ]) {
+      const bad = structuredClone(c)
+      mutate(bad.slides[0].data)
+      assert.equal(validateDeckkitContent(bad, { mode: 'delivery' }).valid, false)
+    }
+  }
+})
+test('teal-journal: narrative text capacity preserves multiline input and selects a fitting layout', () => {
+  const c = file('examples/narrative-content.json')
+  const slide = structuredClone(c.slides[3])
+  const body = Array(9).fill('Repair 工具').join('\n')
+  for (const section of slide.data.sections) section.body = body
+  slide.layoutId = 'auto'
+  const content = excerpt([slide])
+  assert.equal(validateDeckkitContent(content, { mode: 'delivery' }).valid, true)
+  const built = createDeck(content)
+  assert.equal(built.designPlan.layouts[0].layoutId, 'columns')
+  assert.equal(
+    built.designPlan.layouts[0].components.filter(
+      (c) => c.name.startsWith('NarrativeBody') && c.text === body,
+    ).length,
+    4,
+  )
+  const rows = structuredClone(content)
+  rows.slides[0].layoutId = 'leadLeft'
+  assert.equal(validateDeckkitContent(rows, { mode: 'delivery' }).valid, false)
+  const overflow = structuredClone(content)
+  overflow.slides[0].data.sections[0].body += '\nExtra 内容'
+  assert.equal(validateDeckkitContent(overflow, { mode: 'delivery' }).valid, false)
+})
 test('teal-journal: registered source signatures and native evidence remain editable', () => {
   const b = createDeck(fixture())
   assert.equal(b.designCheck.status, 'pass')

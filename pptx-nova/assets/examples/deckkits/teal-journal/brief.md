@@ -2,7 +2,7 @@
 
 DeckKit: `teal-journal`
 Showcase case: `teal-journal.golden-handbook`
-Readiness: `candidate`
+Readiness: `default`
 Slides: 8
 Patch ops: 1024
 Title: VISIT ONCE, RETURN ALL YEAR.

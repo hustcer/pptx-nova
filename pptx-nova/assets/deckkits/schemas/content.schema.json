@@ -306,7 +306,8 @@
               "monoChartSlide",
               "monoProcessSlide",
               "monoHierarchySlide",
-              "monoClosingSlide"
+              "monoClosingSlide",
+              "journalNarrativeSlide"
             ]
           },
           "data": {

@@ -313,6 +313,8 @@ These rules apply to all new decks, including Express and Studio:
   publication. The validator checks the judgment record, not beauty; never invent observations.
 - Generate or normalize `outline.json` first, then write `deck_lock.json`; do not jump directly from prompt to patch.
 - Default to DeckKit-first: `content.json -> DeckKit -> patch -> xdoc -> PPTX -> validation`.
+- Match source responsibilities to registered slots before drafting; never invent metrics, dates,
+  owners or allocations merely to fill a layout. Follow `references/create/deckkit-mode.md` for gaps.
 - Persuasive decks for formal reports, clients, investors, boards, roadshows, strategy, product-platform, and similar contexts must read `references/create/narrative-quality.md`, lock `deckProfile`, and per-slide `claimTitle` / `proofObject` / `rhythm` / `layoutIntent` / `visualDensity` in `deck_lock.json`, then write `narrative_quality_review.json` after PNG review.
 - Before writing `content.json` or a manual patch, compare each slide against `deck_lock.slides[]` and confirm page type, rhythm, structural intent, density, and proof object have not drifted from memory. If mismatched, fix the lock or content source first instead of patching around it.
 - Non-appendix slides should have a clear point of view or direction. Main titles/subtitles should be short, scannable, and fitted to DeckKit slots. Avoid pure topic labels such as `Product Overview`, `Market Analysis`, or `Roadmap`. Put the full conclusion in `claimTitle`; when needed, move it into the subtitle, callout, or `proofObject`. Do not sacrifice layout merely to make the displayed title conclusion-like.

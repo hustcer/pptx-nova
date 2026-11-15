@@ -1,19 +1,20 @@
 # Teal Journal：青绿手记
 
-1.0.0 是 default 创建型 DeckKit，可参与默认及自动交付选择。暖纸底、河蓝结构、珊瑚强调、叙事衬线、方角色域与开放细线共同构成身份；数值事实以同目录 `design.json` 为唯一来源。
+1.1.0 是 default 创建型 DeckKit，可参与默认及自动交付选择。暖纸底、河蓝结构、珊瑚强调、叙事衬线、方角色域与开放细线共同构成身份；数值事实以同目录 `design.json` 为唯一来源。
 
-八类职责、十六个执行构图：
+九类职责、十八个执行构图：
 
-| 页型                 | 构图                  | 内容用途与边界                                       |
-| -------------------- | --------------------- | ---------------------------------------------------- |
-| journalCoverSlide    | angular / inset       | 大观点、切角资产外壳、强调条、摘要、3–4 个短标记     |
-| journalOutlookSlide  | leadLeft / leadRight  | 焦点指标、原生横条图、2–3 组解释                     |
-| journalAudienceSlide | leadLeft / leadBottom | 3–5 列、2–5 行的原生开放表格；导语与附注分区         |
-| journalCalendarSlide | horizontal / vertical | 3–4 个有序时间区间、实绩/计划标记、2–4 项分配        |
-| journalJourneySlide  | arc / linear          | 3–4 个时段；由同一开始/结束数值计算半环或直线        |
-| journalAnatomySlide  | center / offset       | 可编辑样本、恰好六项说明、比较条；中置引线或侧置规则 |
-| journalResultsSlide  | rail / band           | 2–3 个成果、2–4 个产出、2–3 个重点指标               |
-| journalRoadmapSlide  | rail / stacked        | 分配、2–3 个基线/目标、2–3 项负责人/日期/衡量        |
+| 页型                  | 构图                  | 内容用途与边界                                                  |
+| --------------------- | --------------------- | --------------------------------------------------------------- |
+| journalCoverSlide     | angular / inset       | 大观点、切角资产外壳、强调条、摘要、3–4 个短标记                |
+| journalOutlookSlide   | leadLeft / leadRight  | 焦点指标、原生横条图、2–3 组解释                                |
+| journalAudienceSlide  | leadLeft / leadBottom | 3–5 列、2–5 行的原生开放表格；导语与附注分区                    |
+| journalCalendarSlide  | horizontal / vertical | 3–4 个有序时间区间、实绩/计划标记、2–4 项分配                   |
+| journalJourneySlide   | arc / linear          | 3–4 个时段；由同一开始/结束数值计算半环或直线                   |
+| journalAnatomySlide   | center / offset       | 可编辑样本、恰好六项说明、比较条；中置引线或侧置规则            |
+| journalResultsSlide   | rail / band           | 2–3 个成果、2–4 个产出、2–3 个重点指标                          |
+| journalNarrativeSlide | leadLeft / columns    | 导语与 2–4 组定性内容；开放横栏或纵栏，不要求数值、日期或负责人 |
+| journalRoadmapSlide   | rail / stacked        | 分配、2–3 个基线/目标、2–3 项负责人/日期/衡量                   |
 
 `layoutId: "auto"` 按实际文字容量与近期构图确定性选择，显式布局也必须通过同一检查。预算只是发现提示；合法容量最终由实际输入、canonical PDF/PNG 决定。过长内容应换合法构图、重组或拆页；不删字段、不改数值、不缩到字号下限以下。相同构图连续超过合同上限会报错；不同内容仍应人工检查跨页节奏。
 
@@ -28,3 +29,9 @@
 参考的照片只迁移为显式资产外壳，不复制原图，也不伪装成插画替代。1.0.0 没有注册外部图片输入或自由 customOps，不宣称照片摄入、原生换肤、已有源稿无损保留、动画或其他比例验证。若真实交付需要照片，先扩展可验证的资产合同再使用；不能把外壳示例称作完整摄影主题复刻。
 
 标准流程为 `slots → validate-content → create/build → create/run → exact-candidate PNG review → finalize`。验证范围与环境未验证项见 [验收记录](../../../benchmarks/visual/cases/teal-journal/golden-handbook/review.md)。
+
+## 1.1.0 定性叙事扩展
+
+新增 `journalNarrativeSlide`，适用于贡献、客户场景、策略、计划与合作诉求。必填公共字段与其他页型相同，正文使用 `lead: { heading, body }` 与 `sections: [{ heading, body }]`。标题/正文来自输入，不内置行业政策、业务词或示例数字。`leadLeft` 是导语加开放横栏，适合短句；`columns` 是导语加开放纵栏，适合较长解释。两者均接受 2–4 项，实际容量仍由解析器逐实例检查，无法容纳时换布局或拆页，不缩字或删项。主导语 24pt，分项标题 18pt，正文 16pt。
+
+这是向后兼容的新增入口，旧八类页型与内容无需迁移。跨主题、中英混排及容量边界示例见 `examples/narrative-content.json`，两种布局均纳入 `golden-narrative` 视觉回归。数值对比继续使用 outlook、results 等既有职责，不以定性页替换必需图表或表格。

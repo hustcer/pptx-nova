@@ -94,6 +94,10 @@ Rules:
 
 ## Contact Sheet Plan
 
+`deck_lock.slides[].rhythm` uses `anchor`, `dense`, `breathing` or `appendix` to describe viewing
+rhythm. Catalog groups such as `evidence`, `judgment` and `process` describe page responsibilities;
+they are not valid lock rhythm values. Put the responsibility in `proofObject` / `layoutIntent`.
+
 Before writing `content.json`, create either `contact_sheet_plan.json` or embed
 equivalent fields in `deck_lock.slides[]`:
 

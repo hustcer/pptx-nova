@@ -1,0 +1,124 @@
+{
+  "meta": {
+    "deckkit": "teal-journal",
+    "designScope": "excerpt"
+  },
+  "slides": [
+    {
+      "type": "journalNarrativeSlide",
+      "layoutId": "leadLeft",
+      "data": {
+        "title": "A shared repair library",
+        "subtitle": "Qualitative priorities without fabricated metrics / 定性内容不编造数值",
+        "eyebrow": "COMMUNITY / REPAIR LIBRARY",
+        "verdict": "Priorities describe services, not a numeric allocation.",
+        "source": "Synthetic workshop notes / 合成跨主题验证材料",
+        "lead": {
+          "heading": "Shared tools",
+          "body": "Borrow, repair and return household equipment."
+        },
+        "sections": [
+          {
+            "heading": "Volunteer support",
+            "body": "Offer supervised repair sessions and guidance for new volunteers."
+          },
+          {
+            "heading": "Local access",
+            "body": "Accept requests from residents and neighbourhood groups."
+          }
+        ]
+      }
+    },
+    {
+      "type": "journalNarrativeSlide",
+      "layoutId": "columns",
+      "data": {
+        "title": "Community repair priorities",
+        "subtitle": "Qualitative priorities without fabricated metrics / 定性内容不编造数值",
+        "eyebrow": "COMMUNITY / REPAIR LIBRARY",
+        "verdict": "Priorities describe services, not a numeric allocation.",
+        "source": "Synthetic workshop notes / 合成跨主题验证材料",
+        "lead": {
+          "heading": "Local support",
+          "body": "Services are grouped by the role they play."
+        },
+        "sections": [
+          {
+            "heading": "Volunteer support",
+            "body": "Offer supervised repair sessions and guidance for new volunteers."
+          },
+          {
+            "heading": "Local access",
+            "body": "Accept requests from residents and neighbourhood groups."
+          }
+        ]
+      }
+    },
+    {
+      "type": "journalNarrativeSlide",
+      "layoutId": "leadLeft",
+      "data": {
+        "title": "社区工具共享与维修",
+        "subtitle": "Qualitative priorities without fabricated metrics / 定性内容不编造数值",
+        "eyebrow": "COMMUNITY / REPAIR LIBRARY",
+        "verdict": "Priorities describe services, not a numeric allocation.",
+        "source": "Synthetic workshop notes / 合成跨主题验证材料",
+        "lead": {
+          "heading": "共享工具",
+          "body": "由社区协作维护，让工具使用、维修与归还形成清晰流程。"
+        },
+        "sections": [
+          {
+            "heading": "志愿支持",
+            "body": "提供工具使用指导和维修协助。"
+          },
+          {
+            "heading": "借用服务",
+            "body": "居民与社区组织可申请借用。"
+          },
+          {
+            "heading": "使用说明",
+            "body": "每件工具配有明确说明。"
+          },
+          {
+            "heading": "归还维护",
+            "body": "记录状态，妥善存放共享设备。"
+          }
+        ]
+      }
+    },
+    {
+      "type": "journalNarrativeSlide",
+      "layoutId": "columns",
+      "data": {
+        "title": "A reusable service framework",
+        "subtitle": "Qualitative priorities without fabricated metrics / 定性内容不编造数值",
+        "eyebrow": "COMMUNITY / REPAIR LIBRARY",
+        "verdict": "Priorities describe services, not a numeric allocation.",
+        "source": "Synthetic workshop notes / 合成跨主题验证材料",
+        "lead": {
+          "heading": "Practical access",
+          "body": "Four qualitative services, with every supplied heading and description retained."
+        },
+        "sections": [
+          {
+            "heading": "Training",
+            "body": "Provide guidance for safe use of shared tools."
+          },
+          {
+            "heading": "Borrowing",
+            "body": "Keep instructions with each item."
+          },
+          {
+            "heading": "Repairs",
+            "body": "Explain the next useful step to residents."
+          },
+          {
+            "heading": "Returns",
+            "body": "Record condition and store equipment carefully."
+          }
+        ]
+      }
+    }
+  ]
+}

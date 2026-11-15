@@ -250,6 +250,7 @@
       "id": "teal-journal.golden-handbook",
       "deckkit": "teal-journal",
       "kind": "golden",
+      "showcase": true,
       "contentPath": "../../assets/deckkits/teal-journal/examples/content.json",
       "buildPath": "../../assets/deckkits/teal-journal/examples/build.mjs",
       "expectedPath": "cases/teal-journal/golden-handbook/expected.json",
@@ -299,6 +300,15 @@
       "buildPath": "../../assets/deckkits/monochrome/examples/build.mjs",
       "expectedPath": "cases/monochrome/golden-library/expected.json",
       "reviewPath": "cases/monochrome/golden-library/review.md"
+    },
+    {
+      "id": "teal-journal.golden-narrative",
+      "deckkit": "teal-journal",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/teal-journal/examples/narrative-content.json",
+      "buildPath": "../../assets/deckkits/teal-journal/examples/build.mjs",
+      "expectedPath": "cases/teal-journal/golden-narrative/expected.json",
+      "reviewPath": "cases/teal-journal/golden-narrative/review.md"
     }
   ]
 }

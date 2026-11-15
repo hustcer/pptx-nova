@@ -1580,8 +1580,8 @@
       "deckkit": "teal-journal",
       "caseId": "teal-journal.golden-handbook",
       "kind": "golden",
-      "readiness": "candidate",
-      "version": "1.0.0",
+      "readiness": "default",
+      "version": "1.1.0",
       "title": "VISIT ONCE, RETURN ALL YEAR.",
       "bestFor": [
         "editorial handbook",
@@ -1600,8 +1600,8 @@
         },
         "contactSheet": {
           "path": "teal-journal/contact-sheet.webp",
-          "bytes": 583658,
-          "sha256": "99d6d30419a639ff38e377c86cd9647c34439f14cbdb5ed0b24b7ace5ffa3a4e",
+          "bytes": 583704,
+          "sha256": "39d9edd8ab300f72b53f82847c028714e7f258e133e3d65369d76d2ae40315ac",
           "quality": 86
         },
         "content": {
@@ -1611,13 +1611,13 @@
         },
         "brief": {
           "path": "teal-journal/brief.md",
-          "bytes": 730,
-          "sha256": "302cb564eec1b6d0aca3dc549a808cbbd0fd187b2827965288276543fe263dc6"
+          "bytes": 728,
+          "sha256": "a3412319284d0c6638ca4d2181d65fc4c38122ca75292e7b76a79ed73feee55e"
         },
         "summary": {
           "path": "teal-journal/summary.json",
-          "bytes": 2709,
-          "sha256": "5a6a26e47177c04b562cd1b3dbf96913d1a9fee51fa561a33d9b9a0c2013d9c1"
+          "bytes": 2768,
+          "sha256": "b8b813d1443cebb077f9bf796e93786a980e234be949a80c324d66d55799467f"
         }
       },
       "validation": {
@@ -1649,17 +1649,17 @@
           "changed": 0,
           "resolved": 0,
           "reviewable": 0,
-          "baselineUnavailable": true,
+          "baselineUnavailable": false,
           "baselineUpdated": false
         },
         "lowByFamily": {},
         "newLowByFamily": {},
         "changedLowByFamily": {},
         "baseline": {
-          "schemaVersion": "",
-          "fingerprintVersion": "",
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
           "path": "pptx-nova/benchmarks/visual/baselines/teal-journal.golden-handbook.vision-baseline.json",
-          "available": false,
+          "available": true,
           "issueCount": 0
         },
         "stylePolicy": {

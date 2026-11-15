@@ -63,17 +63,17 @@
       "changed": 0,
       "resolved": 0,
       "reviewable": 0,
-      "baselineUnavailable": true,
+      "baselineUnavailable": false,
       "baselineUpdated": false
     },
     "lowByFamily": {},
     "newLowByFamily": {},
     "changedLowByFamily": {},
     "baseline": {
-      "schemaVersion": "",
-      "fingerprintVersion": "",
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
       "path": "pptx-nova/benchmarks/visual/baselines/teal-journal.golden-handbook.vision-baseline.json",
-      "available": false,
+      "available": true,
       "issueCount": 0
     },
     "stylePolicy": {
@@ -96,12 +96,12 @@
       "command": "cwebp -quiet -q 86 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 1193960,
-      "sha256": "3954768b7a7463278af40b4fe83c154b9d6e2698bd5b311a4aeffa2da14b6899"
+      "bytes": 1193864,
+      "sha256": "36923ce08920fb90ee0f48bdbdcb60609ab536d35839fce1b45d9f63fca067dc"
     },
     "webp": {
-      "bytes": 583658,
-      "sha256": "99d6d30419a639ff38e377c86cd9647c34439f14cbdb5ed0b24b7ace5ffa3a4e"
+      "bytes": 583704,
+      "sha256": "39d9edd8ab300f72b53f82847c028714e7f258e133e3d65369d76d2ae40315ac"
     }
   }
 }

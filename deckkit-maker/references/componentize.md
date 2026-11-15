@@ -193,6 +193,11 @@ node tools/run-tests.mjs deckkits
   （`pptx-nova-visual-case/v1`）和 `review.md`；`buildPath` 为
   `../../assets/deckkits/<id>/examples/build.mjs`，相对 `benchmarks/visual/index.json` 所在目录解析。
 
+同一套件有多个 golden 时，必须恰好给一个条目设置 `showcase: true`，供示例更新器选择展示稿；
+其他 golden 仍保留为回归语料。新增第二个 golden 后先运行
+`node tools/run-tests.mjs maintenance/examples-layout.test.mjs maintenance/update-deckkit-examples.test.mjs`，
+再按主 skill 的示例维护流程执行定向更新及 check，不能只跑 benchmark/readiness 就认为示例入口仍可用。
+
 必须额外审查 `stress-density` 和 `mixed-language`，但默认不要把这两个 case 写入
 `benchmarks/visual/index.json` 或提交到 git。把临时 content、patch、PPTX、PNG、
 contact sheet 和审查结论放在 `.tmp/deckkit-<id>/benchmark/stress-density/` 与

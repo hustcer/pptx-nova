@@ -4167,6 +4167,15 @@
             },
             "strip": {
               "$ref": "#/$defs/journalStyle"
+            },
+            "narrativeLead": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "narrativeHeading": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "narrativeBody": {
+              "$ref": "#/$defs/journalStyle"
             }
           },
           "required": [
@@ -4366,6 +4375,15 @@
               },
               "minItems": 2,
               "maxItems": 2
+            },
+            "sections": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
             }
           },
           "required": [
@@ -4401,7 +4419,8 @@
                   "journey",
                   "anatomy",
                   "results",
-                  "roadmap"
+                  "roadmap",
+                  "narrative"
                 ]
               },
               "variants": {

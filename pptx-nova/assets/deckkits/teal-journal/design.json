@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "teal-journal",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -186,6 +186,27 @@
         "color": "deep",
         "bold": true,
         "lineHeight": 1.12
+      },
+      "narrativeLead": {
+        "role": "body",
+        "sizePt": 24,
+        "color": "deep",
+        "bold": false,
+        "lineHeight": 1.12
+      },
+      "narrativeHeading": {
+        "role": "display",
+        "sizePt": 18,
+        "color": "ink",
+        "bold": true,
+        "lineHeight": 1.12
+      },
+      "narrativeBody": {
+        "role": "body",
+        "sizePt": 16,
+        "color": "ink",
+        "bold": false,
+        "lineHeight": 1.12
       }
     },
     "spacing": {
@@ -217,7 +238,8 @@
       "targets": [2, 3],
       "actions": [2, 3],
       "allocation": [2, 4],
-      "markers": [3, 4]
+      "markers": [3, 4],
+      "sections": [2, 4]
     },
     "families": {
       "journalCoverSlide": {
@@ -370,6 +392,23 @@
               "targets": [0.8, 3.55, 7.3, 2.75],
               "actions": [8.7, 3.55, 3.83, 2.75],
               "rail": [0.8, 2.15, 11.73, 0.33]
+            }
+          }
+        }
+      },
+      "journalNarrativeSlide": {
+        "role": "narrative",
+        "variants": {
+          "leadLeft": {
+            "regions": {
+              "lead": [0.8, 2.18, 3.15, 4.08],
+              "sections": [4.5, 2.18, 8.03, 4.08]
+            }
+          },
+          "columns": {
+            "regions": {
+              "lead": [0.8, 2.18, 3.15, 4.08],
+              "sections": [4.5, 2.18, 8.03, 4.08]
             }
           }
         }

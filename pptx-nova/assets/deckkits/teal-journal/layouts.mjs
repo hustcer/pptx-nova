@@ -300,6 +300,34 @@ export function compileJournalLayout(design, family, id, variant, d, path = 'dat
         ])
       table('Audience', r.table, d.columns, d.rows, d.focusColumn)
       tx('Methodology', r.note, d.methodology, 'small', 'methodology')
+    } else if (family.role === 'narrative') {
+      const [x, y, w, h] = r.lead
+      tx('NarrativeLeadHeading', [x, y, w, 0.9], d.lead.heading, 'narrativeLead', 'lead.heading')
+      tx('NarrativeLeadBody', [x, y + 1.08, w, h - 1.08], d.lead.body, 'narrativeBody', 'lead.body')
+      cells(
+        r.sections,
+        d.sections.length,
+        id === 'leadLeft',
+        id === 'leadLeft' ? 0.08 : 0.25,
+      ).forEach(([sx, sy, sw, sh], i) => {
+        rule('NarrativeRule' + i, sx, sy, sw)
+        const headingHeight = id === 'leadLeft' ? 0.42 : 0.8
+        tx(
+          'NarrativeHeading' + i,
+          [sx, sy + 0.05, sw, headingHeight],
+          d.sections[i].heading,
+          'narrativeHeading',
+          `sections[${i}].heading`,
+        )
+        const offset = headingHeight + 0.11
+        tx(
+          'NarrativeBody' + i,
+          [sx, sy + offset, sw, sh - offset],
+          d.sections[i].body,
+          'narrativeBody',
+          `sections[${i}].body`,
+        )
+      })
     } else if (family.role === 'calendar') {
       if (!(d.axisEnd > d.axisStart)) throw Error('Calendar axis must increase')
       d.phases.forEach((v, i) => {

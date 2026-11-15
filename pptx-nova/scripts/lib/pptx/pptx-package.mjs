@@ -35,6 +35,7 @@ function readZipEntries(path) {
     const commentLength = bytes.readUInt16LE(offset + 32)
     const localHeaderOffset = bytes.readUInt32LE(offset + 42)
     const name = bytes.subarray(offset + 46, offset + 46 + nameLength).toString('utf8')
+    if (entries.has(name)) throw new Error(`Duplicate PPTX ZIP part: ${name}`)
     entries.set(name, {
       bytes,
       name,
@@ -321,5 +322,16 @@ export function readPptxPackage(path) {
     if (!entries.has(part)) throw new Error(`Missing OPC relationship target: ${part}`)
     return part
   }
-  return { sharedParts, slides, chartExScope, partTree: root, relatedPart }
+  return {
+    sharedParts,
+    slides,
+    chartExScope,
+    partTree: root,
+    relatedPart,
+    partNames: () => [...entries.keys()].sort(),
+    partBytes: (part) => {
+      if (!entries.has(part)) throw new Error(`Missing OPC part: ${part}`)
+      return readZipEntry(entries.get(part))
+    },
+  }
 }

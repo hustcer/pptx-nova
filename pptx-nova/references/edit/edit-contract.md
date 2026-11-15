@@ -28,6 +28,11 @@ inspect/select
   -> publish only when agentGate.passed=true
 ```
 
+For a non-structural visible edit whose canonical regression report finds intended pixel changes,
+use the [scoped visual finalizer](../review/export-and-check.md#reviewed-scoped-edit-finalization)
+after actual PNG review. It replays this gate and preserves the native oracle decision in its report;
+neither a passing contract nor a reviewed picture alone authorizes publication.
+
 Create the contract after target resolution and before writing/applying the
 patch. The generator hashes the current source PPTX. If the source later
 changes, the gate returns `nextAction: "refresh-inspect"`; do not reuse old

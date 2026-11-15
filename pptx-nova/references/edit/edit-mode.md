@@ -11,6 +11,8 @@ objects within the Edit Contract; do not redesign preserved content merely to sa
 For a requested visual improvement, use the [shared design floor](../review/design-floor.md).
 Inherit the incumbent visual system, identify the exact page/object scope, and target its weakest
 hierarchy/type/composition problem. A local polish request does not select a replacement DeckKit.
+For reviewed intentional pixel changes in a non-structural edit, close with the
+[scoped visual finalizer](../review/export-and-check.md#reviewed-scoped-edit-finalization).
 
 ## Load Order
 

@@ -140,7 +140,7 @@ export const REVIEW_CHECKS = [
 ]
 
 /** Validate the common review contract; workflow-specific checks stay with callers. */
-export function verifyVisualReview(reviewPath, binding, { mode }) {
+export function verifyVisualReview(reviewPath, binding, { mode, allowScoped = false }) {
   const review = JSON.parse(readFileSync(reviewPath, 'utf8'))
   if (
     review.schemaVersion !== 'pptx-nova-visual-review/v1' ||
@@ -151,7 +151,8 @@ export function verifyVisualReview(reviewPath, binding, { mode }) {
   )
     throw new Error(`${mode} requires a completed passing visual review`)
   if (
-    review.summary?.slidesReviewed !== binding.slideCount ||
+    review.summary?.slidesReviewed !==
+      (allowScoped ? binding.reviewedSlides?.length : binding.slideCount) ||
     JSON.stringify(review.binding) !== JSON.stringify(binding)
   )
     throw new Error('visual review is stale or has incomplete candidate coverage')

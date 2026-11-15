@@ -192,10 +192,44 @@ node <skill-root>/scripts/cli/review/visual-evidence-gate.mjs \
   --json
 ```
 
-Only exit status `0` and `deliveryAuthorized=true` authorize an automated
+For this generic consumer, only exit status `0` and `deliveryAuthorized=true` authorize an automated
 delivery. Exit `4` is a content blocker. Exit `5` requires actual human
 confirmation; an Agent must not reinterpret it as success. Invalid or
 internally inconsistent manifests exit `3`.
+
+### Reviewed scoped Edit finalization
+
+An authorized local layout/style edit is expected to change pixels. After the exact source and
+candidate PNGs have actually been reviewed, a non-structural Edit may use this explicit consumer:
+
+```bash
+node <skill-root>/scripts/cli/edit/finalize.mjs \
+  --contract <run-dir>/edit-contract.json --candidate <run-dir>/candidate.pptx \
+  --manifest <run-dir>/visual-evidence/manifest.json --review <run-dir>/visual_review.json \
+  --output <fresh-final.pptx> --report <run-dir>/edit-finalization.json --json
+```
+
+Record the review using `visual-review.mjs --mode edit` with the same candidate/manifest, the
+actual one-based number of scoped pages reviewed, and all applicable checks. The finalizer reruns
+the Edit Contract gate from its current evidence, requires exact source/candidate identities and
+scope, complete scoped source/candidate PNG/PDF artifacts, passing required non-pixel machine
+checks and no unresolved findings. It accepts only reviewed intended raster changes and preserves
+the raw native `decision` under a separate scoped-edit `acceptance` policy. Success publishes the
+same candidate bytes and returns `status=delivered` plus `deliveryAuthorized=true`.
+
+It cannot accept added/removed slides or objects, stale reviews, environment uncertainty, unresolved layout
+warnings, unreviewed pages or out-of-scope changes. Those retain their existing recovery/handoff.
+This v1 consumer permits changes only in the reviewed slide XML parts, resolved through the
+presentation's relationships. Every other decompressed OPC part must remain byte-identical,
+including other slides, relationships, themes, charts, workbooks, media and notes. It also refuses
+selected slides with unsupported or uncertain semantic regions; use the existing explicit
+preservation review for those tasks. Unchanged unsupported objects on other slides do not expand
+the edit scope. A zero reliable-change count alone is insufficient to prove preservation.
+It does not claim independent PowerPoint parity or replace the generic consumer's exit-5 meaning.
+Final paths must be fresh; existing source, candidate and evidence are preserved.
+The contract must require dry-run, semantic-diff, PNG preview, vision-diff and final inspect.
+Retain the full diff with `xdoc pptx diff <source> <candidate> --detail full --output <run-dir>/diff-full.json --json`;
+bind its stdout summary and retained file through the existing evidence manifest before finalizing.
 
 Translation uses the explicit workflow consumer described in
 [Translation finalization](../translation/translation-runner.md#fit-and-review-before-publication):

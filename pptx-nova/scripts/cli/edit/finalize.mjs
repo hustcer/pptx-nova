@@ -12,7 +12,8 @@ const usage = `Usage:
 
 Replays the existing Edit Contract gate from its current run evidence, verifies the exact
 source/candidate scoped PNG/PDF artifacts and actual bound Edit review, then publishes those bytes.
-Only edits to retained objects in reviewed slide XML with complete semantic comparison are supported;
+Edits to retained objects use complete semantic comparison. The explicit native-artwork profile
+also permits declared, bounded text-free freeforms after independent source-XML preservation checks;
 every other OPC part must remain byte-identical. Raw native oracle
 decisions stay intact. Failed machine checks, environment uncertainty and stale reviews still stop.
 Output and report must be fresh paths. No overwrite switch or implicit user confirmation.

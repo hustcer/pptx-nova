@@ -219,6 +219,9 @@ same candidate bytes and returns `status=delivered` plus `deliveryAuthorized=tru
 
 It cannot accept added/removed slides or objects, stale reviews, environment uncertainty, unresolved layout
 warnings, unreviewed pages or out-of-scope changes. Those retain their existing recovery/handoff.
+The separate [native artwork addition profile](../edit/edit-contract.md#native-artwork-additions)
+accepts only explicitly declared freeforms and caption offsets after independent source-XML preservation;
+its report names a distinct acceptance policy. Ordinary scoped edits retain the restrictions above.
 This v1 consumer permits changes only in the reviewed slide XML parts, resolved through the
 presentation's relationships. Every other decompressed OPC part must remain byte-identical,
 including other slides, relationships, themes, charts, workbooks, media and notes. It also refuses

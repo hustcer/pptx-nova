@@ -244,6 +244,38 @@ rejects copied target slides outside the contract. Flattened
 `dependencyMappings[]` remains aggregate audit evidence; it is not converted
 into synthetic patch operations.
 
+## Native artwork additions
+
+For an authorized image-region illustration in an existing deck, `operationKind: "native-artwork"`
+uses `scope: "structural"`, `preserve: ["slide-count", "source-objects"]`, and an
+`expectedStructure` with zero slide delta and the exact changed slides. Declare every new freeform
+as an object target with `produced: true`, its unique resolved name, actual op indexes, and
+`expected.nativeArtworkRegion: [x, y, width, height]` in inches. Its frame including line width and
+all path control points must fit that region. Stroke bounds reserve square caps and tangent-based
+miter reach; inherited line decorations that cannot be bounded require a separate geometry review.
+The current profile rejects slide/layout theme overrides rather than assuming the base theme is effective.
+Use explicit local RGB/none fill and line paint plus `set-shape.effect: { "inherit": false }` so
+theme effects cannot silently add a shadow, glow or reflection. Additions are text-free native freeforms, with no
+relationships, groups, media or active content. Shared artwork motifs use this supported subset.
+
+Existing source objects remain unchanged. A caption may move only through its inspect-proven numeric
+ID and predeclared `expected.nativeArtworkPosition: { "x": 123, "y": 456 }` in integer EMU; this
+permits only its offset, preserving size, text, typography, effects and other XML. No removal is allowed.
+Use actual dry-run/diff classifications: xdoc can classify a text-free freeform's empty text carrier as
+`text`, and a caption offset as `style`; these categories do not authorize rewriting visible text.
+
+Require dry-run, full semantic diff, PNG preview, vision-diff, final inspect and structure-check.
+After actual canonical source/candidate PNG review, use `cli/edit/finalize.mjs` as usual. Its explicit
+`pptx-nova-native-artwork-edit-acceptance/v1` policy independently compares the selected slide XML
+after removing only declared drawings and applying only declared caption offsets, including the
+namespace bindings used by markup compatibility and QName values. This also proves
+inherited animation/transition and other comparison gaps unchanged; it does not waive uncertainty
+about the new geometry or a failed visual check. Every other OPC part remains byte-identical.
+
+The ordinary scoped Edit profile still rejects object additions/removals. This profile does not
+authorize arbitrary structural edits, replace source pictures, change themes or add generated bitmap
+assets. See [native visuals](../create/native-visuals.md) for the shared generator and composition review.
+
 ## Evidence Policy
 
 Choose the smallest policy that can prove the requested edit:

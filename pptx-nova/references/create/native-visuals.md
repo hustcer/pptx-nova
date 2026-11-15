@@ -7,6 +7,13 @@ illustrations, image holders and image-led layouts. Use the current xdoc contrac
 visual; a colored rectangle, crossed shell or caption alone is not a delivered picture replacement.
 This does not replace supplied photographs, approved brand assets or source-deck pictures during edits.
 
+Maintained DeckKit inspection examples may deliberately show clearly labelled image holders so their
+asset regions remain discoverable. These examples describe the slot, not a finished visual for a new
+user deck. For each delivery, inspect the actual page and classify every picture responsibility:
+authorized supplied asset, explanatory native illustration, or decorative native composition. A sample
+holder or a kit's historical shell default never satisfies the latter two. Extend a missing registered
+adapter before building that page; choose the subject for its content instead of repeating one motif.
+
 ## Choose what the visual should communicate
 
 Record the subject and whether the visual is explanatory or decorative in the existing
@@ -30,6 +37,8 @@ returns native-evidence components. Any kit can place those components in its ow
 use a distinct component `prefix` when one slide has multiple regions. Do not copy the drawing logic
 into a kit. `createNativeArtworkPatch()` emits the same drawing as typed
 xdoc operations, using a supplied RGB palette and unique object-name prefix.
+Its standalone patch explicitly disables inherited shape effects to keep the composition stable in
+an existing deck's theme. Kit adapters retain responsibility for their own paint and design contracts.
 
 For a standalone authoring input, prepare a spec and call the shared CLI:
 
@@ -82,3 +91,15 @@ PowerPoint export when available; static PNGs do not prove playback or cross-dev
 Shared generation is available to every kit; existing content schemas do not automatically acquire
 new fields. Keep the drawing engine shared and add only a thin region/slot adapter when a kit needs
 one. Teal Journal is an initial adapter and validation example, not the owner of this capability.
+
+## Add artwork to an existing deck
+
+Use the existing deck's actual region, palette and inspect-proven identities; do not select a new kit
+or regenerate other slides. The standalone shared CLI emits editable additions. Retain existing labels;
+when necessary, declare their exact new offsets before applying the patch.
+
+The reviewed Edit finalizer supports a bounded `operationKind: "native-artwork"` profile described in
+[Edit Contract](../edit/edit-contract.md#native-artwork-additions). It requires source-object XML
+preservation, declared text-free freeforms inside their owned regions, unchanged package parts outside
+the reviewed slide XML, and the ordinary machine and actual PNG review gates. Other structural edits
+retain their own workflow; the native oracle decision is preserved in the final report.

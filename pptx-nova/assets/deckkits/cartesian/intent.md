@@ -35,7 +35,10 @@ levels in independent-row mode fail rather than being silently ignored. Numberin
 and neutral Roman markers can be generated; every business label/value comes from content.
 
 `image.editorial` remains a caller-provided assets-manifest slot. With no image,
-the editable crossed frame is intentional. contain/cover/crop-safe/no-crop use
+the editable crossed frame identifies the slot in inspection samples. A delivery needing a new
+illustration must follow [shared native visuals](../../../references/create/native-visuals.md):
+extend the registered image-region adapter, contract and tests, retain the image label, and replace
+the crossed shell with a complete content-appropriate composition. contain/cover/crop-safe/no-crop use
 normal asset resolution; no source photo or full-page screenshot is bundled.
 Stats are display strings; no numeric graphic is derived from those strings.
 

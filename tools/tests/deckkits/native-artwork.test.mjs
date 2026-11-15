@@ -29,6 +29,7 @@ test('shared native artwork adapts to unrelated palettes, aspect ratios and obje
           patch.ops.every((op) => op.slide === 2 && ['add-freeform', 'set-shape'].includes(op.op)),
         )
         for (const op of patch.ops.filter((op) => op.op === 'set-shape')) {
+          assert.deepEqual(op.effect, { inherit: false })
           for (const color of [op.fill.color, op.line.color].filter(Boolean))
             assert.ok(Object.values(palette).includes(color))
         }

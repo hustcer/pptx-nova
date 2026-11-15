@@ -354,6 +354,8 @@ These rules apply to all new decks, including Express and Studio:
 
 These rules apply to modifying existing PPTX files:
 
+- For new illustrations in an existing image region, follow [native visuals](references/create/native-visuals.md)
+  and its source-preserving Edit Contract route; retain the deck's actual visual identity.
 - Treat the input deck as read-only by default. Inspect first, then dry-run, then write intermediate files in the run directory.
 - Keep sidecars distinct from the primary PPTX and every input. On an output failure, inspect publication facts before recovery: `primaryOutputPublished:true` means the PPTX already reached disk even though the command failed. Preserve both paths and the report; never automatically replay or add `--overwrite`. See `references/common-workflow.md` and `references/runtime/troubleshooting.md` for sidecar recovery, including creation tasks.
 - Do not edit objects by guessing selectors. When the target object is unclear, first narrow candidates with `xdoc pptx select input.pptx --query '{"textRegex":"..."}' --json` or a query file, then write the patch. Check dry-run `resolvedSelectors[]`; for an ambiguous selector, inspect `suggestions[].remediation` and follow `references/runtime/troubleshooting.md`. Capture the first submission before an automatic retry, validate the complete kind/target shape against retained request/input/asset snapshots, and revalidate and authorize. A replacement request runs once from the original input; document remediation applies only its repair patch to the exact diagnosed bytes. Missing context or `remediationUnavailable` never permits a guessed replay.

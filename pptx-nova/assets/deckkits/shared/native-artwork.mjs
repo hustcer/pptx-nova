@@ -241,6 +241,7 @@ export function createNativeArtworkPatch({
           shape: { name },
           fill: c.fill ? { type: 'solid', color: palette[c.fill] } : { type: 'none' },
           line: c.line ? { color: palette[c.line], width: c.linePt + 'pt' } : { noLine: true },
+          effect: { inherit: false },
         },
       ]
     }),

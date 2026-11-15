@@ -8,6 +8,7 @@ import {
 } from '../review/canonical-visual-evidence.mjs'
 import { verifyDiffEvidence } from '../review/diff-evidence.mjs'
 import { readPptxPackage } from '../pptx/pptx-package.mjs'
+import { verifyNativeArtworkAdditions } from './native-artwork-preservation.mjs'
 
 const read = (path) => JSON.parse(readFileSync(path, 'utf8'))
 const fail = (message) => {
@@ -21,6 +22,7 @@ const fail = (message) => {
 export function acceptScopedEditVisuals({ candidate, contract, manifest, review, gate }) {
   const raw = read(manifest),
     edit = read(contract)
+  const nativeArtwork = edit.operationKind === 'native-artwork'
   const result = evaluateVisualEvidence(manifest, { candidate })
   if (['invalid', 'blocked'].includes(result.status))
     fail(result.errors.join('; ') || 'Native visual evidence is blocked')
@@ -32,11 +34,22 @@ export function acceptScopedEditVisuals({ candidate, contract, manifest, review,
     fail('Environment uncertainty cannot be accepted as intentional editing')
   if (
     edit.schemaVersion !== 'pptx-nova-edit-contract/v1' ||
-    !['single-object', 'single-slide', 'multi-slide', 'all-slides-style'].includes(edit.scope) ||
+    !(nativeArtwork
+      ? edit.scope === 'structural'
+      : ['single-object', 'single-slide', 'multi-slide', 'all-slides-style'].includes(
+          edit.scope,
+        )) ||
     /structur/i.test(edit.operationKind ?? '')
   )
     fail('This consumer requires a non-structural Edit Contract')
-  for (const kind of ['dry-run', 'semantic-diff', 'png-preview', 'vision-diff', 'final-inspect'])
+  for (const kind of [
+    'dry-run',
+    'semantic-diff',
+    'png-preview',
+    'vision-diff',
+    'final-inspect',
+    ...(nativeArtwork ? ['structure-check'] : []),
+  ])
     if (!edit.requiredEvidence?.includes(kind))
       fail(`Scoped finalization requires ${kind} evidence`)
   if (
@@ -77,6 +90,7 @@ export function acceptScopedEditVisuals({ candidate, contract, manifest, review,
       fail('Full semantic diff is incomplete or stale')
   } else diff = verifyDiffEvidence(diff, edit.source.pptx, candidate)
   if (
+    !nativeArtwork &&
     ['slideAdded', 'slideRemoved', 'shapeAdded', 'shapeRemoved'].some(
       (key) => diff.summary?.[key] !== 0,
     )
@@ -121,6 +135,9 @@ export function acceptScopedEditVisuals({ candidate, contract, manifest, review,
   for (const part of before.partNames())
     if (!allowedParts.has(part) && !before.partBytes(part).equals(after.partBytes(part)))
       fail(`Unreviewed OPC part changed: ${part}`)
+  const artworkPreservation = nativeArtwork
+    ? verifyNativeArtworkAdditions({ before, after, edit, slides, diff })
+    : null
   if (
     !isDeepStrictEqual(
       diff.slides.map((s) => s.slide),
@@ -131,7 +148,7 @@ export function acceptScopedEditVisuals({ candidate, contract, manifest, review,
   for (const slide of diff.slides.filter((s) => slides.includes(s.slide)))
     if (
       !Array.isArray(slide.unsupported) ||
-      slide.unsupported.length ||
+      (!nativeArtwork && slide.unsupported.length) ||
       !Array.isArray(slide.shapeChanges) ||
       slide.shapeChanges.some((change) => change.reliability !== 'reliable')
     )
@@ -184,7 +201,9 @@ export function acceptScopedEditVisuals({ candidate, contract, manifest, review,
     machineChecksPassed: true,
     deliveryAuthorized: true,
     acceptance: {
-      policyId: 'pptx-nova-scoped-edit-acceptance/v1',
+      policyId: nativeArtwork
+        ? 'pptx-nova-native-artwork-edit-acceptance/v1'
+        : 'pptx-nova-scoped-edit-acceptance/v1',
       contractSha256: fileSha256(contract),
       reviewSha256: fileSha256(review),
       candidateSha256: binding.candidateSha256,
@@ -195,6 +214,7 @@ export function acceptScopedEditVisuals({ candidate, contract, manifest, review,
         policy: 'only-reviewed-slide-xml-may-change',
         reviewedParts: [...allowedParts],
         unchangedParts: before.partNames().length - allowedParts.size,
+        ...(artworkPreservation ? { nativeArtwork: artworkPreservation } : {}),
       },
       assurance:
         'Scoped contract and actual visual review; independent PowerPoint parity is not established',

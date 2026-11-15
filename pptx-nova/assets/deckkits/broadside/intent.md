@@ -73,8 +73,12 @@ Migration mapping:
   where useful, `numberFormat`. There is no guessed conversion from a currency display string.
 - Replace doughnut `items[].value: "40%"` with numeric `40` and explicit unit `%` only when the
   caller knows that is the source meaning. Remove arbitrary `items[].color`.
-- Keep `image.split` as a native editable placeholder shell. It still rejects external image assets;
+- Preserve the registered `image.split` slot; its inspection example uses an editable placeholder shell. It still rejects external image assets;
   the reference contains no reusable image. `imageLabel` and `caption` remain optional content.
+  This shell describes the slot in inspection examples. Actual deliveries needing illustration follow
+  [shared native visuals](../../../references/create/native-visuals.md): extend the split page's registered
+  region adapter, contract and tests, retain its labels, and replace the shell with a finished native
+  composition. The sample default is not delivery-ready image content.
 - The exported `C`, `FONT_DISPLAY`, `FONT_MONO`, `FONT_CN` are aliases of the new contract. Code
   reading retired 1.x color-token names must move to semantic contract roles.
 

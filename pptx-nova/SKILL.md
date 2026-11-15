@@ -39,6 +39,13 @@ Refurbish, Translation, template/data filling and brand work;
 it does not expand edit scope or require source-bound guards for new decks. Skip this authoring
 reference for notes/metadata-only work, licensing and read-only export/checks.
 
+For Create, visible design changes in Edit, and Refurbish, also read
+[the shared design floor](references/review/design-floor.md). Establish incumbent versus target visual
+authority, inspect actual samples/pages, and improve hierarchy, typography, composition and rhythm
+within scope. Its task-context command reuses the kit selector; refinement intents never authorize
+rewriting content or replacing a local edit's visual system. A factual text-only correction inherits
+the incumbent and does not require a new design exercise.
+
 References are grouped by create, edit, translation, runtime, review, content, and policies;
 see [the reference index](references/README.md) for ownership. Reading paths in references are
 relative to the containing document; explicit `references/...` paths start at the skill root.

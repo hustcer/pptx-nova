@@ -60,6 +60,7 @@ Existing-deck changes, template following, refurbishment and guarded patch opera
 
 ## Review
 
+- [Design floor](review/design-floor.md) — Shared aesthetic decisions, scoped refinement intents, task context and rendered criticism for Create, Edit and Refurbish
 - [Object integrity](review/object-integrity.md) — Cross-workflow evidence styles, proof visibility, native table fitting, chart semantics, heading/image fit and conditional source-bound guards
 - [Export, comparison and checks](review/export-and-check.md) — Export, extract, checks, semantic diff, and canonical unified visual evidence
 - [Fidelity diagnosis](review/fidelity-diagnosis.md) — Distinguish authored semantics, renderer behavior and environment differences before repairing a deck

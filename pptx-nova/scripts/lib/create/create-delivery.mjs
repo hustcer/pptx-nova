@@ -25,6 +25,7 @@ export function recordCreateInputs(args, artifacts) {
     artifacts.candidate,
     artifacts.canonicalManifest,
     artifacts.renderContext,
+    ...[artifacts.designContext].filter((p) => p && existsSync(p)),
     ...[
       artifacts.designContract,
       artifacts.designPlan,

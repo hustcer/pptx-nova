@@ -399,6 +399,11 @@ if (args[0] === 'schema') {
   const stableSourceSnapshot = join(runDir, 'source.pptx')
 
   assert.equal(summary.status, 'needs-human-review')
+  const designContext = JSON.parse(readFileSync(summary.artifacts.designContext, 'utf8'))
+  assert.equal(designContext.workflow, 'refurbish')
+  assert.equal(designContext.visualAuthority.kind, 'explicit-deckkit')
+  assert.equal(designContext.preservation.retainNativeProofObjects, true)
+  assert.equal(designContext.deliveryAuthorized, false)
   assert.equal(compactResult.status, 'needs-human-review')
   assert.equal(compactResult.performance.render.compareRenderInvocations, 3)
   assert.equal(compactResult.performance.render.comparePartCount, 3)

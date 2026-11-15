@@ -5,6 +5,21 @@ import { runNode, skillPath } from '../helpers/common.mjs'
 const select = (...args) =>
   JSON.parse(runNode([skillPath('scripts/cli/deckkits/select.mjs'), '--json', ...args]).stdout)
 
+test('explicit catalog paths retain the same selection behavior as the bundled default', () => {
+  const implicit = select('--scenario', 'research courseware')
+  const explicit = select(
+    '--catalog',
+    skillPath('assets/deckkits/catalog.json'),
+    '--scenario',
+    'research courseware',
+  )
+  assert.equal(explicit.selected.id, implicit.selected.id)
+  assert.deepEqual(
+    explicit.ranked.map((entry) => entry.id),
+    implicit.ranked.map((entry) => entry.id),
+  )
+})
+
 test('unspecified intent earns no scenario, language or density match points', () => {
   const result = select()
   for (const entry of result.ranked) {

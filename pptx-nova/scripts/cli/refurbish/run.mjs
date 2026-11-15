@@ -47,6 +47,7 @@ import { resolveFilesystemPath } from '../../lib/runtime/filesystem-paths.mjs'
 import { verifyMultiColumnEvidence } from '../../lib/review/multi-column-evidence.mjs'
 import { proofMapIssues } from '../../lib/review/proof-visibility.mjs'
 import { evaluateReviewPolicy, hasEmbeddedReviewedFindings } from '../../lib/review/policy.mjs'
+import { prepareDesignContext } from '../../lib/design/context.mjs'
 
 const CATALOG_PATH = join(SKILL_ROOT, 'assets/deckkits/catalog.json')
 const READINESS_SCRIPT = cliPath('deckkits/readiness.mjs')
@@ -638,6 +639,7 @@ function buildAgentSummary(summary) {
     artifacts: artifactSet(summary, [
       'summary',
       'plan',
+      'designContext',
       'capabilities',
       'nativeReport',
       'fallbackReport',
@@ -909,6 +911,7 @@ function artifactPaths(runDir) {
     readiness: join(runDir, 'catalog-readiness.json'),
     deliveryReadiness: join(runDir, 'delivery-readiness.json'),
     inspect: join(runDir, 'reference-inspect.json'),
+    designContext: join(runDir, 'design-context.json'),
     nativeReport: join(runDir, 'refurbish-skin.json'),
     chromeDetect: join(runDir, 'chrome-detect.json'),
     fallbackReport: join(runDir, 'fallback-patch-report.json'),
@@ -2343,6 +2346,19 @@ function runRefurbish(inputArgs) {
     }
 
     const inspect = runInspect(summary, args, artifacts)
+    const designContext = prepareDesignContext({
+      workflow: 'refurbish',
+      deckkit: args.deckkit,
+      catalog: args.catalog,
+      inspect,
+    })
+    designContext.source.sourceSha256 = sha256(artifacts.sourceSnapshot)
+    writeJson(artifacts.designContext, designContext)
+    summary.requiredReferences.push({
+      path: 'references/review/design-floor.md',
+      reason:
+        'Review actual target identity and composition; mechanical skinning alone does not establish a finished redesign.',
+    })
 
     const nativeSupported = plan.nativeSkinning?.supported === true
     if (args.route === 'native' && !nativeSupported) {

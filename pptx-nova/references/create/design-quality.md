@@ -10,6 +10,10 @@ criticism to slides. It is self-contained: no Impeccable installation, browser, 
 extra approval, or web-specific styling bans are required. A deck is not a website; page chrome,
 serif type, section labels and native diagrams remain valid when they serve its visual system.
 
+Use the [shared design floor](../review/design-floor.md) for task-context preparation, actual sample
+paths, scoped refinement intents and cross-workflow visual judgment. The Create-specific lock and
+review contract below remains authoritative for new decks.
+
 ## Decide before filling slots
 
 1. Choose the viewer's success: `persuade` (product/sales/decision), `read` (understand evidence),

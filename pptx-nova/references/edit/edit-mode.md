@@ -8,6 +8,10 @@ Editing is selector-sensitive. The main risk is changing the wrong object.
 For visible changes, apply [shared object integrity](../review/object-integrity.md) to affected
 objects within the Edit Contract; do not redesign preserved content merely to satisfy a new style.
 
+For a requested visual improvement, use the [shared design floor](../review/design-floor.md).
+Inherit the incumbent visual system, identify the exact page/object scope, and target its weakest
+hierarchy/type/composition problem. A local polish request does not select a replacement DeckKit.
+
 ## Load Order
 
 For small localized text, notes, footer/date/page-number, metadata, color/font,

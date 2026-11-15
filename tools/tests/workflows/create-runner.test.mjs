@@ -31,7 +31,16 @@ test('create runner retains diagnostic previews on old runtimes without publishi
   const output = join(root, 'out.pptx')
   mkdirSync(runDir, { recursive: true })
   writeJson(contentPath, swissColumnContent())
-  writeJson(lockPath, swissColumnLock({ finalPptx: output, runDir }))
+  writeJson(lockPath, {
+    ...swissColumnLock({ finalPptx: output, runDir }),
+    artDirection: {
+      mode: 'read',
+      audience: 'Quarterly review readers',
+      idea: 'One claim supported by one evidence region',
+      visualAnchor: 'Bundled Swiss Grid sample',
+      intentionalRestraint: 'No invented values or imagery',
+    },
+  })
   const fakeXdoc = writeFakeXdoc(root, successfulFakeXdocSource())
 
   const result = runNode([
@@ -54,6 +63,13 @@ test('create runner retains diagnostic previews on old runtimes without publishi
   const summary = readCreateSummary(result)
   const phaseNames = summary.phases.map((phase) => phase.name)
   const gateNames = summary.gates.map((gate) => gate.name)
+
+  const designContext = JSON.parse(readFileSync(summary.artifacts.designContext, 'utf8'))
+  assert.equal(designContext.workflow, 'create')
+  assert.equal(designContext.visualAuthority.deckkit, 'swiss-grid')
+  assert.equal(designContext.visualReviewCompleted, false)
+  assert.equal(designContext.deliveryAuthorized, false)
+  assert.deepEqual(designContext.artDirection, JSON.parse(readFileSync(lockPath)).artDirection)
 
   assert.equal(summary.status, 'needs-human-review')
   assert.equal(summary.machineGatesPassed, true)

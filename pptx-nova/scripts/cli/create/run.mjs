@@ -41,6 +41,7 @@ import {
   checkDesignPatch,
 } from '../../../assets/deckkits/shared/design-contract.mjs'
 import { resolveFilesystemPath } from '../../lib/runtime/filesystem-paths.mjs'
+import { captureChosenDesignContext } from '../../lib/design/context.mjs'
 
 const VALIDATE_CONTENT_SCRIPT = join(SKILL_ROOT, 'assets/deckkits/validate-content.mjs')
 const BUILD_SCRIPT = cliPath('create/build.mjs')
@@ -334,6 +335,7 @@ function artifactPaths(runDir) {
     designSemantic: join(runDir, 'design-semantic.json'),
     designInspect: join(runDir, 'design-inspect.json'),
     designModel: join(runDir, 'design-model.json'),
+    designContext: join(runDir, 'design-context.json'),
     lockCheck: join(runDir, 'check-lock.json'),
     dryRun: join(runDir, 'dry-run.json'),
     apply: join(runDir, 'apply.json'),
@@ -498,6 +500,7 @@ function buildAgentSummary(summary) {
       candidate: summary.artifacts.candidate,
       patch: summary.artifacts.patch,
       quality: summary.artifacts.quality,
+      designContext: summary.artifacts.designContext,
       dryRun: summary.artifacts.dryRun,
       apply: summary.artifacts.apply,
       vision: summary.artifacts.vision,
@@ -981,6 +984,21 @@ function runCreate(inputArgs) {
   const summary = initialSummary(args, contentJson, artifacts)
 
   try {
+    const lock = readJson(args.lock)
+    const context = captureChosenDesignContext({
+      workflow: 'create',
+      deckkit: args.deckkit,
+      target: 'candidate',
+      language: contentJson?.meta?.language ?? '',
+    })
+    context.artDirection = lock.artDirection ?? null
+    summary.warnings.push(...context.warnings)
+    writeFileSync(artifacts.designContext, `${JSON.stringify(context, null, 2)}\n`)
+    summary.requiredReferences.push({
+      path: 'references/review/design-floor.md',
+      reason:
+        'Use design-context.json and actual rendered pages to judge hierarchy, proof scale and rhythm.',
+    })
     runCapabilityProbe(summary, args, artifacts)
     runValidation(summary, args, artifacts)
     runBuild(summary, args, artifacts)

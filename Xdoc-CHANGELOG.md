@@ -4,18 +4,28 @@ Each tagged release is compared with the preceding `v*.*.*` version tag. Tagged 
 
 For current Agent workflows, use the installed executable's `xdoc schema` and `xdoc pptx <action> --help` to discover its actual contract. Names and examples below describe each historical release; follow later migration entries when upgrading. These notes highlight migrations, new operations, report changes, and failure boundaries. PDF rendering fixes also affect PPTX PNG previews produced through the PDF pipeline; static previews do not verify animation playback or PowerPoint fidelity.
 
-## v0.22.0 - 2026/11/13
+## v0.23.0 - 2026/11/19
 
-Compared with `v0.22.0` (`80bf93e7eb`), through tag `v0.22.0` (`80bf93e7e`). These notes cover CLI behavior and shared engine changes used by the CLI.
+Compared with `v0.23.0` (`81213820`), through tag `v0.23.0` (`812138203`). These notes cover CLI behavior and shared engine changes used by the CLI.
+
+- HTML-to-Markdown conversion now uses the embedded parser for legacy HTML normalization. If compact serialization fails, conversion continues with the decoded HTML and emits `html_legacy_normalization_skipped`. For example, Windows-1252 text keeps its accents when an attribute name prevents serialization. Use `--report` to capture the warning in batch automation and review the resulting Markdown.
+- Slide backgrounds now resolve solid and gradient theme fills referenced by `p:bgRef`. Layout and master references to the theme's background fill list can also resolve pictures using the selected theme's image relationships, with raster fallback when the referenced SVG is missing. Inherited backgrounds use the slide's effective color map, including for picture duotone. A slide without an explicit color-map override keeps the layout mapping.
+- An explicit `p:bgRef` that cannot be resolved, a reserved index (`0` or `1000`), or an explicit no-fill background now produces white. A missing background definition still allows inheritance. PDF output also uses white when a background gradient has no resolvable stops. When normalizing DrawingML gradient stops at the same position, the PDF renderer keeps the last authored color. PPTX-to-JSON summaries can now report a `background` where a theme reference previously went unresolved.
+- Classic charts using style 2, including when the style is omitted, use the effective theme's `tx1` color for automatic axis lines and ticks in supported 2D Cartesian and contour charts, and for automatic radar ticks. Chart-local color mappings override the matching slide mappings. Color resolution now supports DrawingML HSL and recognized preset colors in theme slots.
+- PDF rendering preserves stroke opacity on the affected axis lines and tick marks, including supported 3D ticks. A zero-width contour axis stays hidden along with its ticks. Regenerate PDF or `xdoc pptx preview` output for affected slides before applying manual color or visibility workarounds.
+
+## v0.23.0 - 2026/11/13
+
+Compared with `v0.21.0` (`dcce9c1cb`), through tag `v0.23.0` (`81213820`). These notes cover CLI behavior and shared engine changes used by the CLI.
 
 - `pptx i18n-text-plan` now considers complete local paragraph and run style declarations, including nested color, font and effect properties, when identifying visible style boundaries. Translations previously planned as a single style may now require review or explicit mapping. Differently authored inherited styles are not assumed equivalent; inspect the plan before applying its patch.
 - **Translation input migration:** an explicit `targetSegments` entry for a source run group containing non-whitespace text must itself contain non-whitespace text. A previously accepted empty segment is rejected; redistribute the translated phrases among the source groups instead of erasing a meaningful style boundary.
 - `pptx i18n-style-diff` independently checks text occupancy in changed mixed-style paragraphs, including supported slide, table, chart, notes and shared-template parts. A meaningful source style group emptied in the candidate produces a `visible-style-emptied` blocker even if the remaining style XML is unchanged. Unreadable paragraph structure and changed paragraph counts can also block the check. Same-style continuation runs may still be consolidated without emptying the group.
 - The `pptx-i18n-style-diff/v1` report now includes `textStyleMapping`, with a mapping ID, part, paragraph index, referenced slides, source and candidate text, and style-group details for changed mixed-style paragraphs. Update strict report consumers to accept the expanded schema. Review every mapping's phrase-to-style alignment against the source and candidate previews; non-empty groups and `status: pass` do not establish semantic alignment. Embedded workbook contents remain outside this style check and require separate validation.
 
-## v0.22.0 - 2026/11/12
+## v0.21.0 - 2026/11/12
 
-Compared with `v0.20.0` (`918276739`), through HEAD `80bf93e7eb` (source version `0.22.0`). These notes cover CLI behavior and shared engine changes used by the CLI.
+Compared with `v0.20.0` (`918276739`), through HEAD `dcce9c1cb` (source version `0.21.0`). These notes cover CLI behavior and shared engine changes used by the CLI.
 
 - `add-equation` now typesets supported LaTeX into SVG vector paths in the default and `rendered` modes, replacing the previous SVG containing literal LaTeX text. One-shot and cooperative daemon patch execution use the same typesetter. The obsolete `formula-fallback-svg` risk is no longer emitted; this does not establish visual fidelity for a particular equation.
 - Expanded `native-omml` equation creation to compose sequences, grouped expressions, fractions, square roots, paired parentheses/brackets, combined subscripts/superscripts in either order, and sum/product/integral bodies and limits. For example, `E=\frac{a}{b}+x_i^2` retains all terms. Native editable math and built-in rendered math use the same bounded parser. A sum or integral body stops at the next top-level additive or relation operator; use braces when a larger expression belongs to the body.

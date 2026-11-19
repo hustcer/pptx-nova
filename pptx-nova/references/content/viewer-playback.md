@@ -65,6 +65,17 @@ handle document-level keys scoped to the active/nearest viewer. Entering Present
 View moves focus into it. Browser/OS shortcut interception and fullscreen rejection
 must be distinguished from a viewer defect.
 
+On Viewer/Renderer builds with the 3.13.1 fixes, verify the relevant recovery case:
+
+- When a toolbar export or fullscreen action fails, look for the accessible alert and check
+  that the current slide and navigation are still usable. Verify fullscreen-exit failure
+  through whichever control triggered it, including the Presenter View exit control.
+- When the browser actually exits native fullscreen during Presenter View, check that the
+  presenter timer stops and the configured single or continuous preview resumes at the current slide.
+- On fullscreen entry in the comparison viewer, focus moves to its navigation region. In single
+  view, `Enter` should advance to the next page group when one is available. Record the focused
+  element and current page group when debugging unexpected exit or navigation.
+
 ## Evidence that answers the task
 
 For `randomBar`, verify actual horizontal/vertical strip-mask playback at intermediate times;

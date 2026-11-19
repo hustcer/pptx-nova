@@ -470,7 +470,12 @@ export function mergeTranslationMemoryRepairs(memory, plan) {
       ),
     ),
     instructions:
-      'Fill every targetSegments[].text value, keep targetSegmentsContractId unchanged, then rerun with --apply --overwrite passing this repair file via --memory. Any further scaffold is written to a new translation-memory.repair-N.json, so the file you pass back stays read-only. Segments must keep the source run-group order: when the natural target word order would move text across a group boundary (German/Japanese/Korean verb placement around a hyperlink), rewrite into an order-preserving equivalent such as the German imperative instead of reordering groups.',
+      'Fill every targetSegments[].text value. Source groups containing non-whitespace text require ' +
+      'non-whitespace targets, even when the repair reports allowEmptyText: true. Keep source run-group order ' +
+      'and targetSegmentsContractId. Rephrase as needed and reconstruct targetText through sourceSequence[], ' +
+      'preserving structural literals and field placeholders. ' +
+      'Pass the completed copy via --memory and rerun with --apply --overwrite. Any further scaffold is written ' +
+      'to a new translation-memory.repair-N.json.',
   }
   return merged
 }

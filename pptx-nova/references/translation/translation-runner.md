@@ -6,6 +6,10 @@ within the translation contract, without authorizing redesign or unrelated sourc
 
 ## Inputs
 
+Before drafting, run `xdoc schema --report pptx-i18n-style-diff/v1 --minimal` and resolve
+`disclosure.schemaRef`. Use a published runtime whose `textStyleMapping` declares
+`pptx-i18n-text-style-mapping/v1`. Verify the actual report at the style gate.
+
 The finalizer requires:
 
 - the read-only source and stable translated candidate `.pptx`;
@@ -38,7 +42,8 @@ Use that successful plan's inventory with `artifacts.candidate` and `artifacts.t
 expensive visual evidence, run the [candidate target-consistency gate](translation-mode.md#standard-flow)
 with that preparation's effective units and translations. Repair every mismatch through the complete
 memory and rerun preparation; unchanged code and identifiers must also match byte-for-byte text.
-The finalizer still reruns this gate against its immutable snapshots.
+The finalizer reruns this gate against immutable snapshots. Run the [style and occupancy gate](translation-mode.md#style-signature-gate)
+before rendering. Resolve blockers and refresh the style report whenever a fit repair changes the candidate.
 For tight labels or changed multi-column text,
 complete [pre-finalization review](translation-mode.md#visual-parity-gate) first. Inspect the vision
 delta once, repair fit through the translation memory, render only needed multi-column pages and pass
@@ -47,13 +52,12 @@ invalidates old review. Inspect native tables/dense chart labels at readable siz
 blockers: cell clipping may lack a shape-level warning. Reuse canonical page PNGs and compact wording
 before full comparison; a clean estimator or contact-sheet thumbnail does not prove cell fit.
 
-Run `xdoc pptx visual-audit` on the stable candidate against the source, using the frozen field date,
-**before invoking this runner**. Review its exact candidate PNGs and findings, then record a passing
-`visual-review.mjs --mode translation --candidate <candidate> --manifest <manifest>
---previews <review-dir>/visual-evidence/candidate` record with the
-full slide count and every required check. Supply it with `--visual-manifest` and `--visual-review`
-below. This is Agent visual review; it does not require user approval. Follow
-[the style mapping gate](translation-mode.md#style-signature-gate) for required `--style-diff`, `textStyleAlignment=pass` and bound paragraph judgments via `--text-style-review`.
+Run `xdoc pptx visual-audit` against the source with the stable candidate and
+frozen field date before finalization. Inspect the exact PNGs and findings, then record the Agent
+review with `visual-review.mjs --mode translation --candidate <candidate> --manifest <manifest>
+--previews <preview-dir> --slides-reviewed <count> --style-diff <report>`. Supply every required
+`--check`, including `--check textStyleAlignment=pass`, and `--text-style-review` when required.
+Pass the manifest and Agent review with the flags below.
 
 Translation acceptance consumes the original regression manifest and freshly generated, hash-bound
 source, candidate, inventory, translations, style, consistency and full-deck vision evidence. Complete

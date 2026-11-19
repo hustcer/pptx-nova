@@ -28,8 +28,12 @@ xdoc 让这四层都能改。整 deck 的主题槽位更新可用 theme 层；�
 ```
 
 `schemeClr` 必须放在 `color` 对象里（fill 顶层直接写 `schemeClr` 会报 `unknown field`）；
-取值：`lt1 / dk1 / lt2 / dk2 / accent1..6 / hlink / folHlink`（colorMap 层名字 `bg1/bg2/tx1/tx2` 不被接受，请先经 deck 的 clrMap 换算，默认 `tx1→dk1`、`bg1→lt1`）。
+取值为 `lt1 / dk1 / lt2 / dk2 / accent1..6 / hlink / folHlink`。`bg1/bg2/tx1/tx2` 需先按
+幻灯片的有效 color map 换算，默认 `tx1→dk1`、`bg1→lt1`。
 `alpha` 控制不透明度（0-1）；当前 patch schema 不接受 `lumMod` / `lumOff` 亮度变换字段。
+
+诊断已有形状、文本或背景的主题色时，先核对有效映射。slide 省略 `clrMapOvr` 或使用
+`a:masterClrMapping` 时沿用 layout 映射，显式 `a:overrideClrMapping` 优先。
 
 ## Fill（填充）
 
@@ -416,7 +420,22 @@ xdoc pptx remap-theme clean.pptx \
 }
 ```
 
-`followMaster: true` 表示用 master 背景（即使 slide 自己有 `<p:bg>` 也忽略）。
+要恢复继承，只传 `followMaster: true`，它会移除 slide 本地 `<p:bg>`，随后按
+layout → master 顺序解析。若同一 op 还传 `fill`，运行时会在移除后重新写入本地填充。
+
+### 诊断已有主题背景
+
+- 按 slide → layout → master 查找背景声明。`p:bgRef` 的 `1–999` 指向主题填充列表，
+  `1001` 起指向主题背景填充列表的第一项，后续索引顺延。原生预览可解析其中的
+  实色和渐变。layout/master 的主题背景列表还可通过所选主题的图片关系解析图片，
+  引用的 SVG 缺失时可用现有栅格回退。
+- 背景的归属和实际用色分别取证。继承的主题背景使用 slide 的有效 color map，图片
+  duotone 也受影响。
+- 当前原生渲染中，无法解析的显式 `p:bgRef`、保留索引 `0`/`1000` 和显式 no-fill
+  显示白色。PDF 中无法解析任何色标的背景渐变也显示白色，重复位置使用最后声明的颜色。
+  用同一源 PPTX 重渲染，并按需用 `xdoc convert <deck> --to json --output <run-dir>/source-model.json`
+  查看 `presentation.slides[].background`。该摘要是解析结果，验证归属时仍要查 OOXML 和
+  关系。把已有主题引用或图片背景视为保留对象，背景写入能力以当前 op schema 为准。
 
 ### Master-level（整个 deck）
 

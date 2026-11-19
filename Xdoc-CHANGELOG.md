@@ -6,7 +6,7 @@ For current Agent workflows, use the installed executable's `xdoc schema` and `x
 
 ## v0.23.0 - 2026/11/19
 
-Compared with `v0.23.0` (`81213820`), through tag `v0.23.0` (`812138203`). These notes cover CLI behavior and shared engine changes used by the CLI.
+Compared with `v0.22.0` (`80bf93e7e`), through tag `v0.23.0` (`812138203`). These notes cover CLI behavior and shared engine changes used by the CLI.
 
 - HTML-to-Markdown conversion now uses the embedded parser for legacy HTML normalization. If compact serialization fails, conversion continues with the decoded HTML and emits `html_legacy_normalization_skipped`. For example, Windows-1252 text keeps its accents when an attribute name prevents serialization. Use `--report` to capture the warning in batch automation and review the resulting Markdown.
 - Slide backgrounds now resolve solid and gradient theme fills referenced by `p:bgRef`. Layout and master references to the theme's background fill list can also resolve pictures using the selected theme's image relationships, with raster fallback when the referenced SVG is missing. Inherited backgrounds use the slide's effective color map, including for picture duotone. A slide without an explicit color-map override keeps the layout mapping.
@@ -14,9 +14,9 @@ Compared with `v0.23.0` (`81213820`), through tag `v0.23.0` (`812138203`). These
 - Classic charts using style 2, including when the style is omitted, use the effective theme's `tx1` color for automatic axis lines and ticks in supported 2D Cartesian and contour charts, and for automatic radar ticks. Chart-local color mappings override the matching slide mappings. Color resolution now supports DrawingML HSL and recognized preset colors in theme slots.
 - PDF rendering preserves stroke opacity on the affected axis lines and tick marks, including supported 3D ticks. A zero-width contour axis stays hidden along with its ticks. Regenerate PDF or `xdoc pptx preview` output for affected slides before applying manual color or visibility workarounds.
 
-## v0.23.0 - 2026/11/13
+## v0.22.0 - 2026/11/13
 
-Compared with `v0.21.0` (`dcce9c1cb`), through tag `v0.23.0` (`81213820`). These notes cover CLI behavior and shared engine changes used by the CLI.
+Compared with `v0.21.0` (`dcce9c1cb`), through tag `v0.22.0` (`80bf93e7e`). These notes cover CLI behavior and shared engine changes used by the CLI.
 
 - `pptx i18n-text-plan` now considers complete local paragraph and run style declarations, including nested color, font and effect properties, when identifying visible style boundaries. Translations previously planned as a single style may now require review or explicit mapping. Differently authored inherited styles are not assumed equivalent; inspect the plan before applying its patch.
 - **Translation input migration:** an explicit `targetSegments` entry for a source run group containing non-whitespace text must itself contain non-whitespace text. A previously accepted empty segment is rejected; redistribute the translated phrases among the source groups instead of erasing a meaningful style boundary.

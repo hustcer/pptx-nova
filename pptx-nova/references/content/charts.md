@@ -1090,7 +1090,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
 - `title`：轴标题。`text` / `font` / `rotation`（-90..90 度）；`null` 删除轴标题。
 - `displayUnits`：仅 value 轴。`unit` 取内置档位
   `hundreds / thousands / ten-thousands / hundred-thousands / millions /
-  ten-millions / hundred-millions / billions / trillions`，或直接给正数作自定义
+ten-millions / hundred-millions / billions / trillions`，或直接给正数作自定义
   除数（写 `c:custUnit`）；`showLabel: true` 同时显示单位标签；`null` 移除。
   金额类轴强烈建议用它代替手改数据（"以千为单位"的正确语义表达）。
 
@@ -1182,7 +1182,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
 
 > ⚠️ marker 用 `symbol`（不是 `kind`）：严格 enum，只收
 > `auto / circle / dash / diamond / dot / none / picture / plus / square / star /
-> triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
+triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
 > `line` 取颜色字符串（如 `"FFFFFF"`），不是对象。
 
 ### 趋势线 / 误差线（系列级分析装饰）
@@ -1211,7 +1211,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
   唯一稳定 identity，不要假设可按 index 增删。`trendlines: []` 清空全部趋势线，
   省略字段保持原集合。单数 `trendline` 和 `trendlines: null` 均被拒绝。
 - 每条趋势线的 `type`：`exponential / linear / logarithmic / moving-average /
-  polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
+polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
   moving-average，`intercept` 仅 exponential/linear/polynomial（组合错会被
   dry-run 拒绝并说明）；还支持 `forward` / `backward`（外推期数）、`name`、
   `line`（线样式）。pie/doughnut/radar 等不支持趋势线的 series 会拒绝非空集合，
@@ -1432,6 +1432,12 @@ point 作用域目前只收 `position` 和 `font`（带 `showValue` 等会报
 
 先用当前 xdoc 对同一源文件重渲染，不为恢复旧像素改数据或固定自动轴：
 
+- 经典图表 `c:style=2` 或省略样式时，受支持的二维直角坐标图与等值线图的自动轴线和
+  刻度、雷达图的自动刻度使用有效主题 `tx1`。查 chart-local `c:clrMapOvr`、slide 的
+  有效 color map 和 theme 色槽，再核对渲染的轴线与刻度。图表本地映射优先，主题色槽
+  可含 DrawingML HSL 或可识别的 preset 色。显式轴笔优先于自动配色；PDF 渲染保留受影响
+  轴线与刻度的描边不透明度（含受支持的 3D 刻度）。零宽等值线轴及其刻度保持隐藏。
+  先重出 PDF 或 `pptx preview`，再判断旧的手工配色、加粗或可见性补丁是否仍属任务范围。
 - 折线自动 domain 包含实际绘制的误差棒端点；累计/统计误差须按系列语义解释，显式
   min/max 仍优先。不要缩减误差值或截断轴来掩盖旧 domain 的问题。
 - 柱/条形的 overlap 与 stacking 是独立因素；类目轴方向还影响 horizontal bar 的系列
@@ -1515,7 +1521,7 @@ For PowerPoint-only chart types such as `waterfall`, `sunburst`, `treemap`,
   scriptable PowerPoint + Nushell + xdoc PDFium evidence route is available:
   `nu <skill-root>/scripts/cli/office/powerpoint-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json > <run-dir>/powerpoint-native-render.json`.
   Then run the high-risk finalizer with `--candidate deck.pptx
-  --powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
+--powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
   the final ZIP, identifies ChartEx by OPC Content Type, and maps relationships
   through slide/layout/master ownership to one-based presentation order. Renamed
   parts and inherited charts are included; a filename alone is not chart identity.

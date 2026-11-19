@@ -58,6 +58,12 @@ authoring support.
 
 For the affected content, extend the check without rewriting the source:
 
+- Slide backgrounds: inspect `p:cSld/p:bg` on the slide, layout and master in
+  inheritance order. Resolve theme `p:bgRef` using the background owner's part
+  and the slide's effective color map. An absent slide `p:bg` inherits, while
+  an unresolved explicit reference or explicit no-fill renders white in the
+  current native pipeline. See [background resolution](../content/styles-and-themes.md#background背景)
+  before adding an override to reproduce old pixels.
 - Histograms: retain raw repeated observations, interval closure and precise
   boundaries; counts must match the reported intervals. Stock high/low lines and
   surface height-band legends carry data meaning. Hidden ChartEx axes/gridlines

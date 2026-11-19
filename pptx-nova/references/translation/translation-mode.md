@@ -262,8 +262,10 @@ units file, translation contract, or executable patch.
 
 Review and fill the paragraph groups in batches. Copy the emitted repair memory to a new file and
 merge decisions by `unitId`, then by its exact `sourceRunGroupId`, preserving all unedited entries,
-source guards and contract IDs. If wording changes, update that override's `targetText` and every
-affected segment together. Reconstruct `targetText` by replaying `sourceSequence[]` in order: substitute
+source guards and contract IDs. Each source group with non-whitespace text needs a non-whitespace
+target segment, even when the repair metadata says `allowEmptyText: true`. If wording changes,
+update that override's `targetText` and every affected segment together.
+Reconstruct `targetText` by replaying `sourceSequence[]` in order: substitute
 each `text-group` with its translated segment matched by `sourceRunGroupId`, append the unchanged
 `literal` for `break` / `tab`, and append the unchanged `placeholder` for `field`. The result must equal
 `targetText` exactly. Keep structural literals and field placeholders outside `targetSegments[].text`;
@@ -437,8 +439,9 @@ the meaning of each styled phrase, not merely the paragraph's overall meaning.
    - Copy `translationPatchTemplate` and merge it into the existing
      `translations[]` record matched by `unitId`. Do not append a second record.
    - Replace every `targetSegments[].text: null` with the translated text for
-     that exact group. Empty string is valid when the target intentionally
-     clears a group; `null` or a missing field is not.
+     that exact group. Use a non-whitespace string for every source group with
+     non-whitespace text. `allowEmptyText: true` permits an empty string only
+     for a source group without meaningful text. Every group still needs a string.
    - Preserve `targetSegmentsContractId`. It binds the mapping to the current
      hyperlink/style/field/break/tab topology even when the concatenated source
      text did not change.
@@ -579,9 +582,9 @@ the meaning of each styled phrase, not merely the paragraph's overall meaning.
      `sourceRunGroupId` must come verbatim from
      `i18n-plan.reviewRequired[].repair.sourceRunGroups[]`; never guess ids or
      infer them from run order. Preserve the repair's
-     `targetSegmentsContractId`. Missing, duplicated, unknown, out-of-order,
-     stale-contract, or targetText-reconstruction-mismatched segments must fail
-     closed.
+     `targetSegmentsContractId`. Each group needs exactly one correctly ordered
+     segment with non-whitespace text for every meaningful source group. Reconstruct
+     `targetText` through `sourceSequence[]`, keeping structural literals and field placeholders.
    - Break and tab nodes are structural delimiters. Preserve the corresponding
      `\n` and `\t` delimiters in `targetText`; the planner partitions translated
      text around them and keeps the original OOXML nodes unchanged. A missing,
@@ -841,7 +844,10 @@ and visual review.
 
 The native gate additionally rejects emptied meaningful style groups and emits
 `textStyleMapping` for changed mixed-style paragraphs, including table/chart and
-shared-part text. Missing mapping coverage is not a pass. Complete style identity
+shared-part text. `visible-style-emptied` can occur with identical textless style
+signatures. Read the reported part, paragraph and group, repair the mapping and
+rerun the gate on the repaired candidate before rendering. Missing mapping coverage
+is not a pass. Complete style identity
 includes color/font/effect children, not just bold/italic/size attributes.
 Mechanical occupancy still cannot prove that emphasis belongs to the intended
 words. Use the runner's `style-review.mjs` scaffold, compare every source/target

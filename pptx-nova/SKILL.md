@@ -152,6 +152,8 @@ Use these only to choose the entry reference; the routing table owns details.
   bundled PowerPoint playback probe when that probe is available.
 - **Refurbish / translate**: use `references/edit/refurbish-runner.md` / `references/translation/translation-runner.md`. The runner owns route,
   evidence, one canonical comparison, and publication; read only references it names on failure.
+  For translation, confirm native `textStyleMapping` before drafting and screen the stable candidate
+  with `i18n-style-diff` before canonical rendering.
 - **Chinese / East Asian font normalization**: read `references/edit/font-normalization.md`.
   Discover `text/font-family-normalization`; use Chinese selection when Japanese/Korean must stay intact.
   The document-wide `set-font` op has no shape selector. Use its dedicated Edit Contract target,
@@ -181,10 +183,11 @@ Use these only to choose the entry reference; the routing table owns details.
   positional series-line `noFill` preservation in marker-style XY data replacement, and horizontal tick
   density. Data replacement does not preserve all chart formatting; inspect and verify the result.
 - **Chart rendering changes**: use `references/content/charts.md` for automatic 2D/3D fitting,
-  surface camera/paint, imported stacked ribbons, crossing-plane occlusion, signed-area end caps,
-  hidden-axis semantics and gradient cuts. Keep Web texture evidence separate from native PDF evidence.
-  For Latin word breaks, distributed paragraphs, table spacing or picture/arrow differences,
-  use `references/review/fidelity-diagnosis.md`; parser model fields are not patch fields.
+  theme-resolved axis paint, surface camera/paint, imported stacked ribbons, crossing-plane occlusion,
+  signed-area end caps, hidden-axis semantics and gradient cuts. Keep Web texture evidence separate
+  from native PDF evidence. For inherited backgrounds, Latin word breaks, distributed paragraphs,
+  table spacing or picture/arrow differences, follow `references/review/fidelity-diagnosis.md` to
+  re-render the source and trace the owning parts before choosing a patch.
 - **Existing Shape 3D / Text 3D**: read the local-declaration guidance in `references/edit/inspect-and-edit.md`.
   Preserve owner-bound XML facts during neighboring edits; render improvements do not grant
   authoring support or PowerPoint fidelity. Query the independent render axis for bounded parallel

@@ -621,7 +621,7 @@ xdoc html2md page.html -o <run-dir>/page.md
 xdoc html2md "https://example.com/post" -o <run-dir>/page.md
 xdoc html2md ./pages --recursive --output-dir <run-dir>/md     # batch
 xdoc html2md page.html --html-base-url "https://site.com/" -o <run-dir>/resolved.md
-xdoc html2md ./pages --recursive --report <run-dir>/html2md-report.json
+xdoc html2md ./pages --recursive --output-dir <run-dir>/md --report <run-dir>/html2md-report.json
 
 # PDF -> retained text
 xdoc pdf extract-text input.pdf -o <run-dir>/text.txt
@@ -633,6 +633,11 @@ Notes:
 
 - `xdoc html2md` and `xdoc convert <input> --from html --to md` share the same
   HTML-to-Markdown engine; a URL passed to `convert` auto-detects as `html`.
+- For legacy-encoded HTML, retain `--report <run-dir>/html2md-report.json` with
+  `-o` or `--output-dir` when diagnosing extraction. `html_legacy_normalization_skipped`
+  means compact normalization failed and conversion continued with the decoded HTML. Review
+  the actual Markdown for accents, tables and links before reuse, even when the
+  batch item succeeded. Retry extraction only when the output needs correction.
 - `xdoc pdf extract-text`: `--engine auto` resolves to PDFium in native builds
   (`pdflite` is not yet available); `--pages` is 1-based; `--mode layout` keeps
   visual order, `natural` is the reading flow. With `--json --pretty` inspect

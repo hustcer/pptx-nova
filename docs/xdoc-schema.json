@@ -114252,7 +114252,7 @@
     }
   },
   "name": "xdoc",
-  "version": "0.23.0 (81213820)",
+  "version": "0.25.0 (838a61af)",
   "schemaVersion": "cli-agent/v1",
   "defaultCommand": "convert",
   "artifactSchemaEvolution": {

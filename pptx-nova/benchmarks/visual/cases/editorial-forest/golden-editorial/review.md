@@ -1,6 +1,6 @@
 # Editorial Forest golden review
 
-Accepted **0.1.0 / candidate**, 2026-11-13. Runtime: xdoc `0.23.0 (80bf93e7)`;
+Accepted **0.1.0 / candidate**, 2026-11-13. Runtime: xdoc `0.25.0 (80bf93e7)`;
 frozen `XDOC_FIELD_DATE=2026-11-13`. This does not promote the kit to production/default.
 
 ## Source and design decisions

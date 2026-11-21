@@ -144,8 +144,9 @@ Use these only to choose the entry reference; the routing table owns details.
   effect counts and raw behavior metadata do not authorize edits. `references/content/animations.md` covers fixed
   whole-shape Box/Dissolve and their distinct preview limits. For basic effects, follow the disclosed
   repeat/autoReverse/restart/easing contract and its omitted/null/value update semantics.
-  For imported group/pattern effects and Web slideshow controls, follow `references/content/animations.md` and its
-  conditional playback reference. Shape deletion must preserve surviving timing conditions or reject.
+  For imported group/pattern effects, follow `references/content/animations.md`. For Web slideshow behavior,
+  including shape-triggered builds and Slide/Section Zoom, follow `references/content/viewer-playback.md`
+  and verify the loaded Viewer build. Shape deletion must preserve surviving timing conditions or reject.
   For P14 transitions, follow `references/content/animations.md`'s per-kind schema and independent capability axes;
   inspect source/fallback timing separately and never equate authoring with playback certification.
   For Morph, use exact `!!` object names, run `morph-check`, and bind delivery evidence to the
@@ -182,7 +183,7 @@ Use these only to choose the entry reference; the routing table owns details.
 - **Scatter / bubble**: follow `references/content/charts.md` for marker-only versus connected variants,
   positional series-line `noFill` preservation in marker-style XY data replacement, and horizontal tick
   density. Data replacement does not preserve all chart formatting; inspect and verify the result.
-- **Chart rendering changes**: use `references/content/charts.md` for automatic 2D/3D fitting,
+- **Chart rendering changes**: use `references/content/charts.md` for continuous date axes, automatic 2D/3D fitting,
   theme-resolved axis paint, surface camera/paint, imported stacked ribbons, crossing-plane occlusion,
   signed-area end caps, hidden-axis semantics and gradient cuts. Keep Web texture evidence separate
   from native PDF evidence. For inherited backgrounds, Latin word breaks, distributed paragraphs,

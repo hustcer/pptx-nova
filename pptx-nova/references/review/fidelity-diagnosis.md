@@ -25,6 +25,11 @@ or bundled entry; `xdoc --version` does not identify the code running in a brows
 Capture after fonts are ready and layout has settled, at a recorded display scale.
 When validating an upgrade, confirm the page loads the intended current build;
 an old bundle cannot verify new renderer behavior.
+After an explicit upload, check the active file and slide before capturing. A
+Viewer can reset to slide 1 and clear the requested URL page during upload. Wait
+for the upload to finish, navigate to the intended slide, then confirm the
+displayed page. When using a preconfigured demo, match the served PPTX bytes to
+the target SHA-256.
 
 When PowerPoint PDF export omits hidden slides, logical slide numbers differ from
 PDF page numbers. Retain the snapshot's `pdf_pages` mapping; a requested hidden
@@ -230,9 +235,11 @@ Use these only for the affected content; compare original and candidate with the
   minimum height for middle/bottom anchoring during rendering; growth is distinct
   from an edit that requests native reflow. Preserve the frame, margins and anchor
   before testing `textLayout`; see `../edit/inspect-and-edit.md`. Tabs use inherited
-  `defTabSz` (including explicit zero), custom stops and hanging indents. The
-  regular grid is frame-rooted and resumes after custom stops; a hanging first tab
-  can reach the reading margin. Check no-wrap/center/right alignment separately.
+  `defTabSz` (including explicit zero), custom stops and hanging indents. For
+  paragraphs without authored stops or `defTabSz`, xdoc 0.25.0 PDF/PNG uses a
+  72 pt default grid (previously 36 pt). The grid is frame-rooted and resumes
+  after custom stops. A hanging first tab can reach the reading margin. Check
+  no-wrap/center/right alignment and alignment across hard breaks, including RTL.
   Do not replace tabs with spaces or force top alignment to imitate old exports.
 - **Glyph sizing and language:** enclosed symbols keep authored sizes; a centered
   indivisible overflowing glyph can overhang by measured advance without moving

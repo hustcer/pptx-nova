@@ -274,7 +274,11 @@ record font/size differences separately from lost content or collisions.
 
 For an imported native equation, retain attributed OMML text, including `m:t`
 with `xml:space` or other attributes, whitespace, fractions and sub/superscript
-structure. Re-render the same source with the current runtime before diagnosing
+structure. In xdoc 0.25.0, `xdoc extract --parts resources` can report authored
+spaces as `\space` in `resources.math[].latex` and reflect n-ary limit
+placement with `\limits` or `\nolimits`. When extraction changes after an upgrade,
+compare the OMML, math meaning and inline/display context before treating it as a
+content change. Re-render the same source with the current runtime before diagnosing
 missing math text or replacing it with an image. Restored content and remaining
 math metric differences are separate findings.
 

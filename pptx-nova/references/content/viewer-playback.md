@@ -1,6 +1,6 @@
 # Viewer playback diagnosis
 
-Read only for Web slideshow/playback or keyboard/focus tasks, after `animations.md`.
+Read for Web slideshow/playback or keyboard/focus tasks. For PPTX timing edits, also read `animations.md`.
 Use the actual loaded Viewer build and its public API, not the xdoc version or a
 static export, as evidence. These controls do not change PPTX timing or expand the
 authoring subset. Keep ordinary export/edit workflows on their existing runners.
@@ -44,6 +44,25 @@ Web Component methods match the controller, with `playbackchange` carrying
 Framework adapters share the controller; use their actual callback/event contract
 (Vue exposes `playback-change`), rather than guessing attribute names from callbacks.
 
+On builds that support authored trigger shapes, click the actual shape or a
+member of its bound drawing group. The member's own trigger takes priority,
+then the nearest bound group. In fullscreen or Presenter View, a canvas or
+unbound-shape click with `clickToAdvanceAnimation` enabled advances the ordinary
+build. Keyboard and Presenter Next also use the ordinary sequence. Host `play()`
+runs it first, followed by shape-triggered sequences in source order. Verify
+manual trigger clicks separately, associating playback events with
+`sourceShapeId` where exposed.
+
+To verify imported Slide/Section Zoom, activate its thumbnail in an animation-enabled
+slideshow session. Section Zoom follows the authored target order, then returns
+to the parent or continues from the last target according to its return setting.
+Check the sequence and return with actual clicks and Next. Continuous preview
+uses ordinary slide links. For single-slide inline testing, use
+`animationScope: 'always'` on a build that exposes it. A zero duration cuts
+immediately. An omitted duration uses the destination's transition. Preserve the native links
+and route when editing nearby content. The `set-slide-transition` kind `zoom`
+is a separate page transition.
+
 ## Keyboard and focus controls
 
 Focus/click the intended viewer before diagnosing navigation. Only the nearest
@@ -64,6 +83,11 @@ Embedded preview navigation requires focus; fullscreen and Presenter View also
 handle document-level keys scoped to the active/nearest viewer. Entering Presenter
 View moves focus into it. Browser/OS shortcut interception and fullscreen rejection
 must be distinguished from a viewer defect.
+
+When checking Previous on a build with slideshow review support, confirm that
+manual review holds the revisited slide's authored auto-advance until forward
+navigation resumes. The outgoing fade can replay in reverse when the destination
+has no visual transition. Check manual review and host `play()` timing separately.
 
 On Viewer/Renderer builds with the 3.13.1 fixes, verify the relevant recovery case:
 

@@ -5,7 +5,7 @@
 新建 PPTX 也通过 [演示表现力指南](../create/presentation-expression.md) 主动进入本流程，
 包括一句话 Express；用户无需先提出动画要求。既有文稿的局部编辑仍遵守原任务范围。
 
-仅当任务涉及 Web 放映、play/pause、自动切页或键盘/焦点异常时，再读
+仅当任务涉及 Web 放映、对象触发、Slide/Section Zoom、play/pause、自动切页或键盘/焦点异常时，再读
 [Viewer 播放诊断](viewer-playback.md)。普通 PPTX 导出无需启动浏览器。
 
 ## 能力发现
@@ -136,6 +136,11 @@ inspect/timing 证据，再回读最终 timing；不要仅为通过 merge-safe �
 `merge-safe` 是默认思路：如果现有 timing 含 media timing、interactive trigger、unsupported timing、
 未建模的 motion path / emphasis 或复杂 build，dry-run 应拒绝覆盖。不要为通过门禁而改成 `replace`，除非用户明确
 接受丢弃/重建既有动画树。
+
+xdoc 0.25.0 新建 `fade-out`（或 `effect: "fade", phase: "exit"`）时会在
+`p:animEffect/p:cBhvr/p:cTn` 写入 `fill="hold"`，使对象在退出结束后留在最终透明状态。
+验证时核对这一内部 behavior 节点，并在实际放映中等到效果结束。编辑旁边的内容时保留既有
+淡出 timing，其结束后是否恢复可见取决于原稿的有效填充行为。
 
 ## 基础动画 timing modifier
 

@@ -63,6 +63,20 @@ immediately. An omitted duration uses the destination's transition. Preserve the
 and route when editing nearby content. The `set-slide-transition` kind `zoom`
 is a separate page transition.
 
+## Custom shows and hover links
+
+On a build that exposes `startCustomShow(id)`, use the ID from
+`PptxPresentation.customShows` with the controller or Viewer Web Component.
+To verify an authored route, activate the actual link and follow the show through
+its end. Check authored order and repeated members, plus return to the calling
+slide and normal Next when the link requests return. If fullscreen is unavailable
+or denied, record the inline session and verify its timing and exit there.
+
+Exercise hover and click separately on the authored run in slideshow mode. For
+inherited text, check each target against relationships from the part that defines
+it. Use a controlled target when testing dispatch. `extract --parts links` and
+PDF annotations cover clicks only.
+
 ## Keyboard and focus controls
 
 Focus/click the intended viewer before diagnosing navigation. Only the nearest

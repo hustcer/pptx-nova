@@ -451,6 +451,11 @@ Adjust fallback contact sheet options only when needed:
 - `--contact-background EEEEEE` to see page edges better
 - `--contact-output path/to/contact-sheet.png` for a custom output path
 
+For a standalone source/candidate comparison, query `xdoc schema --command pptx.contact-diff`.
+The disclosed two-positional form is `xdoc pptx contact-diff old.pptx new.pptx --output diff.png --json`.
+Omit `--map` for same-number pairing. The direct command defaults to 72 DPI. Workflow delivery
+continues to use the comparison evidence and DPI policy of its runner.
+
 ## Preflight Checks
 
 For fonts, links, and compatibility:
@@ -602,6 +607,31 @@ xdoc extract deck.pptx --parts notes,resources,links,fonts
 
 Save extracted JSON/report files in the run directory unless the user asks for a
 specific output location.
+
+### Verify links and navigation
+
+For a scoped PDF, use the same `--slides` selection for conversion, extraction
+and preflight. For example:
+
+```bash
+xdoc extract deck.pptx --parts links --slides 1,3 --output links.json
+xdoc check deck.pptx --checks links --slides 1,3 --output link-check.json
+xdoc convert deck.pptx --to pdf --slides 1,3 --output linked.pdf
+```
+
+Read `xdoc schema --report links/v1` before validating the report. The expanded
+click inventory includes direct shapes, rich chart titles (`source: "chart-title"`)
+and visible inherited elements. Use `kind` for classification and keep the
+optional `action` even when `url` is empty. Relative and Windows drive file
+targets can emit `file_link_present`. Link policy findings describe the target
+classification. Check reachability in the intended consumer.
+
+Inspect PDF annotations or exercise the links in the target PDF reader. Direct
+slide jumps are omitted when their target slide is outside the export. First,
+last, next and previous use the exported page order and can use an authored
+fallback URL at a boundary. Even an action-only jump classified as `internal`
+can lack a destination. For hover links and custom-show routes, use actual
+[slideshow evidence](../content/viewer-playback.md#custom-shows-and-hover-links).
 
 ## Ingest HTML / URL / PDF (inbound)
 

@@ -1089,8 +1089,8 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
 
 - `title`：轴标题。`text` / `font` / `rotation`（-90..90 度）；`null` 删除轴标题。
 - `displayUnits`：仅 value 轴。`unit` 取内置档位
-  `hundreds / thousands / ten-thousands / hundred-thousands / millions /
-  ten-millions / hundred-millions / billions / trillions`，或直接给正数作自定义
+  `hundreds / thousands / ten-thousands / hundred-thousands / millions / ten-millions / hundred-millions / billions / trillions`，
+  或直接给正数作自定义
   除数（写 `c:custUnit`）；`showLabel: true` 同时显示单位标签；`null` 移除。
   金额类轴强烈建议用它代替手改数据（"以千为单位"的正确语义表达）。
 
@@ -1181,8 +1181,8 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
 重复出现且字段冲突会被拒绝）。
 
 > ⚠️ marker 用 `symbol`（不是 `kind`）：严格 enum，只收
-> `auto / circle / dash / diamond / dot / none / picture / plus / square / star /
-> triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
+> `auto / circle / dash / diamond / dot / none / picture / plus / square / star / triangle / x`
+> （其它值直接被 schema 拒绝）。marker 的 `fill` /
 > `line` 取颜色字符串（如 `"FFFFFF"`），不是对象。
 
 ### 趋势线 / 误差线（系列级分析装饰）
@@ -1210,8 +1210,8 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
 - 使用 `trendlines` 数组按顺序**完整替换**同一系列的趋势线集合；数组顺序是
   唯一稳定 identity，不要假设可按 index 增删。`trendlines: []` 清空全部趋势线，
   省略字段保持原集合。单数 `trendline` 和 `trendlines: null` 均被拒绝。
-- 每条趋势线的 `type`：`exponential / linear / logarithmic / moving-average /
-  polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
+- 每条趋势线的 `type`：`exponential / linear / logarithmic / moving-average / polynomial / power`。
+  `order`（2..6）仅 polynomial，`period`（2..255）仅
   moving-average，`intercept` 仅 exponential/linear/polynomial（组合错会被
   dry-run 拒绝并说明）；还支持 `forward` / `backward`（外推期数）、`name`、
   `line`（线样式）。pie/doughnut/radar 等不支持趋势线的 series 会拒绝非空集合，
@@ -1432,6 +1432,13 @@ point 作用域目前只收 `position` 和 `font`（带 `showValue` 等会报
 
 先用当前 xdoc 对同一源文件重渲染，不为恢复旧像素改数据或固定自动轴：
 
+- 富文本主标题与多行轴标题先核对原有段落、显式换行和样式继承。对关闭 overlay 的标题，
+  检查实际换行后的留白、旋转轴标题和图例是否相撞；标题含链接时另做
+  [PDF 跳转检查](../review/export-and-check.md#verify-links-and-navigation)。
+- 多级分类标签核对叶子槽与父标签跨度。非堆叠二维折线保留类别槽，按 `dispBlanksAs`
+  处理缺值。组合图按轴 ID 检查网格对齐、绘制层次与重复线。保留原始缺值和类别顺序。
+- 散点趋势线按配对的数值 X/Y 检查。在 log 轴上核对坐标有效性、曲线裁剪和公式／R²
+  的位置。全无可绘制线段时，自动标签可能省略。显式位置仍优先。
 - xdoc 0.26.0 的 PDF/PNG 会按日期缓存中的实际间隔放置使用 `c:dateAx` 的二维折线/面积点，
   兼容的组合层按 category axis ID 共享比例尺。若柱/条层也使用该 ID，共享轴改用等距分类槽，
   无可用日期范围时同样回退到分类轴。先核对 axis ID、Excel 日期序列和 `c:date1904`，
@@ -1526,8 +1533,8 @@ For PowerPoint-only chart types such as `waterfall`, `sunburst`, `treemap`,
   use a non-interactive PowerPoint baseline render when the optional macOS +
   scriptable PowerPoint + Nushell + xdoc PDFium evidence route is available:
   `nu <skill-root>/scripts/cli/office/powerpoint-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json > <run-dir>/powerpoint-native-render.json`.
-  Then run the high-risk finalizer with `--candidate deck.pptx
-  --powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
+  Then run the high-risk finalizer with `--candidate deck.pptx --powerpoint-native-render <run-dir>/powerpoint-native-render.json`.
+  It reads
   the final ZIP, identifies ChartEx by OPC Content Type, and maps relationships
   through slide/layout/master ownership to one-based presentation order. Renamed
   parts and inherited charts are included; a filename alone is not chart identity.

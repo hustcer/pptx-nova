@@ -223,6 +223,13 @@ Use these only for the affected content; compare original and candidate with the
   another paint path. Inspect paint and text separately, including clipping after autofit. Uncovered
   legacy symbol-font slots can intentionally reserve blank advances; a blank is not permission to
   insert a substitute glyph. Check original code points, font mapping and Office reference first.
+- **WordArt:** inspect the authored warp preset and the current PDF/PNG result.
+  Eligible single-line `textArchUp` and `textDeflateBottom` can retain the warp.
+  Multiple paragraphs, bidi text, unsupported effects or wrapped `textDeflateBottom`
+  can fall back to ordinary layout. Check warped ink and chart-title clearance
+  in the rendered page, including shape/group rotation, before acting on estimated
+  text fit. For linked or shadowed WordArt, inspect PDF annotation bounds and
+  confirm selectable text appears once with `xdoc pdf extract-text out.pdf --engine pdfium`.
 - **Cached artwork and color:** do not reapply `a14:imgLayer` editing effects over Office's rendered
   preview. Direct grayscale/duotone is separate. Cached SmartArt shade is not tint; ordered/repeated
   source color transforms can affect the result. Mirrored WMF fallback font sizes use absolute window
@@ -416,6 +423,10 @@ Read this section only for these symptoms; ordinary native PNG/PDF checks do not
 need a browser run. Confirm the fixes and fallbacks on the loaded Web build;
 neither xdoc identity nor an npm package version alone proves they are present.
 
+- **Fixed paragraph spacing and autofit:** compare the effective absolute or
+  relative line height on the loaded renderer, then measure the mounted text or
+  automatic table row after fonts settle. Fixed spacing can still exceed the
+  frame after font shrinkage. Preserve the authored spacing while diagnosing.
 - **Text changes color in fullscreen/presenter/host chrome:** the rendered slide's
   default text color should be isolated from host UI CSS. Compare unresolved text
   and math separately from authored solid/gradient colors, at the same scale and

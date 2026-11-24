@@ -145,7 +145,7 @@ Use these only to choose the entry reference; the routing table owns details.
   whole-shape Box/Dissolve and their distinct preview limits. For basic effects, follow the disclosed
   repeat/autoReverse/restart/easing contract and its omitted/null/value update semantics.
   For imported group/pattern effects, follow `references/content/animations.md`. For Web slideshow behavior,
-  including shape-triggered builds and Slide/Section Zoom, follow `references/content/viewer-playback.md`
+  including shape-triggered builds, Slide/Section Zoom, custom shows and hover links, follow `references/content/viewer-playback.md`
   and verify the loaded Viewer build. Shape deletion must preserve surviving timing conditions or reject.
   For P14 transitions, follow `references/content/animations.md`'s per-kind schema and independent capability axes;
   inspect source/fallback timing separately and never equate authoring with playback certification.
@@ -172,6 +172,7 @@ Use these only to choose the entry reference; the routing table owns details.
   candidate; only reliable changes are machine facts. Preview is for inspection, while the canonical
   visual evidence consumed through the applicable workflow gate remains the delivery authority. Discover each action's DPI bounds/default;
   after upgrades or calendar changes, use fresh rendering evidence as described in `references/review/fidelity-diagnosis.md`.
+  For clickable PDF navigation, use `references/review/export-and-check.md#verify-links-and-navigation`.
   For input quota or authorization failures, follow `references/runtime/troubleshooting.md#conversion-input-quotas-and-authorization-failures`;
   use the local CLI contract, keeping SDK product limits and proposed APIs separate.
 - **ChartEx or structural risk**: bind the specialized audit and PowerPoint-native evidence when
@@ -183,12 +184,10 @@ Use these only to choose the entry reference; the routing table owns details.
 - **Scatter / bubble**: follow `references/content/charts.md` for marker-only versus connected variants,
   positional series-line `noFill` preservation in marker-style XY data replacement, and horizontal tick
   density. Data replacement does not preserve all chart formatting; inspect and verify the result.
-- **Chart rendering changes**: use `references/content/charts.md` for continuous date axes, automatic 2D/3D fitting,
-  theme-resolved axis paint, surface camera/paint, imported stacked ribbons, crossing-plane occlusion,
-  signed-area end caps, hidden-axis semantics and gradient cuts. Keep Web texture evidence separate
-  from native PDF evidence. For inherited backgrounds, Latin word breaks, distributed paragraphs,
-  table spacing or picture/arrow differences, follow `references/review/fidelity-diagnosis.md` to
-  re-render the source and trace the owning parts before choosing a patch.
+- **Chart rendering changes**: use `references/content/charts.md` for rich titles, category/date axes,
+  gaps and combo grids, scatter trendlines, and 3D fitting and paint. For WordArt, paragraph fitting,
+  and other fidelity discrepancies, follow `references/review/fidelity-diagnosis.md` to re-render the
+  source and trace the owning parts before choosing a patch.
 - **Existing Shape 3D / Text 3D**: read the local-declaration guidance in `references/edit/inspect-and-edit.md`.
   Preserve owner-bound XML facts during neighboring edits; render improvements do not grant
   authoring support or PowerPoint fidelity. Query the independent render axis for bounded parallel

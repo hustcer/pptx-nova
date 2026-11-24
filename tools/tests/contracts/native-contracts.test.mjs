@@ -1183,8 +1183,8 @@ nativeTest(
     assert.ok(lines[1].includes('1.23456789012345'))
     assert.ok(lines[2].includes('1.23'))
     assert.ok(!lines[2].includes('1.23456789012345'))
-    assert.match(text.pages[3].text, /\[-1e\+308, 0\]/)
-    assert.match(text.pages[3].text, /\(0, 1e\+308\]/)
+    assert.match(text.pages[3].text, /\[-1[eE]\+308, 0\]/)
+    assert.match(text.pages[3].text, /\(0, 1[eE]\+308\]/)
     assert.doesNotMatch(text.pages[3].text, /NaN|Infinity/)
     const bands = ['0.2–0.3', '0.1–0.2', '0–0.1']
     for (const index of [4, 5, 6, 7]) {

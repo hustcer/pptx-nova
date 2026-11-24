@@ -9598,13 +9598,19 @@
           ],
           "positionals": [
             {
-              "name": "input",
+              "name": "source",
               "required": false,
               "type": "path",
-              "description": "Input PPTX path; equivalent to --input."
+              "description": "Source PPTX path; equivalent to --source."
+            },
+            {
+              "name": "candidate",
+              "required": false,
+              "type": "path",
+              "description": "Candidate PPTX path. Use the second positional after a positional source, or pass --candidate or --final."
             }
           ],
-          "acceptsInputPositional": true,
+          "acceptsInputPositional": false,
           "authorization": {
             "productWrite": false,
             "taskAuthorization": "not-applicable"
@@ -9658,9 +9664,6 @@
               "log-level": {
                 "type": "string",
                 "default": "info"
-              },
-              "input": {
-                "type": "string"
               }
             },
             "required": ["dpi", "overwrite", "json", "quiet", "log-level"],
@@ -114252,7 +114255,7 @@
     }
   },
   "name": "xdoc",
-  "version": "0.25.0 (838a61af)",
+  "version": "0.26.0 (82d63a7f)",
   "schemaVersion": "cli-agent/v1",
   "defaultCommand": "convert",
   "artifactSchemaEvolution": {
@@ -120256,7 +120259,12 @@
                 "type": "string"
               },
               "url": {
-                "type": "string"
+                "type": "string",
+                "description": "Authored click URL or normalized package path. Empty for action-only slide navigation. A resolved click action can supersede this field."
+              },
+              "action": {
+                "type": "string",
+                "description": "Click action associated with the link, when present."
               },
               "kind": {
                 "enum": ["external", "email", "file", "internal", "unknown-scheme", "unknown"],

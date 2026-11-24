@@ -137,7 +137,7 @@ inspect/timing 证据，再回读最终 timing；不要仅为通过 merge-safe �
 未建模的 motion path / emphasis 或复杂 build，dry-run 应拒绝覆盖。不要为通过门禁而改成 `replace`，除非用户明确
 接受丢弃/重建既有动画树。
 
-xdoc 0.25.0 新建 `fade-out`（或 `effect: "fade", phase: "exit"`）时会在
+xdoc 0.26.0 新建 `fade-out`（或 `effect: "fade", phase: "exit"`）时会在
 `p:animEffect/p:cBhvr/p:cTn` 写入 `fill="hold"`，使对象在退出结束后留在最终透明状态。
 验证时核对这一内部 behavior 节点，并在实际放映中等到效果结束。编辑旁边的内容时保留既有
 淡出 timing，其结束后是否恢复可见取决于原稿的有效填充行为。

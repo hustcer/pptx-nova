@@ -35,7 +35,7 @@ Both `just deckkit-examples -d teal-journal` and its `check` mode passed after t
 
 Fresh verification is retained in `.tmp/deckkit-teal-journal-review-20261115-01/`, including the
 runtime capability snapshot, executable identity and unchanged-binary post-check. The observed
-runtime was `0.25.0 (ce65e639)`, executable SHA-256
+runtime was `0.26.0 (ce65e639)`, executable SHA-256
 `1016f8b9f7c0a3c374b423693d68ae34ec671c724741b3c365d64a2f7ac2ed89`.
 Both golden benchmarks and required-live delivery readiness passed with frozen field date
 2026-11-15. All twelve freshly rendered canonical PNGs were byte-identical to the inspected

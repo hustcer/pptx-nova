@@ -5,7 +5,7 @@ English. It verifies fixed-canvas proof scale and action-led hierarchy while ret
 fields in native editable objects. This case does not add animation, raster illustrations or a
 webpage layout.
 
-Reviewed on 2026-11-15 with xdoc 0.25.0, frozen date 2026-11-15. All four actual PNGs were
+Reviewed on 2026-11-15 with xdoc 0.26.0, frozen date 2026-11-15. All four actual PNGs were
 inspected, including complex Chinese bold glyphs at enlarged original pixels. The initial
 Arial Unicode MS request filled inner spaces in “需／复／量／清”; changing the kit's CJK
 roles to Noto Sans SC restored distinct strokes without changing layout or content.

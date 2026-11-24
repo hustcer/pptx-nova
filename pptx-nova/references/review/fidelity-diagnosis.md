@@ -236,7 +236,7 @@ Use these only for the affected content; compare original and candidate with the
   from an edit that requests native reflow. Preserve the frame, margins and anchor
   before testing `textLayout`; see `../edit/inspect-and-edit.md`. Tabs use inherited
   `defTabSz` (including explicit zero), custom stops and hanging indents. For
-  paragraphs without authored stops or `defTabSz`, xdoc 0.25.0 PDF/PNG uses a
+  paragraphs without authored stops or `defTabSz`, xdoc 0.26.0 PDF/PNG uses a
   72 pt default grid (previously 36 pt). The grid is frame-rooted and resumes
   after custom stops. A hanging first tab can reach the reading margin. Check
   no-wrap/center/right alignment and alignment across hard breaks, including RTL.

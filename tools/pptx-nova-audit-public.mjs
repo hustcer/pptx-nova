@@ -27,9 +27,8 @@ const ALLOWED_BINARY_PATTERNS = [
   /^assets\/examples\/deckkits\/[^/]+\/deck\.pptx$/,
   /^assets\/examples\/deckkits\/[^/]+\/contact-sheet\.webp$/,
   /^assets\/examples\/deckkits\/pink-script\/structurify-qr\.png$/,
-  /^assets\/icons\/tabler-icons\.pack\.br$/,
 ]
-const LICENSE_REQUIRED_PATTERNS = [/^assets\/icons\/tabler-icons\.pack\.br$/]
+const LICENSE_REQUIRED_PATTERNS = [/^assets\/icons\/tabler-icons\.(?:catalog|outline|filled)\.tsv$/]
 const TEXT_EXTENSIONS = new Set([
   '',
   '.cjs',
@@ -40,6 +39,7 @@ const TEXT_EXTENSIONS = new Set([
   '.md',
   '.mjs',
   '.svg',
+  '.tsv',
   '.txt',
   '.yaml',
   '.yml',
@@ -149,10 +149,20 @@ function audit() {
     )
     if (
       !info.manifestVerified ||
+      info.storage !== 'split-tsv' ||
+      entry?.pack !== 'tabler-icons.catalog.tsv' ||
+      ['catalog', 'outline', 'filled'].some(
+        (part) => entry?.files?.[part] !== `tabler-icons.${part}.tsv`,
+      ) ||
       entry?.sourceVersion !== info.version ||
       entry?.iconCount !== info.iconCount ||
       ['outline', 'filled'].some((style) => entry?.styles?.[style] !== info.counts[style]) ||
-      provenance.packSha256 !== info.sha256
+      provenance.canonicalSha256 !== info.canonicalSha256 ||
+      ['catalog', 'outline', 'filled'].some(
+        (part) =>
+          provenance.files?.[part]?.file !== info.files?.[part]?.file ||
+          provenance.files?.[part]?.sha256 !== info.files?.[part]?.sha256,
+      )
     )
       throw new Error('Icon catalog or provenance does not match the verified pack')
   } catch (error) {
@@ -160,7 +170,7 @@ function audit() {
       issues,
       'error',
       'icon-pack-integrity',
-      'assets/icons/tabler-icons.pack.br',
+      'assets/icons/tabler-icons.catalog.tsv',
       error.message,
     )
   }

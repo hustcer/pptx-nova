@@ -510,7 +510,7 @@ DeckKit 运行 `<skill-root>/scripts/cli/deckkits/readiness.mjs --target deliver
 
 ### Tabler 图标包
 
-运行时查询使用 bundled `assets/icons/tabler-icons.pack.br`。在 `pptx-nova/` 目录内刷新图标包时，
+运行时查询使用 bundled 明文 TSV 图标包（`assets/icons/tabler-icons.catalog.tsv`、`assets/icons/tabler-icons.outline.tsv`、`assets/icons/tabler-icons.filled.tsv`）。在 `pptx-nova/` 目录内刷新图标包时，
 必须显式提供 Tabler checkout：
 
 ```bash

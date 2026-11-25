@@ -343,8 +343,9 @@ component API and integration boundary; it does not apply a patch or bypass the 
 
 ## Asset tools
 
-- `cli/assets/icons.mjs` - query/generate the bundled Tabler icon pack, verify its
-  integrity and passive geometry, or unpack it to a new review-only TSV file.
+- `cli/assets/icons.mjs` - query/generate the bundled plain-text Tabler icon pack
+  (`catalog`/`outline`/`filled` TSVs), verify its integrity and passive geometry, or
+  export a combined canonical review TSV via `unpack`.
   See [icon data and provenance](../assets/icons/README.md).
 
 - `cli/assets/formula-render.mjs` - materialize literal-LaTeX draft SVGs from a dedicated

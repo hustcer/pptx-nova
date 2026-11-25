@@ -144,7 +144,8 @@ and empty blockers.
 - Record license/source before committing any logo, icon, image, or template file.
 - Prefer native editable objects over SVG/image-only assets.
 - For common deck icons, use the Tabler full icon pack:
-  `icons/tabler-icons.pack.br` contains outline and filled icons, and
+  `icons/tabler-icons.catalog.tsv`, `icons/tabler-icons.outline.tsv`, and
+  `icons/tabler-icons.filled.tsv` contain outline and filled icons in plain text, and
   `icons/icon-license` carries the Tabler MIT license. Agents should search or
   fetch icon names through `node <skill-root>/scripts/cli/assets/icons.mjs ...`; DeckKit
   generators should read icons through `assets/deckkits/shared/icon-assets.kit.mjs`

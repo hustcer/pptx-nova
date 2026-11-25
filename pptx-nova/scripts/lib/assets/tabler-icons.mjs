@@ -2,24 +2,28 @@ import { SKILL_ROOT } from '../runtime/skill-paths.mjs'
 
 import { Buffer } from 'node:buffer'
 import { createHash } from 'node:crypto'
-import { brotliCompressSync, brotliDecompressSync, constants as zlibConstants } from 'node:zlib'
+import { brotliDecompressSync } from 'node:zlib'
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 
 export const PACK_SCHEMA_VERSION = 'pptx-nova-tabler-icon-pack/v1'
-export const PACK_MANIFEST_SCHEMA_VERSION = 'pptx-nova-tabler-icon-pack-manifest/v1'
+export const SPLIT_PACK_SCHEMA_VERSION = 'pptx-nova-tabler-icon-pack/v2'
+export const PACK_MANIFEST_SCHEMA_VERSION = 'pptx-nova-tabler-icon-pack-manifest/v2'
+export const LEGACY_PACK_MANIFEST_SCHEMA_VERSION = 'pptx-nova-tabler-icon-pack-manifest/v1'
 export const MAX_PACK_BYTES = 4 * 1024 * 1024
 export const MAX_DECODED_PACK_BYTES = 16 * 1024 * 1024
 export const DEFAULT_SOURCE_ROOT = process.env.TABLER_ICONS_ROOT ?? ''
 
-export const DEFAULT_PACK_PATH = join(SKILL_ROOT, 'assets/icons/tabler-icons.pack.br')
+export const DEFAULT_PACK_PATH = join(SKILL_ROOT, 'assets/icons/tabler-icons.catalog.tsv')
 export const DEFAULT_LICENSE_PATH = join(SKILL_ROOT, 'assets/icons/icon-license')
 
 const STYLES = ['outline', 'filled']
+const SPLIT_PARTS = ['catalog', 'outline', 'filled']
 const ICON_NAME_RE = /^[a-z0-9][a-z0-9-]*$/
 const FIELD_SEP = '\t'
 const DEFAULT_LIMIT = 20
 const DEFAULT_OUTLINE_STROKE_WIDTH = '1'
+const DEFAULT_PACK_BASENAME = 'tabler-icons'
 
 export const TABLER_SHELLS = {
   outline: {
@@ -60,10 +64,75 @@ const packTextCache = new Map()
 const parsedPackCache = new Map()
 const packVerificationCache = new Map()
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex')
-export const tablerPackManifestPath = (path) => path.replace(/\.br$/, '') + '.manifest.json'
 
 function fail(message) {
   throw new Error(message)
+}
+
+function splitPackPathsFromPrefix(prefix) {
+  return {
+    mode: 'split-tsv',
+    prefix,
+    cacheKey: `${prefix}.catalog.tsv`,
+    catalog: `${prefix}.catalog.tsv`,
+    outline: `${prefix}.outline.tsv`,
+    filled: `${prefix}.filled.tsv`,
+    manifest: `${prefix}.pack.manifest.json`,
+  }
+}
+
+export function resolveTablerPackPaths(packPath = DEFAULT_PACK_PATH, { forWrite = false } = {}) {
+  const path = resolve(packPath)
+
+  if (path.endsWith('.br')) {
+    if (forWrite) {
+      fail('Plain-text split TSV packs are required; do not generate compressed .br outputs')
+    }
+    return {
+      mode: 'brotli',
+      cacheKey: path,
+      pack: path,
+      manifest: `${path.slice(0, -'.br'.length)}.manifest.json`,
+    }
+  }
+
+  if (path.endsWith('.catalog.tsv')) {
+    return splitPackPathsFromPrefix(path.slice(0, -'.catalog.tsv'.length))
+  }
+
+  if (path.endsWith('.pack.manifest.json')) {
+    return splitPackPathsFromPrefix(path.slice(0, -'.pack.manifest.json'.length))
+  }
+
+  if (path.endsWith('.tsv')) {
+    if (forWrite) {
+      fail('Split icon pack output must be a directory, *.catalog.tsv, or *.pack.manifest.json')
+    }
+    return {
+      mode: 'single-tsv',
+      cacheKey: path,
+      pack: path,
+      manifest: `${path.slice(0, -'.tsv'.length)}.manifest.json`,
+    }
+  }
+
+  if (existsSync(path) && statSync(path).isFile()) {
+    if (forWrite) {
+      fail(`Icon pack output path is an existing file with an unsupported extension: ${path}`)
+    }
+    return {
+      mode: 'single-tsv',
+      cacheKey: path,
+      pack: path,
+      manifest: `${path}.manifest.json`,
+    }
+  }
+
+  return splitPackPathsFromPrefix(join(path, DEFAULT_PACK_BASENAME))
+}
+
+export function tablerPackManifestPath(packPath = DEFAULT_PACK_PATH) {
+  return resolveTablerPackPaths(packPath).manifest
 }
 
 function normalizeSvg(text) {
@@ -216,49 +285,86 @@ function readSourceRows(sourceRoot) {
   return rows.sort((a, b) => a.style.localeCompare(b.style) || a.name.localeCompare(b.name))
 }
 
+function formatShellLines(shells) {
+  return STYLES.map((style) =>
+    [
+      '@shell',
+      style,
+      assertCleanField(shells[style].prefix, `${style}.prefix`),
+      assertCleanField(shells[style].suffix, `${style}.suffix`),
+    ].join(FIELD_SEP),
+  )
+}
+
+function formatCatalogLines(rows) {
+  return rows.map((row) =>
+    [
+      '@icon',
+      assertCleanField(row.style, `${row.name}.style`),
+      assertCleanField(row.name, `${row.name}.name`),
+      assertCleanField(row.category || '-', `${row.name}.category`),
+      assertCleanField(row.tags.join(','), `${row.name}.tags`),
+      assertCleanField(row.aliases.join(','), `${row.name}.aliases`),
+      assertCleanField(row.version || '-', `${row.name}.version`),
+      assertCleanField(row.unicode || '-', `${row.name}.unicode`),
+    ].join(FIELD_SEP),
+  )
+}
+
+function formatSvgLines(rows) {
+  return rows.map((row) =>
+    [
+      '@svg',
+      assertCleanField(row.style, `${row.name}.style`),
+      assertCleanField(row.name, `${row.name}.name`),
+      assertCleanField(row.body, `${row.name}.body`),
+    ].join(FIELD_SEP),
+  )
+}
+
 function renderPackText({ rows, version, shells = TABLER_SHELLS }) {
   const header = [
     `# ${PACK_SCHEMA_VERSION}`,
     `# source=tabler-icons`,
     `# version=${assertCleanField(version, 'version')}`,
-    ...STYLES.map((style) =>
-      [
-        '@shell',
-        style,
-        assertCleanField(shells[style].prefix, `${style}.prefix`),
-        assertCleanField(shells[style].suffix, `${style}.suffix`),
-      ].join(FIELD_SEP),
-    ),
+    ...formatShellLines(shells),
     '@@catalog',
   ].join('\n')
 
-  const catalog = rows
-    .map((row) =>
-      [
-        '@icon',
-        assertCleanField(row.style, `${row.name}.style`),
-        assertCleanField(row.name, `${row.name}.name`),
-        assertCleanField(row.category || '-', `${row.name}.category`),
-        assertCleanField(row.tags.join(','), `${row.name}.tags`),
-        assertCleanField(row.aliases.join(','), `${row.name}.aliases`),
-        assertCleanField(row.version || '-', `${row.name}.version`),
-        assertCleanField(row.unicode || '-', `${row.name}.unicode`),
-      ].join(FIELD_SEP),
-    )
-    .join('\n')
-
-  const icons = rows
-    .map((row) =>
-      [
-        '@svg',
-        assertCleanField(row.style, `${row.name}.style`),
-        assertCleanField(row.name, `${row.name}.name`),
-        assertCleanField(row.body, `${row.name}.body`),
-      ].join(FIELD_SEP),
-    )
-    .join('\n')
-
+  const catalog = formatCatalogLines(rows).join('\n')
+  const icons = formatSvgLines(rows).join('\n')
   return `${header}\n${catalog}\n@@icons\n${icons}\n`
+}
+
+function renderSplitPackTexts({ rows, version, shells = TABLER_SHELLS }) {
+  const cleanVersion = assertCleanField(version, 'version')
+  const catalog = [
+    `# ${SPLIT_PACK_SCHEMA_VERSION}`,
+    '# source=tabler-icons',
+    `# version=${cleanVersion}`,
+    '# part=catalog',
+    ...formatShellLines(shells),
+    '@@catalog',
+    ...formatCatalogLines(rows),
+  ].join('\n')
+
+  const renderStylePart = (style) => {
+    const styleRows = rows.filter((row) => row.style === style)
+    return [
+      `# ${SPLIT_PACK_SCHEMA_VERSION}`,
+      '# source=tabler-icons',
+      `# version=${cleanVersion}`,
+      `# part=${style}`,
+      '@@icons',
+      ...formatSvgLines(styleRows),
+    ].join('\n')
+  }
+
+  return {
+    catalog: `${catalog}\n`,
+    outline: `${renderStylePart('outline')}\n`,
+    filled: `${renderStylePart('filled')}\n`,
+  }
 }
 
 export function buildTablerIconPackText(sourceRoot = DEFAULT_SOURCE_ROOT, options = {}) {
@@ -273,24 +379,16 @@ export function buildTablerIconPackText(sourceRoot = DEFAULT_SOURCE_ROOT, option
   })
 }
 
-function compressPackText(text) {
-  const bytes = Buffer.from(text, 'utf8')
-  return brotliCompressSync(bytes, {
-    params: {
-      [zlibConstants.BROTLI_PARAM_QUALITY]: 11,
-      [zlibConstants.BROTLI_PARAM_SIZE_HINT]: bytes.length,
-    },
+export function buildSplitTablerIconPackTexts(sourceRoot = DEFAULT_SOURCE_ROOT, options = {}) {
+  if (!sourceRoot)
+    fail('Tabler source root is required. Pass --source-root or set TABLER_ICONS_ROOT.')
+  const sourceRootPath = resolve(sourceRoot)
+  const rows = readSourceRows(sourceRootPath)
+  return renderSplitPackTexts({
+    rows,
+    version: tablerVersion(sourceRootPath),
+    shells: tablerShellsForPack(options),
   })
-}
-
-function syncBytes(path, bytes, check) {
-  const current = existsSync(path) ? readFileSync(path) : null
-  const changed = !current || !current.equals(bytes)
-  if (changed && !check) {
-    mkdirSync(dirname(path), { recursive: true })
-    writeFileSync(path, bytes)
-  }
-  return { path, changed, bytes: bytes.length }
 }
 
 function syncText(path, text, check) {
@@ -303,76 +401,51 @@ function syncText(path, text, check) {
   return { path, changed, bytes: Buffer.byteLength(text) }
 }
 
-export function generateTablerIconPack({
-  sourceRoot = DEFAULT_SOURCE_ROOT,
-  output = DEFAULT_PACK_PATH,
-  licenseOutput = DEFAULT_LICENSE_PATH,
-  outlineStrokeWidth = DEFAULT_OUTLINE_STROKE_WIDTH,
-  check = false,
-} = {}) {
-  if (!sourceRoot)
-    fail('Tabler source root is required. Pass --source-root or set TABLER_ICONS_ROOT.')
-  const sourceRootPath = resolve(sourceRoot)
-  const outputPath = resolve(output)
-  const licenseOutputPath = resolve(licenseOutput)
-  const licensePath = join(sourceRootPath, 'LICENSE')
-
-  if (!existsSync(sourceRootPath)) fail(`Tabler source root does not exist: ${sourceRootPath}`)
-  if (!existsSync(licensePath)) fail(`Tabler LICENSE does not exist: ${licensePath}`)
-
-  const packText = buildTablerIconPackText(sourceRootPath, { outlineStrokeWidth })
-  const info = parseTablerIconPackText(packText)
-  const packBytes = compressPackText(packText)
-  const licenseText = readFileSync(licensePath, 'utf8')
-  const manifestPath = tablerPackManifestPath(outputPath)
-  const manifest = createTablerIconPackManifest(packBytes, packText, info, {
-    packFile: basename(outputPath),
-    licenseFile: basename(licenseOutputPath),
-    licenseText,
+function buildCanonicalPackTextFromParsed(pack) {
+  const rows = pack.catalog.map((entry) => ({
+    ...entry,
+    body: pack.bodies.get(`${entry.style}/${entry.name}`),
+  }))
+  return renderPackText({
+    rows,
+    version: pack.version,
+    shells: pack.shells,
   })
-
-  const outputResult = syncBytes(outputPath, packBytes, check)
-  const licenseResult = syncText(licenseOutputPath, licenseText, check)
-  const manifestResult = syncText(manifestPath, JSON.stringify(manifest, null, 2) + '\n', check)
-  const stale = outputResult.changed || licenseResult.changed || manifestResult.changed
-
-  if (check && stale) {
-    const stalePaths = [outputResult, licenseResult, manifestResult]
-      .filter((item) => item.changed)
-      .map((item) => item.path)
-      .join(', ')
-    fail(`generated Tabler icon pack is stale: ${stalePaths}`)
-  }
-
-  return {
-    schemaVersion: 'pptx-nova-tabler-icons-sync/v2',
-    checked: check,
-    sourceRoot: sourceRootPath,
-    output: outputResult,
-    license: licenseResult,
-    manifest: manifestResult,
-    sourceVersion: info.version,
-    outlineStrokeWidth: formatPackStrokeWidth(outlineStrokeWidth),
-    iconCount: info.catalog.length,
-    counts: info.counts,
-  }
 }
 
-function createTablerIconPackManifest(bytes, text, pack, { packFile, licenseFile, licenseText }) {
+function createSplitTablerIconPackManifest(
+  parts,
+  canonicalText,
+  pack,
+  { paths, licenseFile, licenseText },
+) {
   const sample =
     pack.catalog.find((e) => e.style === 'outline' && e.name === 'presentation') ?? pack.catalog[0]
+  const files = Object.fromEntries(
+    SPLIT_PARTS.map((part) => [
+      part,
+      {
+        file: basename(paths[part]),
+        byteLength: Buffer.byteLength(parts[part], 'utf8'),
+        sha256: sha256(parts[part]),
+      },
+    ]),
+  )
   return {
     schemaVersion: PACK_MANIFEST_SCHEMA_VERSION,
-    purpose: 'Offline passive SVG icon data; not executable code.',
+    purpose: 'Offline passive SVG icon data in plain-text UTF-8 TSV files; not executable code.',
     source: { repository: 'https://github.com/tabler/tabler-icons', version: pack.version },
-    compression: { algorithm: 'brotli', quality: 11 },
-    pack: { file: packFile, byteLength: bytes.length, sha256: sha256(bytes) },
-    decoded: {
+    storage: {
+      format: 'split-tsv',
       encoding: 'utf-8',
-      format: 'Tab-separated catalog and fixed-shell SVG geometry',
-      schemaVersion: pack.schemaVersion,
-      byteLength: Buffer.byteLength(text),
-      sha256: sha256(text),
+      compression: 'none',
+      schemaVersion: SPLIT_PACK_SCHEMA_VERSION,
+    },
+    files,
+    canonical: {
+      schemaVersion: PACK_SCHEMA_VERSION,
+      byteLength: Buffer.byteLength(canonicalText, 'utf8'),
+      sha256: sha256(canonicalText),
       iconCount: pack.catalog.length,
       counts: pack.counts,
     },
@@ -390,72 +463,418 @@ function createTablerIconPackManifest(bytes, text, pack, { packFile, licenseFile
   }
 }
 
-export function readTablerIconPackText(packPath = DEFAULT_PACK_PATH) {
-  const path = resolve(packPath)
-  if (!packTextCache.has(path)) {
-    const stat = statSync(path)
-    if (!stat.isFile() || stat.size > MAX_PACK_BYTES)
-      fail('Tabler icon pack exceeds the compressed size limit or is not a file')
-    const bytes = readFileSync(path)
-    if (bytes.length > MAX_PACK_BYTES) fail('Tabler icon pack exceeds the compressed size limit')
-    const manifestPath = tablerPackManifestPath(path)
-    const required = path === resolve(DEFAULT_PACK_PATH)
-    if (required && !existsSync(manifestPath))
-      fail('Bundled Tabler icon pack integrity manifest is missing')
-    let manifest = null
-    if (existsSync(manifestPath)) {
-      if (statSync(manifestPath).size > 128 * 1024) fail('Tabler icon pack manifest is too large')
-      manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
-      if (
-        manifest.schemaVersion !== PACK_MANIFEST_SCHEMA_VERSION ||
-        manifest.compression?.algorithm !== 'brotli' ||
-        manifest.decoded?.encoding !== 'utf-8' ||
-        manifest.pack?.byteLength !== bytes.length ||
-        manifest.pack?.sha256 !== sha256(bytes)
-      )
-        fail('Tabler icon pack compressed integrity check failed')
-    }
-    const decoded = brotliDecompressSync(bytes, { maxOutputLength: MAX_DECODED_PACK_BYTES })
-    const text = new TextDecoder('utf-8', { fatal: true }).decode(decoded)
+export function generateTablerIconPack({
+  sourceRoot = DEFAULT_SOURCE_ROOT,
+  output = DEFAULT_PACK_PATH,
+  licenseOutput = DEFAULT_LICENSE_PATH,
+  outlineStrokeWidth = DEFAULT_OUTLINE_STROKE_WIDTH,
+  check = false,
+} = {}) {
+  if (!sourceRoot)
+    fail('Tabler source root is required. Pass --source-root or set TABLER_ICONS_ROOT.')
+  const sourceRootPath = resolve(sourceRoot)
+  const paths = resolveTablerPackPaths(output, { forWrite: true })
+  const licenseOutputPath = resolve(licenseOutput)
+  const licensePath = join(sourceRootPath, 'LICENSE')
+
+  if (!existsSync(sourceRootPath)) fail(`Tabler source root does not exist: ${sourceRootPath}`)
+  if (!existsSync(licensePath)) fail(`Tabler LICENSE does not exist: ${licensePath}`)
+
+  const parts = buildSplitTablerIconPackTexts(sourceRootPath, { outlineStrokeWidth })
+  const info = parseSplitTablerIconPackTexts(parts)
+  const canonicalText = buildCanonicalPackTextFromParsed(info)
+  const licenseText = readFileSync(licensePath, 'utf8')
+  const manifest = createSplitTablerIconPackManifest(parts, canonicalText, info, {
+    paths,
+    licenseFile: basename(licenseOutputPath),
+    licenseText,
+  })
+
+  const catalogResult = syncText(paths.catalog, parts.catalog, check)
+  const outlineResult = syncText(paths.outline, parts.outline, check)
+  const filledResult = syncText(paths.filled, parts.filled, check)
+  const licenseResult = syncText(licenseOutputPath, licenseText, check)
+  const manifestResult = syncText(paths.manifest, JSON.stringify(manifest, null, 2) + '\n', check)
+  const allResults = [catalogResult, outlineResult, filledResult, licenseResult, manifestResult]
+  const stale = allResults.some((item) => item.changed)
+
+  if (check && stale) {
+    const stalePaths = allResults
+      .filter((item) => item.changed)
+      .map((item) => item.path)
+      .join(', ')
+    fail(`generated Tabler icon pack is stale: ${stalePaths}`)
+  }
+
+  return {
+    schemaVersion: 'pptx-nova-tabler-icons-sync/v3',
+    checked: check,
+    sourceRoot: sourceRootPath,
+    format: 'split-tsv',
+    output: catalogResult,
+    files: {
+      catalog: catalogResult,
+      outline: outlineResult,
+      filled: filledResult,
+    },
+    license: licenseResult,
+    manifest: manifestResult,
+    sourceVersion: info.version,
+    outlineStrokeWidth: formatPackStrokeWidth(outlineStrokeWidth),
+    iconCount: info.catalog.length,
+    counts: info.counts,
+  }
+}
+
+function readBoundedUtf8File(path, label, maxBytes = MAX_DECODED_PACK_BYTES) {
+  const stat = statSync(path)
+  if (!stat.isFile() || stat.size > maxBytes)
+    fail(`${label} exceeds the size limit or is not a file`)
+  const bytes = readFileSync(path)
+  if (bytes.length > maxBytes) fail(`${label} exceeds the size limit`)
+  const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+  return { bytes, text }
+}
+
+function readLegacyBrotliPack(paths, required) {
+  const stat = statSync(paths.pack)
+  if (!stat.isFile() || stat.size > MAX_PACK_BYTES)
+    fail('Tabler icon pack exceeds the compressed size limit or is not a file')
+  const bytes = readFileSync(paths.pack)
+  if (bytes.length > MAX_PACK_BYTES) fail('Tabler icon pack exceeds the compressed size limit')
+  if (required && !existsSync(paths.manifest))
+    fail('Bundled Tabler icon pack integrity manifest is missing')
+  let manifest = null
+  if (existsSync(paths.manifest)) {
+    if (statSync(paths.manifest).size > 128 * 1024) fail('Tabler icon pack manifest is too large')
+    manifest = JSON.parse(readFileSync(paths.manifest, 'utf8'))
     if (
-      manifest &&
-      (manifest.decoded?.byteLength !== decoded.length ||
-        manifest.decoded?.sha256 !== sha256(decoded))
+      manifest.schemaVersion !== LEGACY_PACK_MANIFEST_SCHEMA_VERSION ||
+      manifest.compression?.algorithm !== 'brotli' ||
+      manifest.decoded?.encoding !== 'utf-8' ||
+      manifest.pack?.byteLength !== bytes.length ||
+      manifest.pack?.sha256 !== sha256(bytes)
     )
-      fail('Tabler icon pack decoded integrity check failed')
-    const pack = parseTablerIconPackText(text)
-    if (
-      manifest &&
-      (manifest.source?.version !== pack.version ||
-        manifest.decoded?.schemaVersion !== pack.schemaVersion ||
-        manifest.decoded?.iconCount !== pack.catalog.length ||
-        STYLES.some((style) => manifest.decoded?.counts?.[style] !== pack.counts[style]))
-    )
-      fail('Tabler icon pack metadata integrity check failed')
-    if (
-      required &&
-      (manifest.license?.spdx !== 'MIT' ||
-        manifest.license?.file !== 'icon-license' ||
-        manifest.license?.sha256 !== sha256(readFileSync(DEFAULT_LICENSE_PATH)))
-    )
-      fail('Bundled Tabler icon license integrity check failed')
-    packTextCache.set(path, text)
-    parsedPackCache.set(path, pack)
-    packVerificationCache.set(path, {
+      fail('Tabler icon pack compressed integrity check failed')
+  }
+  const decoded = brotliDecompressSync(bytes, { maxOutputLength: MAX_DECODED_PACK_BYTES })
+  const text = new TextDecoder('utf-8', { fatal: true }).decode(decoded)
+  if (
+    manifest &&
+    (manifest.decoded?.byteLength !== decoded.length ||
+      manifest.decoded?.sha256 !== sha256(decoded))
+  )
+    fail('Tabler icon pack decoded integrity check failed')
+  const pack = parseTablerIconPackText(text)
+  if (
+    manifest &&
+    (manifest.source?.version !== pack.version ||
+      manifest.decoded?.schemaVersion !== pack.schemaVersion ||
+      manifest.decoded?.iconCount !== pack.catalog.length ||
+      STYLES.some((style) => manifest.decoded?.counts?.[style] !== pack.counts[style]))
+  )
+    fail('Tabler icon pack metadata integrity check failed')
+  return {
+    text,
+    pack,
+    verification: {
       status: 'pass',
+      storage: 'brotli',
       manifestVerified: Boolean(manifest),
       compressedBytes: bytes.length,
       decodedBytes: decoded.length,
       sha256: sha256(bytes),
       decodedSha256: sha256(decoded),
-    })
+      canonicalBytes: decoded.length,
+      canonicalSha256: sha256(decoded),
+    },
   }
-  return packTextCache.get(path)
+}
+
+function readSingleTsvPack(paths) {
+  const { bytes, text } = readBoundedUtf8File(paths.pack, 'Tabler icon pack')
+  const pack = parseTablerIconPackText(text)
+  const digest = sha256(bytes)
+  return {
+    text,
+    pack,
+    verification: {
+      status: 'pass',
+      storage: 'single-tsv',
+      manifestVerified: false,
+      totalBytes: bytes.length,
+      canonicalBytes: bytes.length,
+      canonicalSha256: digest,
+    },
+  }
+}
+
+function readSplitTsvPack(paths, required) {
+  if (required && !existsSync(paths.manifest))
+    fail('Bundled Tabler icon pack integrity manifest is missing')
+
+  let manifest = null
+  if (existsSync(paths.manifest)) {
+    if (statSync(paths.manifest).size > 128 * 1024) fail('Tabler icon pack manifest is too large')
+    manifest = JSON.parse(readFileSync(paths.manifest, 'utf8'))
+    if (
+      manifest.schemaVersion !== PACK_MANIFEST_SCHEMA_VERSION ||
+      manifest.storage?.format !== 'split-tsv' ||
+      manifest.storage?.encoding !== 'utf-8' ||
+      manifest.storage?.compression !== 'none' ||
+      manifest.storage?.schemaVersion !== SPLIT_PACK_SCHEMA_VERSION
+    )
+      fail('Tabler icon pack manifest format integrity check failed')
+  }
+
+  let totalBytes = 0
+  const partTexts = {}
+  const fileMeta = {}
+  for (const part of SPLIT_PARTS) {
+    const partPath = paths[part]
+    const expectedFile = basename(partPath)
+    if (manifest) {
+      const entry = manifest.files?.[part]
+      if (
+        !entry ||
+        typeof entry.file !== 'string' ||
+        entry.file !== expectedFile ||
+        entry.file.includes('/') ||
+        entry.file.includes('\\') ||
+        entry.file.includes('..')
+      )
+        fail(`Tabler icon pack manifest file entry integrity check failed for ${part}`)
+    }
+    const { bytes, text } = readBoundedUtf8File(partPath, `Tabler icon ${part} part`)
+    totalBytes += bytes.length
+    if (totalBytes > MAX_DECODED_PACK_BYTES) fail('Tabler icon pack exceeds the decoded size limit')
+    const digest = sha256(bytes)
+    if (
+      manifest &&
+      (manifest.files[part].byteLength !== bytes.length || manifest.files[part].sha256 !== digest)
+    )
+      fail(`Tabler icon pack ${part} file integrity check failed`)
+    partTexts[part] = text
+    fileMeta[part] = { file: expectedFile, byteLength: bytes.length, sha256: digest }
+  }
+
+  const pack = parseSplitTablerIconPackTexts(partTexts)
+  const canonicalText = buildCanonicalPackTextFromParsed(pack)
+  const canonicalBytes = Buffer.byteLength(canonicalText, 'utf8')
+  const canonicalSha256 = sha256(canonicalText)
+
+  if (
+    manifest &&
+    (manifest.source?.version !== pack.version ||
+      manifest.canonical?.schemaVersion !== PACK_SCHEMA_VERSION ||
+      manifest.canonical?.byteLength !== canonicalBytes ||
+      manifest.canonical?.sha256 !== canonicalSha256 ||
+      manifest.canonical?.iconCount !== pack.catalog.length ||
+      STYLES.some((style) => manifest.canonical?.counts?.[style] !== pack.counts[style]))
+  )
+    fail('Tabler icon pack metadata integrity check failed')
+
+  if (
+    required &&
+    (manifest.license?.spdx !== 'MIT' ||
+      manifest.license?.file !== 'icon-license' ||
+      manifest.license?.sha256 !== sha256(readFileSync(DEFAULT_LICENSE_PATH)))
+  )
+    fail('Bundled Tabler icon license integrity check failed')
+
+  return {
+    text: canonicalText,
+    pack,
+    verification: {
+      status: 'pass',
+      storage: 'split-tsv',
+      manifestVerified: Boolean(manifest),
+      totalBytes,
+      files: fileMeta,
+      canonicalBytes,
+      canonicalSha256,
+    },
+  }
+}
+
+export function readTablerIconPackText(packPath = DEFAULT_PACK_PATH) {
+  const paths = resolveTablerPackPaths(packPath)
+  const key = paths.cacheKey
+  if (!packTextCache.has(key)) {
+    const required = key === resolve(DEFAULT_PACK_PATH)
+    const loaded =
+      paths.mode === 'brotli'
+        ? readLegacyBrotliPack(paths, required)
+        : paths.mode === 'single-tsv'
+          ? readSingleTsvPack(paths)
+          : readSplitTsvPack(paths, required)
+    packTextCache.set(key, loaded.text)
+    parsedPackCache.set(key, loaded.pack)
+    packVerificationCache.set(key, loaded.verification)
+  }
+  return packTextCache.get(key)
 }
 
 function splitCsvField(value) {
   if (!value || value === '-') return []
   return value.split(',').filter(Boolean)
+}
+
+function parseShellRecord(parts, shells) {
+  const [, style, prefix, suffix] = parts
+  if (parts.length !== 4 || !STYLES.includes(style) || Object.hasOwn(shells, style))
+    fail('Invalid or duplicate Tabler icon shell')
+  const stroke = prefix.match(/stroke-width="([0-9.]+)"/)?.[1]
+  const expected =
+    style === 'outline'
+      ? tablerShellsForPack({ outlineStrokeWidth: stroke }).outline
+      : TABLER_SHELLS.filled
+  if (prefix !== expected.prefix || suffix !== expected.suffix) fail('Unsafe Tabler SVG shell')
+  shells[style] = { prefix, suffix }
+}
+
+function parseCatalogRecord(parts, catalog, catalogKeys, aliases) {
+  const [, style, name, category, tags, rowAliases, rowVersion, unicode] = parts
+  if (
+    parts.length !== 8 ||
+    !STYLES.includes(style) ||
+    !ICON_NAME_RE.test(name) ||
+    catalogKeys.has(`${style}/${name}`)
+  )
+    fail('Invalid or duplicate Tabler icon catalog row')
+  catalogKeys.add(`${style}/${name}`)
+  const entry = {
+    style,
+    name,
+    category,
+    tags: splitCsvField(tags),
+    aliases: splitCsvField(rowAliases),
+    version: rowVersion,
+    unicode,
+  }
+  catalog.push(entry)
+  for (const alias of entry.aliases) {
+    if (!ICON_NAME_RE.test(alias) || aliases.has(`${style}/${alias}`))
+      fail('Invalid or duplicate Tabler icon alias')
+    aliases.set(`${style}/${alias}`, entry.name)
+  }
+}
+
+function parseSvgRecord(parts, catalogKeys, bodies, expectedStyle = null) {
+  const [, style, name, body] = parts
+  if (
+    parts.length !== 4 ||
+    (expectedStyle && style !== expectedStyle) ||
+    !catalogKeys.has(`${style}/${name}`) ||
+    bodies.has(`${style}/${name}`)
+  )
+    fail('Invalid or duplicate Tabler icon SVG row')
+  assertPassiveSvgBody(body, `${style}/${name}`)
+  bodies.set(`${style}/${name}`, body)
+}
+
+export function parseSplitTablerIconPackTexts({ catalog, outline, filled }) {
+  const catalogText = String(catalog ?? '')
+  if (!catalogText.startsWith(`# ${SPLIT_PACK_SCHEMA_VERSION}\n# source=tabler-icons\n# version=`))
+    fail('Invalid Tabler icon catalog part header')
+
+  const shells = {}
+  const catalogEntries = []
+  const catalogKeys = new Set()
+  const aliases = new Map()
+  let section = 'header'
+  let version = 'unknown'
+  let declaredPart = null
+
+  for (const line of catalogText.split('\n')) {
+    if (!line) continue
+    if (line === '@@catalog') {
+      if (section !== 'header') fail('Invalid Tabler icon catalog section order')
+      section = 'catalog'
+      continue
+    }
+    if (line.startsWith('# version=')) {
+      version = line.slice('# version='.length)
+      continue
+    }
+    if (line.startsWith('# part=')) {
+      declaredPart = line.slice('# part='.length)
+      continue
+    }
+    if (line.startsWith('#')) continue
+
+    const parts = line.split(FIELD_SEP)
+    if (section === 'header' && parts[0] === '@shell') {
+      parseShellRecord(parts, shells)
+      continue
+    }
+    if (section === 'catalog' && parts[0] === '@icon') {
+      parseCatalogRecord(parts, catalogEntries, catalogKeys, aliases)
+      continue
+    }
+    fail('Unknown Tabler icon catalog part record')
+  }
+
+  if (
+    declaredPart !== 'catalog' ||
+    section !== 'catalog' ||
+    !catalogEntries.length ||
+    STYLES.some((style) => !shells[style])
+  )
+    fail('Incomplete Tabler icon catalog part')
+
+  const bodies = new Map()
+  const styleTexts = { outline: String(outline ?? ''), filled: String(filled ?? '') }
+  for (const style of STYLES) {
+    const text = styleTexts[style]
+    if (!text.startsWith(`# ${SPLIT_PACK_SCHEMA_VERSION}\n# source=tabler-icons\n# version=`))
+      fail(`Invalid Tabler icon ${style} part header`)
+    let partSection = 'header'
+    let partVersion = null
+    let partName = null
+    for (const line of text.split('\n')) {
+      if (!line) continue
+      if (line === '@@icons') {
+        if (partSection !== 'header') fail(`Invalid Tabler icon ${style} section order`)
+        partSection = 'icons'
+        continue
+      }
+      if (line.startsWith('# version=')) {
+        partVersion = line.slice('# version='.length)
+        continue
+      }
+      if (line.startsWith('# part=')) {
+        partName = line.slice('# part='.length)
+        continue
+      }
+      if (line.startsWith('#')) continue
+
+      const parts = line.split(FIELD_SEP)
+      if (partSection === 'icons' && parts[0] === '@svg') {
+        parseSvgRecord(parts, catalogKeys, bodies, style)
+        continue
+      }
+      fail(`Unknown Tabler icon ${style} part record`)
+    }
+    if (partName !== style || partVersion !== version || partSection !== 'icons')
+      fail(`Incomplete or mismatched Tabler icon ${style} part`)
+  }
+
+  if (bodies.size !== catalogKeys.size) fail('Incomplete Tabler icon pack')
+
+  const counts = Object.fromEntries(
+    STYLES.map((style) => [style, catalogEntries.filter((entry) => entry.style === style).length]),
+  )
+
+  return {
+    schemaVersion: SPLIT_PACK_SCHEMA_VERSION,
+    version,
+    shells,
+    catalog: catalogEntries,
+    bodies,
+    aliases,
+    counts,
+  }
 }
 
 export function parseTablerIconPackText(text) {
@@ -489,57 +908,15 @@ export function parseTablerIconPackText(text) {
 
     const parts = line.split(FIELD_SEP)
     if (section === 'header' && parts[0] === '@shell') {
-      const [, style, prefix, suffix] = parts
-      if (parts.length !== 4 || !STYLES.includes(style) || Object.hasOwn(shells, style))
-        fail('Invalid or duplicate Tabler icon shell')
-      const stroke = prefix.match(/stroke-width="([0-9.]+)"/)?.[1]
-      const expected =
-        style === 'outline'
-          ? tablerShellsForPack({ outlineStrokeWidth: stroke }).outline
-          : TABLER_SHELLS.filled
-      if (prefix !== expected.prefix || suffix !== expected.suffix) fail('Unsafe Tabler SVG shell')
-      shells[style] = { prefix, suffix }
+      parseShellRecord(parts, shells)
       continue
     }
-
     if (section === 'catalog' && parts[0] === '@icon') {
-      const [, style, name, category, tags, rowAliases, rowVersion, unicode] = parts
-      if (
-        parts.length !== 8 ||
-        !STYLES.includes(style) ||
-        !ICON_NAME_RE.test(name) ||
-        catalogKeys.has(`${style}/${name}`)
-      )
-        fail('Invalid or duplicate Tabler icon catalog row')
-      catalogKeys.add(`${style}/${name}`)
-      const entry = {
-        style,
-        name,
-        category,
-        tags: splitCsvField(tags),
-        aliases: splitCsvField(rowAliases),
-        version: rowVersion,
-        unicode,
-      }
-      catalog.push(entry)
-      for (const alias of entry.aliases) {
-        if (!ICON_NAME_RE.test(alias) || aliases.has(`${style}/${alias}`))
-          fail('Invalid or duplicate Tabler icon alias')
-        aliases.set(`${style}/${alias}`, entry.name)
-      }
+      parseCatalogRecord(parts, catalog, catalogKeys, aliases)
       continue
     }
-
     if (section === 'icons' && parts[0] === '@svg') {
-      const [, style, name, body] = parts
-      if (
-        parts.length !== 4 ||
-        !catalogKeys.has(`${style}/${name}`) ||
-        bodies.has(`${style}/${name}`)
-      )
-        fail('Invalid or duplicate Tabler icon SVG row')
-      assertPassiveSvgBody(body, `${style}/${name}`)
-      bodies.set(`${style}/${name}`, body)
+      parseSvgRecord(parts, catalogKeys, bodies)
       continue
     }
     fail('Unknown Tabler icon pack record')
@@ -569,15 +946,16 @@ export function parseTablerIconPackText(text) {
 }
 
 export function verifyTablerIconPack(options = {}) {
-  const path = resolve(options.packPath ?? DEFAULT_PACK_PATH)
-  const info = getTablerIconPackInfo({ packPath: path })
-  return { ...info, ...packVerificationCache.get(path), passiveSvgValidated: true }
+  const paths = resolveTablerPackPaths(options.packPath ?? DEFAULT_PACK_PATH)
+  const info = getTablerIconPackInfo({ packPath: paths.cacheKey })
+  return { ...info, ...packVerificationCache.get(paths.cacheKey), passiveSvgValidated: true }
 }
 
 export function loadTablerIconPack({ packPath = DEFAULT_PACK_PATH } = {}) {
-  const path = resolve(packPath)
-  if (!parsedPackCache.has(path)) readTablerIconPackText(path)
-  return parsedPackCache.get(path)
+  const paths = resolveTablerPackPaths(packPath)
+  const key = paths.cacheKey
+  if (!parsedPackCache.has(key)) readTablerIconPackText(key)
+  return parsedPackCache.get(key)
 }
 
 export function getTablerIconPackInfo(options = {}) {
@@ -785,13 +1163,13 @@ function printJson(value) {
 
 function usage() {
   return `Usage:
-  node <skill-root>/scripts/cli/assets/icons.mjs generate [--source-root <dir>] [--output <pack.br>] [--license-output <path>] [--stroke <width>] [--check]
-  node <skill-root>/scripts/cli/assets/icons.mjs info [--pack <pack.br>] [--json]
-  node <skill-root>/scripts/cli/assets/icons.mjs verify [--pack <pack.br>] [--json]
-  node <skill-root>/scripts/cli/assets/icons.mjs unpack --output <new-file.tsv> [--pack <pack.br>]
-  node <skill-root>/scripts/cli/assets/icons.mjs search <query> [--style outline|filled|any] [--limit <n>] [--pack <pack.br>] [--json]
-  node <skill-root>/scripts/cli/assets/icons.mjs names [--style outline|filled] [--pack <pack.br>] [--json]
-  node <skill-root>/scripts/cli/assets/icons.mjs get <name...> [--style outline|filled] [--pack <pack.br>] [--svg|--json]
+  node <skill-root>/scripts/cli/assets/icons.mjs generate [--source-root <dir>] [--output <catalog.tsv|dir>] [--license-output <path>] [--stroke <width>] [--check]
+  node <skill-root>/scripts/cli/assets/icons.mjs info [--pack <catalog.tsv|dir|pack.br>] [--json]
+  node <skill-root>/scripts/cli/assets/icons.mjs verify [--pack <catalog.tsv|dir|pack.br>] [--json]
+  node <skill-root>/scripts/cli/assets/icons.mjs unpack --output <new-file.tsv> [--pack <catalog.tsv|dir|pack.br>]
+  node <skill-root>/scripts/cli/assets/icons.mjs search <query> [--style outline|filled|any] [--limit <n>] [--pack <catalog.tsv|dir|pack.br>] [--json]
+  node <skill-root>/scripts/cli/assets/icons.mjs names [--style outline|filled] [--pack <catalog.tsv|dir|pack.br>] [--json]
+  node <skill-root>/scripts/cli/assets/icons.mjs get <name...> [--style outline|filled] [--pack <catalog.tsv|dir|pack.br>] [--svg|--json]
 `
 }
 

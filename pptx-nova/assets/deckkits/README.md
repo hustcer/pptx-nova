@@ -248,7 +248,7 @@ node <skill-root>/scripts/cli/create/build.mjs \
 ## 图标使用
 
 DeckKit 需要 Tabler 图标时，使用 `createOps()` 返回的 `icon()` 或直接使用
-`shared/icon-assets.kit.mjs`。它通过 skill 内的图标入口读取 `assets/icons/tabler-icons.pack.br`，并把 SVG
+`shared/icon-assets.kit.mjs`。它通过 skill 内的图标入口读取 `assets/icons/tabler-icons.{catalog,outline,filled}.tsv`，并把 SVG
 内联为 `add-image` 的 `bytesBase64 + mimeType`，不依赖网络、临时 SVG 文件或 Tabler
 源码目录：
 

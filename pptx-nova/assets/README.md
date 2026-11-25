@@ -3,8 +3,9 @@
 This directory is the local asset catalog used by the `pptx-nova` skill.
 
 The catalogs are intentionally small and metadata-first. They define stable IDs,
-selection hints, and generator/patch entry points. Bundled binary assets include
-the Tabler icon pack and curated DeckKit showcases.
+selection hints, and generator/patch entry points. Bundled binary assets are
+limited to curated DeckKit showcases; the Tabler icon pack is stored as
+plain-text UTF-8 TSV files.
 
 ## Directories
 
@@ -26,8 +27,9 @@ the Tabler icon pack and curated DeckKit showcases.
   regenerate the derived catalogs before publishing the skill. Packaged skill
   consumers should use the bundled generated catalogs as-is.
 - Keep binary and licensed assets out until their license source is recorded.
-- Tabler icons are vendored as a deterministic Brotli pack at
-  `icons/tabler-icons.pack.br`, with the Tabler MIT license copied to
+- Tabler icons are vendored as deterministic plain-text UTF-8 TSV files at
+  `icons/tabler-icons.catalog.tsv`, `icons/tabler-icons.outline.tsv`, and
+  `icons/tabler-icons.filled.tsv`, with the Tabler MIT license copied to
   `icons/icon-license`. The [icon data reference](icons/README.md) documents the readable integrity
   manifest, pinned provenance, size/geometry checks, and review commands. Refresh the pack,
   license, and generated integrity manifest from a reviewed local Tabler checkout with:

@@ -1,17 +1,17 @@
 #!/usr/bin/env nu
 
-const default_output = "pptx-nova/assets/icons/tabler-icons.pack.br"
+const default_output = "pptx-nova/assets/icons/tabler-icons.catalog.tsv"
 const default_license_output = "pptx-nova/assets/icons/icon-license"
 const default_source_root = ($nu.home-dir | path join "iWork" "refs" "tabler-icons")
 const icon_tool = "pptx-nova/scripts/cli/assets/icons.mjs"
 
 def main [
   --source-root (-s): string = $default_source_root   # Local tabler-icons checkout root.
-  --output (-o): string = $default_output             # Generated deterministic Brotli icon pack.
+  --output (-o): string = $default_output             # Generated plain-text icon pack entry (catalog/outline/filled TSVs + manifest) or target directory.
   --license-output: string = $default_license_output  # Vendored Tabler MIT license path.
   --stroke: string = "1"          # Default stroke width for generated outline icons.
   --manifest (-m): string = ""    # Deprecated; full Tabler pack no longer uses a curated manifest.
-  --check # Only verify generated output and license are up to date.
+  --check # Only verify generated icon pack files, manifest, and license are up to date.
 ]: nothing -> record {
   let source_root_path = ($source_root | path expand)
   let output_path = ($output | path expand)

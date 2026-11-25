@@ -128,7 +128,7 @@ schema-public manifest xdoc_repo='../pptx':
     }
   }
 
-# Generate or check deterministic Brotli icon pack
+# Generate or check deterministic plain-text Tabler icon pack
 icon *OPTIONS: 
   @nu tools/generate-pptx-nova-tabler-icons.nu {{OPTIONS}}
 

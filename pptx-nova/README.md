@@ -580,7 +580,8 @@ DeckKits.
 
 ### Tabler Icon Pack
 
-Runtime icon lookup uses the bundled `assets/icons/tabler-icons.pack.br`. When refreshing the icon
+Runtime icon lookup uses the bundled plain-text TSV pack (`assets/icons/tabler-icons.catalog.tsv`,
+`assets/icons/tabler-icons.outline.tsv`, and `assets/icons/tabler-icons.filled.tsv`). When refreshing the icon
 pack inside `pptx-nova/`, explicitly provide a Tabler checkout:
 
 ```bash

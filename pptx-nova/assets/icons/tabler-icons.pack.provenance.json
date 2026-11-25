@@ -1,6 +1,20 @@
 {
-  "schemaVersion": "pptx-nova-tabler-icon-pack-provenance/v1",
-  "packSha256": "96c01f2753d80a0c0d44221dd9edfb51b476c25f18442f2a8fd8bb57b70ad14c",
+  "schemaVersion": "pptx-nova-tabler-icon-pack-provenance/v2",
+  "canonicalSha256": "1ec3475bd962c9e913097bf65bde173ae5b7554931ee5248f4e26f24fe872ec0",
+  "files": {
+    "catalog": {
+      "file": "tabler-icons.catalog.tsv",
+      "sha256": "2e9977bab21850eff1cbb99a788395288c75fcfd00ab74e436084de7ee7f9feb"
+    },
+    "outline": {
+      "file": "tabler-icons.outline.tsv",
+      "sha256": "7cb15808f569612662febe3bd4bababf05912630b78de67975a6a3ead6072fc2"
+    },
+    "filled": {
+      "file": "tabler-icons.filled.tsv",
+      "sha256": "5464de72926e27fd39183b0955ed92046e1ef4d136a070604aa921bd9767d1c7"
+    }
+  },
   "upstream": {
     "repository": "https://github.com/tabler/tabler-icons",
     "tag": "v3.45.0",

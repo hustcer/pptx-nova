@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { Buffer } from 'node:buffer'
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -19,9 +19,13 @@ import {
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const TOOL = join(ROOT, 'tools/generate-pptx-nova-tabler-icons.nu')
 const ICON_CLI = join(ROOT, 'pptx-nova/scripts/cli/assets/icons.mjs')
-const PACK_PATH = join(ROOT, 'pptx-nova/assets/icons/tabler-icons.pack.br')
-const LICENSE_PATH = join(ROOT, 'pptx-nova/assets/icons/icon-license')
-const CATALOG_PATH = join(ROOT, 'pptx-nova/assets/icons/catalog.json')
+const ICONS_DIR = join(ROOT, 'pptx-nova/assets/icons')
+const CATALOG_TSV_PATH = join(ICONS_DIR, 'tabler-icons.catalog.tsv')
+const OUTLINE_TSV_PATH = join(ICONS_DIR, 'tabler-icons.outline.tsv')
+const FILLED_TSV_PATH = join(ICONS_DIR, 'tabler-icons.filled.tsv')
+const LEGACY_BR_PATH = join(ICONS_DIR, 'tabler-icons.pack.br')
+const LICENSE_PATH = join(ICONS_DIR, 'icon-license')
+const CATALOG_PATH = join(ICONS_DIR, 'catalog.json')
 
 const OUTLINE_SHELL =
   '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
@@ -40,9 +44,9 @@ function writeJson(path, value) {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`)
 }
 
-test('Tabler icon pack metadata and license are present', () => {
+test('Tabler icon pack metadata, plain-text TSV parts, and license are present', () => {
   const info = getTablerIconPackInfo()
-  assert.equal(info.schemaVersion, 'pptx-nova-tabler-icon-pack/v1')
+  assert.equal(info.schemaVersion, 'pptx-nova-tabler-icon-pack/v2')
   assert.equal(info.version, '3.45.0')
   assert.equal(info.counts.outline, 5112)
   assert.equal(info.counts.filled, 1054)
@@ -51,7 +55,12 @@ test('Tabler icon pack metadata and license are present', () => {
 
   const catalog = JSON.parse(readFileSync(CATALOG_PATH, 'utf8'))
   const tablerEntry = catalog.entries.find((entry) => entry.id === 'tabler-full-pack')
-  assert.equal(tablerEntry.pack, 'tabler-icons.pack.br')
+  assert.equal(tablerEntry.pack, 'tabler-icons.catalog.tsv')
+  assert.deepEqual(tablerEntry.files, {
+    catalog: 'tabler-icons.catalog.tsv',
+    outline: 'tabler-icons.outline.tsv',
+    filled: 'tabler-icons.filled.tsv',
+  })
   assert.equal(tablerEntry.licenseFile, 'icon-license')
   assert.equal(tablerEntry.sourceVersion, info.version)
   assert.equal(tablerEntry.iconCount, info.iconCount)
@@ -63,9 +72,10 @@ test('Tabler icon pack metadata and license are present', () => {
   assert.match(license, /Copyright \(c\) 2020-2026 Paweł Kuna/)
   assert.match(license, /Permission is hereby granted, free of charge/)
 
-  const packBytes = readFileSync(PACK_PATH)
-  assert.ok(packBytes.length > 300_000)
-  assert.ok(packBytes.length < 450_000)
+  assert.equal(existsSync(LEGACY_BR_PATH), false)
+  assert.ok(readFileSync(CATALOG_TSV_PATH, 'utf8').includes('# part=catalog\n'))
+  assert.ok(readFileSync(OUTLINE_TSV_PATH, 'utf8').includes('# part=outline\n'))
+  assert.ok(readFileSync(FILLED_TSV_PATH, 'utf8').includes('# part=filled\n'))
 })
 
 test('Tabler icon helper searches, resolves aliases, recolors SVG, and emits add-image payloads', () => {
@@ -176,13 +186,15 @@ test('DeckKit core primitive emits add-run ops with the shared font floor', () =
   ])
 })
 
-test('Tabler icon generator writes deterministic Brotli pack and license', () => {
+test('Tabler icon generator writes deterministic split plain-text TSVs, manifest, and license', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'pptx-nova-tabler-icons-'))
+  t.after(() => rmSync(dir, { recursive: true, force: true }))
   const sourceRoot = join(dir, 'tabler-icons')
   const outlineDir = join(sourceRoot, 'icons', 'outline')
   const filledDir = join(sourceRoot, 'icons', 'filled')
-  const outputPath = join(dir, 'out', 'tabler-icons.pack.br')
-  const licenseOutputPath = join(dir, 'out', 'icon-license')
+  const outDir = join(dir, 'out')
+  const outputPath = join(outDir, 'tabler-icons.catalog.tsv')
+  const licenseOutputPath = join(outDir, 'icon-license')
   mkdirSync(outlineDir, { recursive: true })
   mkdirSync(filledDir, { recursive: true })
 
@@ -240,11 +252,20 @@ ${FILLED_SHELL}
     readFileSync(licenseOutputPath, 'utf8'),
     readFileSync(join(sourceRoot, 'LICENSE'), 'utf8'),
   )
+  assert.equal(existsSync(join(outDir, 'tabler-icons.catalog.tsv')), true)
+  assert.equal(existsSync(join(outDir, 'tabler-icons.outline.tsv')), true)
+  assert.equal(existsSync(join(outDir, 'tabler-icons.filled.tsv')), true)
+  assert.equal(existsSync(join(outDir, 'tabler-icons.pack.manifest.json')), true)
+  assert.equal(existsSync(join(outDir, 'tabler-icons.pack.br')), false)
 
-  const info = readJsonCommand('node', [ICON_CLI, 'info', '--pack', outputPath, '--json'])
-  assert.equal(info.version, '0.0.0-test')
-  assert.equal(info.iconCount, 2)
-  assert.deepEqual(info.counts, { outline: 1, filled: 1 })
+  // Both entry path and directory path work for querying.
+  for (const packArg of [outputPath, outDir, join(outDir, 'tabler-icons.pack.manifest.json')]) {
+    const info = readJsonCommand('node', [ICON_CLI, 'info', '--pack', packArg, '--json'])
+    assert.equal(info.schemaVersion, 'pptx-nova-tabler-icon-pack/v2')
+    assert.equal(info.version, '0.0.0-test')
+    assert.equal(info.iconCount, 2)
+    assert.deepEqual(info.counts, { outline: 1, filled: 1 })
+  }
 
   const found = readJsonCommand('node', [
     ICON_CLI,
@@ -267,10 +288,51 @@ ${FILLED_SHELL}
   assert.equal(icons[0].name, 'demo')
   assert.equal(icons[0].svg, `${outlineShell('1.5')}<path d="M1 2l3 4"/></svg>`)
 
+  const filledIcons = readJsonCommand('node', [
+    ICON_CLI,
+    'get',
+    'star',
+    '--style',
+    'filled',
+    '--pack',
+    outDir,
+    '--json',
+  ])
+  assert.equal(filledIcons[0].svg, `${FILLED_SHELL}<path d="M2 2l4 8"/></svg>`)
+
   const check = spawnSync(
     'nu',
     [
       TOOL,
+      '--source-root',
+      sourceRoot,
+      '--output',
+      outDir,
+      '--license-output',
+      licenseOutputPath,
+      '--stroke',
+      '1.5',
+      '--check',
+    ],
+    { cwd: ROOT, encoding: 'utf8' },
+  )
+  assert.equal(check.status, 0, check.stderr || check.stdout)
+
+  const manifestPath = join(outDir, 'tabler-icons.pack.manifest.json')
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
+  assert.equal(manifest.storage.format, 'split-tsv')
+  assert.equal(manifest.storage.compression, 'none')
+  assert.equal(manifest.canonical.iconCount, 2)
+
+  // Stale detection catches tampered part files as well as stale manifest.
+  const outlinePath = join(outDir, 'tabler-icons.outline.tsv')
+  const originalOutline = readFileSync(outlinePath, 'utf8')
+  writeFileSync(outlinePath, `${originalOutline}# drift\n`)
+  const stalePart = spawnSync(
+    'node',
+    [
+      ICON_CLI,
+      'generate',
       '--source-root',
       sourceRoot,
       '--output',
@@ -283,10 +345,10 @@ ${FILLED_SHELL}
     ],
     { cwd: ROOT, encoding: 'utf8' },
   )
-  assert.equal(check.status, 0, check.stderr || check.stdout)
-  const manifestPath = join(dir, 'out', 'tabler-icons.pack.manifest.json')
-  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
-  assert.equal(manifest.decoded.iconCount, 2)
+  assert.equal(stalePart.status, 1)
+  assert.match(stalePart.stderr, /tabler-icons\.outline\.tsv/)
+  writeFileSync(outlinePath, originalOutline)
+
   writeFileSync(manifestPath, '{}\n')
   const staleManifest = spawnSync(
     'node',

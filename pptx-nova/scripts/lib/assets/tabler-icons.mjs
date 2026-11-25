@@ -640,8 +640,7 @@ function readSplitTsvPack(paths, required) {
         typeof entry.file !== 'string' ||
         entry.file !== expectedFile ||
         entry.file.includes('/') ||
-        entry.file.includes('\\') ||
-        entry.file.includes('..')
+        entry.file.includes('\\')
       )
         fail(`Tabler icon pack manifest file entry integrity check failed for ${part}`)
     }

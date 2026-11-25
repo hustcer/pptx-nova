@@ -324,6 +324,38 @@ ${FILLED_SHELL}
   assert.equal(manifest.storage.compression, 'none')
   assert.equal(manifest.canonical.iconCount, 2)
 
+  const customPackPath = join(outDir, 'archive..backup.catalog.tsv')
+  const customGenerateArgs = [
+    ICON_CLI,
+    'generate',
+    '--source-root',
+    sourceRoot,
+    '--output',
+    customPackPath,
+    '--license-output',
+    licenseOutputPath,
+  ]
+  const customPack = readJsonCommand('node', customGenerateArgs)
+  assert.equal(readJsonCommand('node', [...customGenerateArgs, '--check']).checked, true)
+  const verification = readJsonCommand('node', [
+    ICON_CLI,
+    'verify',
+    '--pack',
+    customPack.manifest.path,
+    '--json',
+  ])
+  assert.equal(verification.manifestVerified, true)
+  assert.equal(verification.files.catalog.file, 'archive..backup.catalog.tsv')
+  const [customIcon] = readJsonCommand('node', [
+    ICON_CLI,
+    'get',
+    'demo-alias',
+    '--pack',
+    customPackPath,
+    '--json',
+  ])
+  assert.equal(customIcon.svg, `${outlineShell('1')}<path d="M1 2l3 4"/></svg>`)
+
   // Stale detection catches tampered part files as well as stale manifest.
   const outlinePath = join(outDir, 'tabler-icons.outline.tsv')
   const originalOutline = readFileSync(outlinePath, 'utf8')

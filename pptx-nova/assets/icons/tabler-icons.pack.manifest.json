@@ -3,7 +3,7 @@
   "purpose": "Offline passive SVG icon data in plain-text UTF-8 TSV files; not executable code.",
   "source": {
     "repository": "https://github.com/tabler/tabler-icons",
-    "version": "3.45.0"
+    "version": "3.53.0"
   },
   "storage": {
     "format": "split-tsv",
@@ -14,27 +14,27 @@
   "files": {
     "catalog": {
       "file": "tabler-icons.catalog.tsv",
-      "byteLength": 657740,
-      "sha256": "2e9977bab21850eff1cbb99a788395288c75fcfd00ab74e436084de7ee7f9feb"
+      "byteLength": 727104,
+      "sha256": "f2ba5f364d3518c4f1d243f030a666f62236b812124b9b7d2ee558bb40a588d5"
     },
     "outline": {
       "file": "tabler-icons.outline.tsv",
-      "byteLength": 1200550,
-      "sha256": "7cb15808f569612662febe3bd4bababf05912630b78de67975a6a3ead6072fc2"
+      "byteLength": 1327786,
+      "sha256": "e791fda8d51b21b220b802d01bdd16b3089da125cea67cac3dbdaabb2177afad"
     },
     "filled": {
       "file": "tabler-icons.filled.tsv",
-      "byteLength": 508780,
-      "sha256": "5464de72926e27fd39183b0955ed92046e1ef4d136a070604aa921bd9767d1c7"
+      "byteLength": 509110,
+      "sha256": "ff189272d8783714f23727a60641b067f8a875c7278d244337ed5e51dc786a10"
     }
   },
   "canonical": {
     "schemaVersion": "pptx-nova-tabler-icon-pack/v1",
-    "byteLength": 2366876,
-    "sha256": "1ec3475bd962c9e913097bf65bde173ae5b7554931ee5248f4e26f24fe872ec0",
-    "iconCount": 6166,
+    "byteLength": 2563806,
+    "sha256": "a70fcdf3989901e6247583a4195e5ffeeed080e0849e20b4d4be6c3f32a50f2c",
+    "iconCount": 6563,
     "counts": {
-      "outline": 5112,
+      "outline": 5509,
       "filled": 1054
     }
   },

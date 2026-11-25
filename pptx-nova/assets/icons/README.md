@@ -3,15 +3,15 @@
 The bundled Tabler icon pack is stored as three plain-text UTF-8 tab-separated files so every row
 is directly human-readable and auditable without opaque compressed binaries:
 
-- `tabler-icons.catalog.tsv` — pack header, fixed `outline` and `filled` SVG shells, and catalog metadata (`@icon` rows) for all 6,166 icons.
-- `tabler-icons.outline.tsv` — passive SVG geometry (`@svg` rows) for all 5,112 outline icons.
+- `tabler-icons.catalog.tsv` — pack header, fixed `outline` and `filled` SVG shells, and catalog metadata (`@icon` rows) for all 6,563 icons.
+- `tabler-icons.outline.tsv` — passive SVG geometry (`@svg` rows) for all 5,509 outline icons.
 - `tabler-icons.filled.tsv` — passive SVG geometry (`@svg` rows) for all 1,054 filled icons.
 
 None of these files is a JavaScript module, executable, encrypted payload, or runtime download. The
 loader parses plain-text records; it does not evaluate them, import them as code, or run commands
 from them.
 
-The current package contains 6,166 icons (5,112 outline and 1,054 filled) from Tabler 3.45.0.
+The current package contains 6,563 icons (5,509 outline and 1,054 filled) from Tabler 3.53.0.
 The MIT license is retained in [icon-license](icon-license).
 
 ## Inspect and verify
@@ -44,25 +44,24 @@ size/grammar checks; `verify` reports `manifestVerified: false` when no manifest
 
 ## Source and reproducibility
 
-The source is [Tabler Icons](https://github.com/tabler/tabler-icons), at tag `v3.45.0`, commit
-[`975920ff99c12c4dc9e3fe61a03738330600f9b2`](https://github.com/tabler/tabler-icons/tree/975920ff99c12c4dc9e3fe61a03738330600f9b2).
-[tabler-icons.pack.provenance.json](tabler-icons.pack.provenance.json) records that revision, the
-expected per-file and canonical SHA-256 digests, and two existing local adjustments: `server` and
-`server-bolt` each add `v-2` to finish one SVG path edge. All other normalized source rows match
-that revision.
+The source is the Tabler Icons `v3.53.0` release at commit `999041dfbde45ad28e6da8af9d96b492461ffb59`.
+This release includes the geometry fixes for `server` and `server-bolt`. The provenance file records
+the revision and the expected per-file and canonical SHA-256 digests.
+[Upstream source](https://github.com/tabler/tabler-icons/tree/999041dfbde45ad28e6da8af9d96b492461ffb59) · [Provenance](tabler-icons.pack.provenance.json)
 
-To reproduce the current files, prepare a checkout at that exact commit, apply the recorded literal
-find/replace adjustments once each, then run the existing dependency-free generator:
+To reproduce the current files, run the dependency-free generator with a clean checkout of that
+commit.
 
 ```bash
-node scripts/cli/assets/icons.mjs generate --source-root <prepared-checkout>
-node scripts/cli/assets/icons.mjs generate --source-root <prepared-checkout> --check
+node scripts/cli/assets/icons.mjs generate --source-root <upstream-checkout>
+node scripts/cli/assets/icons.mjs generate --source-root <upstream-checkout> --check
 ```
 
 The generator reads SVG/JSON/license files only; upstream install/build scripts need not run.
 It emits the three plain-text TSV files, license, and integrity manifest deterministically, and
-`--check` verifies all five outputs. A refresh requires reviewing provenance and synchronizing the
-full-pack catalog version/counts; the public release audit rejects stale catalog/provenance digests.
+`--check` verifies all five outputs. When refreshing the pack, update the full-pack catalog version
+and counts, the provenance record, and the version and count assertions in the Tabler runtime tests.
+The public release audit checks the catalog and provenance against the verified pack.
 
 SHA-256 checks detect changes relative to the installed manifest; they do not authenticate a package
 whose code and manifest have both been replaced. Trust the reviewed distribution and source revision.

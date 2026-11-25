@@ -34,11 +34,11 @@
       "provenance": "tabler-icons.pack.provenance.json",
       "licenseFile": "icon-license",
       "source": "https://github.com/tabler/tabler-icons",
-      "sourceVersion": "3.45.0",
+      "sourceVersion": "3.53.0",
       "license": "MIT",
-      "iconCount": 6166,
+      "iconCount": 6563,
       "styles": {
-        "outline": 5112,
+        "outline": 5509,
         "filled": 1054
       },
       "bestFor": ["DeckKit icon badges", "status markers", "charts", "business objects"],

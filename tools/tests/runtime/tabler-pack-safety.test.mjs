@@ -85,7 +85,7 @@ test('bundled split plain-text pack has verified hashes and passive geometry for
   assert.equal(info.storage, 'split-tsv')
   assert.equal(info.manifestVerified, true)
   assert.equal(info.passiveSvgValidated, true)
-  assert.equal(info.iconCount, 6166)
+  assert.equal(info.iconCount, 6563)
   const provenance = JSON.parse(
     readFileSync(skillPath('assets/icons/tabler-icons.pack.provenance.json'), 'utf8'),
   )

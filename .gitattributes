@@ -1,0 +1,5 @@
+# Tabler pack integrity checks hash these files byte for byte.
+/pptx-nova/assets/icons/tabler-icons.catalog.tsv text eol=lf
+/pptx-nova/assets/icons/tabler-icons.outline.tsv text eol=lf
+/pptx-nova/assets/icons/tabler-icons.filled.tsv text eol=lf
+/pptx-nova/assets/icons/icon-license text eol=lf

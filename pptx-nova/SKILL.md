@@ -6,7 +6,7 @@ description: >
   Use as a slide generator and presentation editor for pitch decks, business
   presentations, quick decks, template filling, reference deck style matching
   with a new outline, data-driven slides, brand checks/rebranding, native PPTX
-  animations/transitions, and PDF/PNG previews. Triggers on slides, slide deck,
+  animations/transitions, and PDF/PNG previews. Triggers on slides, deck, slide deck,
   presentation, PowerPoint, PPT, PPTX, .pptx filenames, 幻灯片, 演示文稿,
   创建 PPT, 做 PPT, 生成演示文稿, 修改 PPTX, 改一下幻灯片, 快速做一份,
   一句话生成, 帮我快速出一版, or 简单提示词生成. Also use for xdoc Runtime

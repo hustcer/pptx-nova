@@ -248,8 +248,9 @@ test('skill routes standard refurbishment through one compact reference', () => 
 
 test('skill stays within the progressive-disclosure byte budget', () => {
   const skill = readFileSync(skillPath('SKILL.md'), 'utf8')
+  // Keep SKILL.md compact while accommodating explicit in-file source-content and credential boundaries.
   assert.ok(
-    Buffer.byteLength(skill, 'utf8') < 55 * 1024,
+    Buffer.byteLength(skill, 'utf8') < 58 * 1024,
     `SKILL.md is ${Buffer.byteLength(skill, 'utf8')} bytes`,
   )
   const commandEntry = skill

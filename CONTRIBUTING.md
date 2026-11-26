@@ -237,6 +237,7 @@ unexpected binaries, missing licenses, and release blockers.
 
 For source-content or licensing security boundary changes, run
 `node tools/run-tests.mjs workflows/source-content-boundary.test.mjs runtime/licensing-security-boundary.test.mjs maintenance/references-layout.test.mjs`.
+The licensing tests exercise action routing and report filtering with synthetic reports.
 The [source-content cases](tools/tests/fixtures/source-content/README.md) describe the separate
 agent behavioral evaluation and its isolation requirements. Keep synthetic payloads outside the
 published skill. Passing literal-data regression tests does not prove model-level injection resistance;

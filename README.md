@@ -288,11 +288,11 @@ sandbox with limited file/network access; the skill itself does not create one. 
 reduce indirect prompt-injection risk but cannot guarantee immunity or removal of Snyk's W011
 exposure warning. See the [source-content safety policy](pptx-nova/references/policies/source-content-safety.md).
 
-Local `xdoc` license commands run only on explicit user request or after an authorization refusal.
-Agents must pass user-supplied license files by file path only to `xdoc auth` without reading or
-printing raw credential contents or `.env` secrets, and registration writes only the current user's
-local `xdoc` config file (never `sudo`, OS system services, or autonomous binary installation). See
-the [runtime licensing guide](pptx-nova/references/runtime/licensing.md).
+Agents pass license files by path to local verification, authorized registration, or an authorized
+one-off `xdoc convert --license` call. File verification is read-only. Registration can update the
+license and Clock state in the current user's configuration directory. Agents filter authorization
+reports locally before using them and keep raw credentials and `.env` secrets out of model context
+and evidence. See the [runtime licensing guide](pptx-nova/references/runtime/licensing.md).
 
 ## Powered by [`xdoc`](docs/xdoc-introducution.md)
 

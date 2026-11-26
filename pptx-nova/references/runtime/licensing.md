@@ -4,17 +4,29 @@ Use this guide when a user explicitly asks to verify, register/install, or renew
 
 ## Credential and Host Boundaries
 
-- **Never load raw credential contents into model context**: Do not open, `cat`, read, print, quote, paste, or log raw license JSON contents, signatures, or private keys in model context, chat responses, shell strings, or evidence files. Pass the user-provided license file **by file path only** to local `xdoc auth` CLI commands (`verify`, `install`) or `xdoc convert --license`, and inspect or report only non-secret structured CLI output (`installedPath`, `installedSha256`, `source.path`, `source.sha256`, `health`, `verification.state`, `admission.state`, validity/capabilities, and reason codes).
-- **User-scoped local config only**: `xdoc auth install` writes only a single user-owned CLI config file (`$HOME/.config/xdoc/xdoc-license.json`, `%APPDATA%\xdoc\xdoc-license.json`, or explicit `XDOC_CONFIG_PATH`). Never use `sudo` or elevated privileges, never install or modify OS system services (`systemd`/`launchd`), system directories, or startup items, and never autonomously download or install the `xdoc` binary.
+- **Never load raw credential contents into model context**: Keep raw license JSON, signatures, private
+  keys, and environment secrets out of model context, chat, shell strings, logs, and evidence. Pass
+  license files **by file path only** to local `auth verify`, `auth install`, or an authorized one-off
+  `xdoc convert --license`. `auth status` takes no file argument.
+- **User-scoped local config only**: `auth install` may write `xdoc-license.json` and Clock state in
+  the user-owned configuration directory. `XDOC_CONFIG_PATH` specifies a directory. Never use `sudo`
+  or elevated privileges, modify OS services (`systemd`/`launchd`), system directories or startup
+  items, or autonomously download or install the `xdoc` binary.
 
 ## Determine the Execution Environment and Scope
 
-- When the user has requested license registration/installation or renewal and provided a file path, verify, register, and validate it under that authorization without asking again. If the user only requests an explanation or diagnosis, perform the corresponding checks; do not uninstall, reset the clock, or replace an existing license incidentally.
+- When the user requests registration or renewal and provides a file path, verify, register, and
+  validate it under that authorization. An authorization refusal permits diagnosis within the task.
+  Only register, renew, reset Clock state, or uninstall with user authorization for that action.
 - Use the same xdoc binary, OS user, working directory, and environment as the pptx-nova execution. First identify the actual binary and run `xdoc --version`; an explicit `XDOC_BIN` and the Agent's `PATH` can select different installations. If the binary is missing, stop and direct the user to install a published Runtime themselves using the [official getting-started guide](https://docs.structurify.io/en/pptx-runtime/getting-started/) (do not autonomously download binaries or run remote installer scripts), then check its current contract once installed.
-- Read the focused schemas for `xdoc schema --command auth.verify`, `auth.install`, and `auth.status`; read `auth.reset-clock` / `auth.uninstall` only when recovery requires them. Resolve each report through its action's `ioContract.stdout.schemaRef`; see [Schema discovery](schema-discovery.md#典型-agent-用法). Examples here do not supersede the current binary's command and report contracts. Auth output is already JSON: use `--pretty`, not `--json`.
+- Read the focused schema for each action used, for example `xdoc schema --command auth.verify`.
+  Resolve its report through `ioContract.stdout.schemaRef`. See [schema discovery](schema-discovery.md#典型-agent-用法)
+  for the precise command contracts.
 - Inspect only relevant non-secret environment configuration: whether `XDOC_CONFIG_PATH` is set, the user's home (or `APPDATA` on Windows), `CI`, and any explicit task `--license` path. The CLI loads `.env` from its working directory at startup; nonblank process environment values take precedence. Do not read or print the entire environment, full `.env` files, or unrelated secrets from `.env`.
 
-Installation and renewal write license configuration and Clock state. `status` performs full admission and may update Clock state; it is not strictly read-only. `verify` only reads the specified file and is suitable when the user explicitly requests no local state changes. For development verification, set `XDOC_CONFIG_PATH` to a newly created private absolute directory; do not touch the user's real license.
+`status` performs full admission and may update Clock state. For file verification only, run
+`verify` and stop, including when verification fails. For development checks, set `XDOC_CONFIG_PATH`
+to a newly created private absolute directory and leave the user's real license alone.
 
 When reading authorization profiles from the runtime schema, select by exact
 profile ID and product, never by array position or a fixed profile count. The
@@ -24,13 +36,32 @@ its `freeQuotaSubjects` are `final-output` and `read-only-input`; Converter uses
 using the Runtime's own feature/output admission and quota reports for this skill;
 the Writer SDK is not a replacement execution path for local xdoc tasks.
 
+## Read Filtered Authorization Reports
+
+For agent-run auth commands, use `<skill-root>/scripts/cli/runtime/auth-report.mjs` as shown below.
+It runs the selected local `xdoc` (`XDOC_BIN` or PATH) in the current working directory and environment.
+Pass an absolute file path to the helper for `verify` and `install`.
+It captures stdout in memory and emits only allowlisted fields from recognized auth reports,
+including path fingerprints, file hashes, status, reason codes, validity, capabilities, and known entitlements.
+It omits identity fields such as `customerId` and `licenseId`, free-form error text, and all raw stderr.
+For path comparisons, fields such as `source.pathSha256` hash the exact UTF-8 path string returned by
+xdoc. They are distinct from file content hashes such as `source.sha256`. Use user-supplied or
+otherwise authorized paths in messages and commands.
+
+Use `exitCode` for the actual xdoc process result and `report` for its filtered fields. A
+`null` report means there is no recognized structured result. Use the filtered `diagnostic` and exit
+code to check the invocation or runtime. The helper returns the xdoc exit code when nonzero and
+fails when xdoc did not exit normally or no recognized report is available. Keep unfiltered streams
+out of tool transcripts and evidence even when troubleshooting. Do not rerun bare auth commands to
+recover missing report fields.
+
 ## Installation and Renewal
 
 1. Preserve the original UTF-8 delivery bytes; compare the SHA-256 with the delivery notice when available. Confirm the file is a readable regular file and the client is within the issuer's supported version range. Runtime requires `xdoc-cli-license/v1`; Viewer/Converter/Writer SDK credentials do not apply. The original file name, such as `runtime-personal.json`, may be retained. Do not edit signed dates, identity, features, or capabilities, and never install a signing private key.
 2. Verify the specified file first. If verification fails, use the table below and correct the conditions before continuing:
 
    ```sh
-   xdoc auth verify --license "/absolute/path/runtime-personal.json" --pretty
+   node "<skill-root>/scripts/cli/runtime/auth-report.mjs" verify "/absolute/path/runtime-personal.json"
    ```
 
    Verification passes only when the exit code is 0 and the report has `outcome: "passed"` and `reason: "ok"`. `status: "success"` alone means the diagnostic completed and can accompany a failed verification.
@@ -40,15 +71,24 @@ the Writer SDK is not a replacement execution path for local xdoc tasks.
 3. Select the configuration directory and install the original file:
 
    ```sh
-   xdoc auth install "/absolute/path/runtime-personal.json" --pretty
-   xdoc auth status --pretty
+   node "<skill-root>/scripts/cli/runtime/auth-report.mjs" install "/absolute/path/runtime-personal.json"
    ```
 
-   Install accepts exactly one positional file; do not use `install --license ...`. Auth argument failures may produce stderr only. Preserve the actual exit code, stdout, and stderr separately; do not combine them and parse them as JSON.
+4. After a successful install, check the installed credential in the same environment:
+
+   ```sh
+   node "<skill-root>/scripts/cli/runtime/auth-report.mjs" status
+   ```
+
+   For an uncertain result or an install with no recognized report, follow
+   [Uncertain Installation Outcome](#uncertain-installation-outcome) before retrying.
+   For a failed install, check the [reported reason](#recovery-by-actual-reason).
 
 The default installation target is `$HOME/.config/xdoc/xdoc-license.json` on POSIX and `%APPDATA%\xdoc\xdoc-license.json` on Windows. When set, `XDOC_CONFIG_PATH` identifies the **configuration directory**: it must be an existing private absolute directory accessible to the current user. Runtime manages `xdoc-license.json` inside it. Create the directory first and set private permissions for the actual execution user (normally `0700` on POSIX; use an appropriate ACL on Windows), then retain the same environment for installation, status, and later tasks. Runtime can create the default user configuration directory. Do not point `XDOC_CONFIG_PATH` at the downloaded JSON or set it only for installation while subsequent Agent tasks use another directory. A normal user registration touches only the user's config directory and never uses `sudo` or modifies OS system services or system directories.
 
-A successful install must show both `status: "success"` and `outcome: "installed"`. Compare `installedPath` and `installedSha256` with the delivered file and inspect the validity period and capabilities in `authenticatedFacts`. A healthy status has these key fields (this is not a complete report):
+A successful install must show both `status: "success"` and `outcome: "installed"`. Check
+`installedSha256` against the delivered file and inspect validity and capabilities in
+`authenticatedFacts`. A healthy status has these key fields:
 
 ```json
 {
@@ -59,39 +99,58 @@ A successful install must show both `status: "success"` and `outcome: "installed
 }
 ```
 
-Compare `source.path` / `source.sha256` with the install report as well. Status exit 0 means only that the query completed: `not-installed` and `unhealthy` can also return 0. Inspect `verification.reason`, `admission.reason`, and `clock`; exit 0 alone does not establish healthy authorization or a successful task.
+Compare `source.pathSha256` and `source.sha256` with `installedPathSha256` and `installedSha256`.
+Status exit 0 means only that the query completed: `not-installed` and `unhealthy` can also return 0.
+Inspect `verification.reason`, `admission.reason`, and `clock`.
 
-For renewal, use the same commands to install the **newly delivered file**, then repeat status and real-task verification. The new license replaces the old one in the selected configuration directory; retain the original delivery file and do not uninstall first. If warned that the replacement has a different identity/license lineage or an earlier expiry, check that the intended file was selected. Editing the expiry in an old JSON file is not renewal.
+For renewal, use the same commands to install the **newly delivered file**, then repeat status and real-task verification. The new license replaces the old one in the selected configuration directory; retain the original delivery file and do not uninstall first. Check the intended delivery file and expiry against the issuer's notice. Editing the expiry in an old JSON file is not renewal.
 
 ### Uncertain Installation Outcome
 
-`outcome: "uncertain"` / `auth_install_outcome_uncertain` means publication may already have occurred. Retain `targetPath`, `attemptedSha256`, and `publication` from the report, then run status in the **same environment**:
+`outcome: "uncertain"` / `auth_install_outcome_uncertain` means publication may already have occurred. Retain `targetPathSha256`, `attemptedSha256`, and `publication` from the filtered report, then run status in the **same environment**:
 
-- If the target path and `source.sha256` match the attempted file and health/admission are healthy, record the currently observable installation result and continue with real-task verification; retain the original uncertain report.
+- If `source.pathSha256` and `source.sha256` match the attempted target and file, and health/admission are healthy, record the currently observable installation result and continue with real-task verification. Retain the filtered uncertain report.
 - If the old file remains, no file exists, or the outcome is still unclear, inspect permissions, storage, and concurrent tasks; correct the conditions before retrying the original delivery.
 - If another process installed a different newer file, check whether replacement matches the current task before overwriting that license.
 
 Do not assume failure left the old file unchanged. Do not automatically roll back, delete the target, or bypass installation admission by copying the file manually.
 
+If the install produced no recognized report, use the intended target and the original delivery
+hash for this comparison. A process exit code alone cannot establish the current installed state.
+
 ## Verify the Actual Task
 
 Install and status verify the local credential; each task is still evaluated against its actual feature, output format, capabilities, and host facts. When there is an original user task, preferably resume it in the same environment, preserving its strict constraints and original inputs and using a new output path. Do not claim that creation, editing, refurbishment, and translation are all authorized merely because PDF conversion succeeded.
 
-To verify conversion independently, use a known valid PPTX that originally has no watermark and an output path that does not exist:
+To verify conversion independently, use a known valid, unwatermarked PPTX and a new output path.
+Provide the exact absolute path of the PPTX. The check accepts one file and rejects wildcard inputs.
 
 ```sh
-xdoc convert "./slides.pptx" --to pdf --output "./licensed-check.pdf" --require-unwatermarked --report "./licensed-check-report.json"
+node "<skill-root>/scripts/cli/runtime/auth-report.mjs" check-convert --require-unwatermarked "/absolute/path/slides.pptx" "/absolute/path/licensed-check.pdf"
 ```
 
-First confirm the options in `xdoc schema --command convert`. `--require-unwatermarked` rejects the task when an unwatermarked mode cannot be authorized. If only paid entitlement needs to be proved and the current command discloses the option, use `--require-entitlement`. Convert stdout is not guaranteed to be JSON. The currently disclosed `--report` can save a `batch/v1` report; inspect `items[].error` fields `kind`, `stage`, and `details.reason`. Failures may still produce only stderr; never invent an authorization report. Check the actual exit code, available reports, and output file. If only the license file is available and there is no suitable task input, report truthfully that it is installed and healthy but task authorization remains unverified.
+First confirm the options in `xdoc schema --command convert`. `--require-unwatermarked` rejects the
+task when an unwatermarked mode cannot be authorized. If only paid entitlement needs to be proved
+and the current command discloses the option, use `--require-entitlement`. The helper discards both
+raw process streams and filters a temporary `batch/v1` report to the item status, known error codes,
+and whether the expected PDF was written. Use the actual exit code and examine the produced PDF.
+If no suitable task input is available, report the registration status and that task authorization
+remains unverified.
 
 A one-off convert can select a credential explicitly without installing it in the user configuration:
 
 ```sh
-xdoc convert "./slides.pptx" --to pdf --output "./explicit-check.pdf" --license "/absolute/path/runtime-personal.json" --require-unwatermarked
+node "<skill-root>/scripts/cli/runtime/auth-report.mjs" check-convert --require-unwatermarked "/absolute/path/slides.pptx" "/absolute/path/explicit-check.pdf" "/absolute/path/runtime-personal.json"
 ```
 
-`xdoc pptx` creation/editing uses the installed credential; do not apply convert's `--license` option to it. For other commands use only options actually disclosed by their current schema/help; do not assume every subcommand supports strict flags.
+The helper passes the optional third path to the local `xdoc convert --license` option.
+`xdoc pptx` creation/editing uses the installed credential. For other commands use options
+disclosed by their current schema/help.
+
+When running a conversion as an authorization check, keep its raw streams and any native batch
+report outside model context. Extract the exit code, structured error kind/stage/reason when
+available, and evidence about the expected output locally before reporting. Do not include raw
+diagnostic text in the authorization evidence.
 
 A paid license does not erase arbitrary watermarks already present in input content. Existing ordinary Free marks, signed watermark obligations, and authorization for new output are handled separately; a watermark remaining after direct conversion of an old watermarked file does not prove installation failed. Do not delete signed metadata or change formats to bypass obligations. See [Conversion Input Quotas and Authorization Failures](troubleshooting.md#conversion-input-quotas-and-authorization-failures) for the distinction between quotas and resources.
 
@@ -101,7 +160,7 @@ For commands supporting explicit credentials, lookup priority is: command `--lic
 
 Compare the actual execution environment:
 
-1. Binary path/version, user/home, working-directory `.env`, `XDOC_CONFIG_PATH`, and `source.path`/hash.
+1. Binary path/version, user/home, working-directory `.env`, `XDOC_CONFIG_PATH`, and `source.pathSha256`/`source.sha256`.
 2. Whether the command still specifies an old `--license`, or the Agent/IDE inherited variables from another launch environment.
 3. Whether an existing user-owned `xdoc` CLI session daemon still uses the old environment (this is a local user-scoped `xdoc` process, never an OS system service). After changing its environment, restart only that user-owned `xdoc` session according to the [daemon guide](daemon-sessions.md), then check status/the task in that same environment without stopping unrelated tasks.
 4. Whether a container or local scheduled task uses another user/configuration path. Installing on the host does not automatically copy the file into a container.
@@ -110,42 +169,52 @@ Local Personal/Enterprise licenses do not automatically include CI, cross-user s
 
 ## Recovery by Actual Reason
 
-The following are symptom-based directions; the current action/report schema defines the complete reason set and exit codes. Argument errors generally use exit 2; install file-read failures use 3, credential refusals 4, and failed/uncertain writes 9. If there is no JSON, retain stderr and do not invent report fields from error prose.
+The following are symptom-based directions; the current action/report schema defines the complete reason set and exit codes. Argument errors generally use exit 2; install file-read failures use 3, credential refusals 4, and failed/uncertain writes 9. If the filtered report is absent, retain the actual exit code and the helper's diagnostic.
 
-| Observation                                                                                             | Check and recovery                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `cli_license_file_read_failed`                                                                          | Check the actual path, case, and current user's file-read and directory-traversal permissions; confirm a readable regular file. Preserve the original; do not automatically use sudo or change unrelated directory permissions.                                                                                                                                                                                                                                                                                                                                                              |
-| `cli_license_too_large`                                                                                 | Read the current verify/install input limit from schema `ioContract.input.maxBytes` (currently 65,536 bytes). Confirm this is the original credential rather than an archive or web page and obtain it again from the issuer; do not truncate or simplify the signed file.                                                                                                                                                                                                                                                                                                                   |
-| JSON/envelope/payload format error, such as `cli_license_json_invalid` / `cli_license_envelope_invalid` | Check for an HTML download, truncated copy, or wrong product file; obtain the original Runtime JSON again. Do not repair the signed payload.                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `cli_license_schema_unsupported` / `cli_license_kind_unsupported` / `cli_license_signature_invalid`     | Check the Runtime product, delivery hash, and supported client range. Use a published client supported by the issuer or request a corrected delivery; do not add trust keys yourself.                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `cli_license_key_not_found`                                                                             | The current client does not trust the declared signing key. Check that the credential's delivery environment matches the client; staging/test credentials may require an issuer-provided test client. The file's `keyId` is only a diagnostic clue until verification succeeds. Use a matching production credential for a production client, or the client designated by the issuer. This reason alone does not establish a need to upgrade or republish the CLI. Do not edit the credential or add trust keys yourself. Explain the mismatch to the user without internal signing details. |
-| `cli_license_expired` / `cli_license_clock_invalid`                                                     | Check the real system time and delivery validity. Install a renewal if expired; wait for valid activation or request correction if not yet valid. reset-clock does not renew or change issuance dates.                                                                                                                                                                                                                                                                                                                                                                                       |
-| `health: "not-installed"`                                                                               | Compare user, configuration directory, cwd `.env`, and source; install in the directory actually used by the task. Downloading the file or running verify alone does not install it.                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `health: "unhealthy"` or verify succeeds but install/task is refused                                    | Inspect the actual verification/admission/clock reason and investigate validity, Clock, device binding, revocation, and the specific feature/capability. Do not repeatedly install the same file expecting permissions to change.                                                                                                                                                                                                                                                                                                                                                            |
-| `config_path_invalid` / `auth_config_invalid`                                                           | Ensure `XDOC_CONFIG_PATH` is an existing private absolute directory, not a JSON file or relative path. Check path aliases and managed-target symlinks; retry with an actual regular directory.                                                                                                                                                                                                                                                                                                                                                                                               |
-| `auth_storage_unavailable` / `auth_install_failed`                                                      | Check current-user directory/file permissions, read-only mounts, disk space, and processes holding locks. If necessary use a new controlled private directory and align later task environments. Do not chmod 777, recursively change permissions, or delete lock files.                                                                                                                                                                                                                                                                                                                     |
-| `outcome: "uncertain"`                                                                                  | Establish publication facts using the path/hash comparison above before deciding whether to retry the same delivery; do not automatically roll back.                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `clock_anomaly`                                                                                         | Follow controlled Clock recovery below; first calibrate system time and stop the relevant tasks/daemon.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `device_pop_failed`                                                                                     | A valid signature does not prove this host possesses the bound device private key. Check whether the delivery is bound to this device and whether the published Runtime supports its host capability; ask the issuer to adapt or reissue it. Do not copy private keys or remove devicePublicKey.                                                                                                                                                                                                                                                                                             |
-| `credential_revoked` or revocation receipt verification error                                           | Retain the actual reason and license hash; ask the issuer to verify revocation or provide corrected delivery. Do not delete receipts, restriction policies, or state to bypass rejection.                                                                                                                                                                                                                                                                                                                                                                                                    |
-| Credential healthy but task reports `no_executable_mode` / `strict_mode_unsatisfied` / exit 4           | Inspect the actual authorization diagnostic, feature, format, capability, and input scope. Do not interpret every exit 4 as a bad file or expiry, or automatically bypass it by splitting slides, deleting charts, or changing formats.                                                                                                                                                                                                                                                                                                                                                      |
-| Credential healthy but resource/font/input error remains                                                | Follow [runtime troubleshooting](troubleshooting.md) for the actual file and engineering limits; a paid license does not raise compiled resource limits.                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Observation                                                                                             | Check and recovery                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `cli_license_file_read_failed`                                                                          | Check the actual path, case, and current user's file-read and directory-traversal permissions; confirm a readable regular file. Preserve the original; do not automatically use sudo or change unrelated directory permissions.                                                                                                                                                                                                                                                                                    |
+| `cli_license_too_large`                                                                                 | Read the current verify/install input limit from schema `ioContract.input.maxBytes` (currently 65,536 bytes). Confirm this is the original credential rather than an archive or web page and obtain it again from the issuer; do not truncate or simplify the signed file.                                                                                                                                                                                                                                         |
+| JSON/envelope/payload format error, such as `cli_license_json_invalid` / `cli_license_envelope_invalid` | Check for an HTML download, truncated copy, or wrong product file; obtain the original Runtime JSON again. Do not repair the signed payload.                                                                                                                                                                                                                                                                                                                                                                       |
+| `cli_license_schema_unsupported` / `cli_license_kind_unsupported` / `cli_license_signature_invalid`     | Check the Runtime product, delivery hash, and supported client range. Use a published client supported by the issuer or request a corrected delivery; do not add trust keys yourself.                                                                                                                                                                                                                                                                                                                              |
+| `cli_license_key_not_found`                                                                             | The current client does not trust the declared signing key. Check that the credential's delivery environment matches the client; staging/test credentials may require an issuer-provided test client. Use a matching production credential for a production client, or the client designated by the issuer. This reason alone does not establish a need to upgrade or republish the CLI. Do not edit the credential or add trust keys yourself. Explain the mismatch to the user without internal signing details. |
+| `cli_license_expired` / `cli_license_clock_invalid`                                                     | Check the real system time and delivery validity. Install a renewal if expired; wait for valid activation or request correction if not yet valid. reset-clock does not renew or change issuance dates.                                                                                                                                                                                                                                                                                                             |
+| `health: "not-installed"`                                                                               | Compare user, configuration directory, cwd `.env`, and source; install in the directory actually used by the task. Downloading the file or running verify alone does not install it.                                                                                                                                                                                                                                                                                                                               |
+| `health: "unhealthy"` or verify succeeds but install/task is refused                                    | Inspect the actual verification/admission/clock reason and investigate validity, Clock, device binding, revocation, and the specific feature/capability. Do not repeatedly install the same file expecting permissions to change.                                                                                                                                                                                                                                                                                  |
+| `config_path_invalid` / `auth_config_invalid`                                                           | Ensure `XDOC_CONFIG_PATH` is an existing private absolute directory, not a JSON file or relative path. Check path aliases and managed-target symlinks; retry with an actual regular directory.                                                                                                                                                                                                                                                                                                                     |
+| `auth_storage_unavailable` / `auth_install_failed`                                                      | Check current-user directory/file permissions, read-only mounts, disk space, and processes holding locks. If necessary use a new controlled private directory and align later task environments. Do not chmod 777, recursively change permissions, or delete lock files.                                                                                                                                                                                                                                           |
+| `outcome: "uncertain"`                                                                                  | Establish publication facts using the path/hash comparison above before deciding whether to retry the same delivery; do not automatically roll back.                                                                                                                                                                                                                                                                                                                                                               |
+| `clock_anomaly`                                                                                         | Follow controlled Clock recovery below; first calibrate system time and stop the relevant tasks/daemon.                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `device_pop_failed`                                                                                     | A valid signature does not prove this host possesses the bound device private key. Check whether the delivery is bound to this device and whether the published Runtime supports its host capability; ask the issuer to adapt or reissue it. Do not copy private keys or remove devicePublicKey.                                                                                                                                                                                                                   |
+| `credential_revoked` or revocation receipt verification error                                           | Retain the actual reason and license hash; ask the issuer to verify revocation or provide corrected delivery. Do not delete receipts, restriction policies, or state to bypass rejection.                                                                                                                                                                                                                                                                                                                          |
+| Credential healthy but task reports `no_executable_mode` / `strict_mode_unsatisfied` / exit 4           | Inspect the actual authorization diagnostic, feature, format, capability, and input scope. Do not interpret every exit 4 as a bad file or expiry, or automatically bypass it by splitting slides, deleting charts, or changing formats.                                                                                                                                                                                                                                                                            |
+| Credential healthy but resource/font/input error remains                                                | Follow [runtime troubleshooting](troubleshooting.md) for the actual file and engineering limits; a paid license does not raise compiled resource limits.                                                                                                                                                                                                                                                                                                                                                           |
 
 ### Clock Recovery and Uninstall
 
 Perform Clock recovery only when `clock_anomaly` has been observed and the user's recovery request covers this action. First calibrate the real system time, stop the tasks and daemon in use, confirm the same configuration directory, then read `xdoc schema --command auth.reset-clock` and execute:
 
 ```sh
-xdoc auth reset-clock --pretty
-xdoc auth status --pretty
+node "<skill-root>/scripts/cli/runtime/auth-report.mjs" reset-clock
 ```
 
 Reset removes only the supported fixed Clock anchor, preserving the license and lock file. Handle `auth_clock_reset_failed`, `auth_clock_reset_outcome_uncertain`, or `auth_clock_reset_unsupported` according to the actual report. If reset is unavailable, explain the limitation and consult the issuer; do not manually delete directories or lock files. Check status in a new process, then restart relevant long-running processes and resume the original task. Reset cannot make an expired, future-valid, device-mismatched, or revoked credential valid. Do not make reset a prerequisite for first installation.
 
-Run `xdoc auth uninstall --pretty` only when the user asks to stop using/remove the installed license. It removes only the license in the currently selected configuration directory, preserving Clock state and lock files. It does not delete the downloaded original or other explicit `--license` files. Free availability after uninstall still depends on actual task conditions.
+Run `node "<skill-root>/scripts/cli/runtime/auth-report.mjs" uninstall` only when the user asks to stop
+using or remove the installed license. It removes the license in the currently selected configuration
+directory and preserves Clock state, lock files, and the downloaded source. Free availability after
+uninstall still depends on actual task conditions.
 
 ## Evidence and Handoff
 
-As needed, retain binary identity, relevant focused schemas, actual commands, non-secret cwd/config-path facts, exit codes, structured auth reports and stderr, and real-task reports/output in a new task evidence directory. Bind the delivery hash, install hash, and status source hash; never read raw license file contents into model context, and do not copy raw license contents, private keys, or unrelated `.env`/environment secrets into chat output, shared evidence, or version control. Tell the user whether diagnosis, healthy registration, or an actual task was completed. When unable to resolve the problem, provide the actual reason, affected feature/environment, and what the issuer needs to correct. Do not send reports externally without the user's explicit request.
+As needed, retain binary identity, relevant focused schemas, commands with path arguments only,
+non-secret cwd/config-path facts, exit codes, **filtered auth reports**, and relevant real-task evidence
+in a new task directory. Bind the delivery hash, install hash, and status source hash. Exclude raw
+auth stdout and stderr, license contents, identity fields, private keys, and environment secrets.
+For a conversion authorization failure, record its exit code, scoped `kind`, `stage`, and reason code
+from the task report. Keep free-form process errors and full task reports out of the licensing evidence.
+Tell the user whether diagnosis, healthy registration, or an actual task was completed. If still
+blocked, report the actual reason, affected feature/environment, and what the issuer can correct.
+Send reports externally only at the user's explicit request.
 
 References: [official licensing guide](https://docs.structurify.io/en/pptx-runtime/licensing/) and its [machine-readable version](https://docs.structurify.io/llms.mdx/docs/en/pptx-runtime/licensing/content.md). Its stated client range may differ from the current binary. Confirm against that binary's schema/help, actual reports, and the issuer's delivery scope; do not infer unpublished activation, online renewal, or device migration capabilities from local source.

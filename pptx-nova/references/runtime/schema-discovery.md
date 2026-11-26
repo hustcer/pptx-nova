@@ -163,9 +163,10 @@ auth 通过 `commands.auth.subcommands.<action>` 披露 `usage`、`options`、`p
 | `uninstall`   | `xdoc auth uninstall`               | 无文件参数；只删除已安装 License。                                                               |
 | `reset-clock` | `xdoc auth reset-clock`             | 无文件参数；只删除固定 Clock anchor，保留锁文件；按实际恢复指引执行。                            |
 
-这些动作的 stdout 本身是 JSON report，不追加 `--json`。参数或进程失败可能只有 stderr，
-不能假设每次失败都有 JSON。认证维护不是普通 PPTX 任务的自动准备步骤；仅在任务需要时
-使用相应动作。测试这些写操作时用新建的 `XDOC_CONFIG_PATH` **目录**隔离本机配置。
+这些动作的 stdout 本身是 JSON report，不追加 `--json`。参数或进程失败可能只有 stderr。
+代理按[许可指南的报告过滤流程](licensing.md#read-filtered-authorization-reports)执行，
+只读取过滤后的结果。认证维护仅在任务需要时执行。测试写操作时用新建的
+`XDOC_CONFIG_PATH` **目录**隔离本机配置。
 
 ### 1. 初次进 deck → 取 op 索引
 

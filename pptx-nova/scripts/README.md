@@ -48,6 +48,10 @@ component API and integration boundary; it does not apply a patch or bypass the 
   directory with starter `outline.json`, `deck_lock.json`, and `content.json`
   for a DeckKit (`--slug`, `--deckkit`, optional `--mode express|studio|edit|export`).
 
+- `cli/runtime/auth-report.mjs` - run a local xdoc authorization action or a strict
+  PDF conversion check. Emit the actual exit code and filtered diagnostics.
+  See the [licensing guide](../references/runtime/licensing.md) for action selection and evidence.
+
 - `cli/runtime/remediation.mjs` - `run` captures the first `apply` submission
   into a private capsule (request, input, and asset snapshots) before any
   automatic retry; `apply` replays exactly one verified `suggestions[]`

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { cliPath, SKILL_ROOT as skillRoot } from '../../lib/runtime/skill-paths.mjs'
+import { DESIGN_MODES } from '../../lib/review/design-quality.mjs'
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { basename, isAbsolute, join, relative, resolve } from 'node:path'
 
@@ -148,8 +149,11 @@ try {
   writeJson(lockTemplatePath, {
     schemaVersion: 'pptx-nova-deck-lock/v1',
     _template: true,
-    _instructions:
-      'Copy this file to deck_lock.json or write deck_lock.json from scratch, then remove _template and _instructions. Do not append another JSON object to this template.',
+    _instructions: [
+      'Copy this file to deck_lock.json or write deck_lock.json from scratch, then remove _template and _instructions.',
+      `For Create, set artDirection.mode to one of ${DESIGN_MODES.join(', ')} and fill the remaining artDirection fields before building.`,
+      'Do not append another JSON object to this template.',
+    ].join(' '),
     mode: args.mode,
     objective: args.objective || args.slug,
     outlinePath: basename(outlinePath),
@@ -166,6 +170,13 @@ try {
     },
     deckkit: {
       id: args.deckkit,
+    },
+    artDirection: {
+      mode: '',
+      audience: '',
+      idea: '',
+      visualAnchor: '',
+      intentionalRestraint: '',
     },
     slides: [],
     assumptions: [],

@@ -23,6 +23,55 @@ import { cartesianImageContent } from '../helpers/asset-fixtures.mjs'
 import { designReviewFixture } from '../helpers/design-review-fixtures.mjs'
 import { captureVisualBinding } from '../../../pptx-nova/scripts/lib/review/canonical-visual-evidence.mjs'
 
+test('create runner rejects unfilled and invalid template modes before building', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-create-art-direction-'))
+  const initialized = runNode([
+    skillPath('scripts/cli/runtime/init-run.mjs'),
+    '--deckkit',
+    'swiss-grid',
+    '--slug',
+    'art direction',
+    '--root',
+    root,
+    '--json',
+  ])
+  const paths = JSON.parse(initialized.stdout)
+  const template = JSON.parse(readFileSync(paths.deckLockTemplatePath, 'utf8'))
+  assert.equal(template.artDirection.mode, '')
+  assert.match(
+    template._instructions,
+    /set artDirection\.mode to one of persuade, read, operate, experience/,
+  )
+  const lock = swissColumnLock(paths)
+  writeJson(paths.contentPath, swissColumnContent())
+
+  for (const mode of [template.artDirection.mode, 'persuade | read | operate | experience']) {
+    writeJson(paths.deckLockPath, { ...lock, artDirection: { ...template.artDirection, mode } })
+    const failed = runNodeStatus(
+      [
+        skillPath('scripts/cli/create/run.mjs'),
+        '--content',
+        paths.contentPath,
+        '--lock',
+        paths.deckLockPath,
+        '--output',
+        paths.finalPptx,
+        '--run-dir',
+        paths.runDir,
+        '--json',
+      ],
+      1,
+    )
+    const summary = readCreateSummary(failed)
+    assert.equal(summary.status, 'failed')
+    assert.equal(summary.error.phase, 'preflight')
+    assert.match(summary.error.message, /deck_lock\.artDirection\.mode.*before building/)
+    assert.deepEqual(summary.phases, [])
+    assert.equal(existsSync(paths.patchPath), false)
+    assert.equal(existsSync(paths.candidatePath), false)
+  }
+})
+
 test('create runner retains diagnostic previews on old runtimes without publishing', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-create-run-'))
   const runDir = join(root, 'run')

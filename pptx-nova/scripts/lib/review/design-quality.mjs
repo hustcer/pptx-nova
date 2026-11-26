@@ -7,7 +7,7 @@ export const DESIGN_CRITERIA = [
   'specificity',
   'rhythm',
 ]
-const MODES = ['persuade', 'read', 'operate', 'experience']
+export const DESIGN_MODES = ['persuade', 'read', 'operate', 'experience']
 const text = (value) => typeof value === 'string' && value.trim().length > 0
 const validSlide = (slide, count) => Number.isInteger(slide) && slide >= 1 && slide <= count
 
@@ -20,9 +20,9 @@ export function validateDesignReview(review, binding, expectedMode = null) {
     review.manifestSha256 !== binding?.manifestSha256
   )
     errors.push('design review is stale: candidate or canonical manifest hash differs')
-  if (!MODES.includes(review.mode)) errors.push('design review requires an audience mode')
+  if (!DESIGN_MODES.includes(review.mode)) errors.push('design review requires an audience mode')
   if (expectedMode !== null) {
-    if (!MODES.includes(expectedMode))
+    if (!DESIGN_MODES.includes(expectedMode))
       errors.push(
         'Create delivery requires a valid deck_lock.artDirection.mode; generate a fresh candidate with the intended audience mode locked',
       )

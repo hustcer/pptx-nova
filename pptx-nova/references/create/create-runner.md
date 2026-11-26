@@ -8,7 +8,7 @@ preservation guards apply only when the task actually retains source objects, no
 
 ## Inputs
 
-The standard runner requires:
+For a Create run intended for delivery, prepare:
 
 - `content.json` matching the selected DeckKit content contract;
 - `deck_lock.json` binding the output path, run directory, slide plan, assumptions, and a valid
@@ -18,6 +18,10 @@ The standard runner requires:
 - `choreography.json` for the default native transitions and selected animation/Morph operations;
   technically optional in the CLI, omitted for a recorded static/unsupported exception. See
   [presentation expression](presentation-expression.md) and [animations](../content/animations.md#standard-create-choreography).
+
+The runner validates `artDirection.mode` before building whenever the lock includes `artDirection`.
+A lock without that section can still generate a candidate. Finalization requires a valid mode in
+the lock bound to the candidate.
 
 If these inputs are not prepared yet:
 
@@ -181,7 +185,12 @@ manifest's findings or decision to make the gate pass.
 
 With a runtime that discloses `visualModes.values` including `create`, machine success produces
 `status=needs-visual-review`. Open `visual-evidence/review.html` (an index of the exact canonical PNGs)
-or inspect all PNGs directly. Review narrative and brand quality as applicable. Record the actual
+or inspect all PNGs directly. The canonical PNGs are `visual-evidence/candidate/slide-<n>.png`
+(1-based, unpadded) beside `render.pdf`; this route emits no contact sheet. Enumerate them by
+slide number from the manifest or a numeric loop: a lexical listing or shell glob orders
+`slide-10.png` before `slide-2.png` and silently scrambles any overview assembled from it.
+A locally assembled overview is a reading aid for rhythm; judge craft on the full-size PNGs.
+Review narrative and brand quality as applicable. Record the actual
 design judgment following [Design quality](design-quality.md), then record the actual
 review using `node <skill-root>/scripts/cli/review/visual-review.mjs --mode create --candidate <run-dir>/candidate.pptx
 --manifest <run-dir>/visual-evidence/manifest.json --previews <run-dir>/visual-evidence

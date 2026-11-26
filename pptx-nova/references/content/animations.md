@@ -675,7 +675,7 @@ transition 使用相邻的 `[source, destination]`（0-based）。morph 声明 `
 所有溢出、语义和 canonical 视觉门禁保持有效，profile 名称本身不能放行。
 
 完整可复用输入见 `assets/deckkits/cartesian/examples/animation-content.json` 和同目录的
-`cartesian-animation-choreography.json`。这是标准 Create 的入口；编辑已有 PPTX 仍使用上述
+`animation-choreography.json`。这是标准 Create 的入口；编辑已有 PPTX 仍使用上述
 inspect → patch → dry-run/apply → 回读和播放验证流程，共用同一原生 probe。
 
 播放探针通过指定放映范围直接从源页开始，读取实际 slide index。`--navigation-timeout-seconds`

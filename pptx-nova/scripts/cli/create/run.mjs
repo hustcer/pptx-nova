@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { cliPath, SKILL_ROOT } from '../../lib/runtime/skill-paths.mjs'
 import { ensureRenderContext } from '../../lib/review/render-context.mjs'
+import { DESIGN_MODES } from '../../lib/review/design-quality.mjs'
 import {
   copyFileSync,
   existsSync,
@@ -984,14 +985,20 @@ function runCreate(inputArgs) {
   const summary = initialSummary(args, contentJson, artifacts)
 
   try {
-    const lock = readJson(args.lock)
+    const { artDirection } = readJson(args.lock)
+    if (artDirection !== undefined && !DESIGN_MODES.includes(artDirection?.mode)) {
+      throw new PhaseFailure(
+        'preflight',
+        `Set deck_lock.artDirection.mode to one of ${DESIGN_MODES.join(', ')} before building a Create candidate`,
+      )
+    }
     const context = captureChosenDesignContext({
       workflow: 'create',
       deckkit: args.deckkit,
       target: 'candidate',
       language: contentJson?.meta?.language ?? '',
     })
-    context.artDirection = lock.artDirection ?? null
+    context.artDirection = artDirection ?? null
     summary.warnings.push(...context.warnings)
     writeFileSync(artifacts.designContext, `${JSON.stringify(context, null, 2)}\n`)
     summary.requiredReferences.push({
